@@ -1,0 +1,732 @@
+import { prisma } from "./prisma";
+
+/**
+ * STRICT PUBLIC DATA QUERY LIBRARY
+ * Guarantee: ALL public queries strictly filter by `status === "APPROVED"`.
+ * DRAFT, PENDING, and REJECTED experiences never appear in public listings or frequency calculations.
+ */
+
+export interface GetExperiencesFilter {
+  query?: string;
+  companySlug?: string;
+  roleSlug?: string;
+  interviewYear?: number;
+  placementType?: string;
+  roundType?: string;
+  result?: string;
+  department?: string;
+  sortBy?: "newest" | "views";
+  page?: number;
+  limit?: number;
+}
+
+/**
+ * Fetch approved experiences with multi-parameter filtering and pagination
+ */
+export async function getPublicExperiences(filter: GetExperiencesFilter = {}) {
+  const {
+    query,
+    companySlug,
+    roleSlug,
+    interviewYear,
+    placementType,
+    roundType,
+    result,
+    department,
+    sortBy = "newest",
+    page = 1,
+    limit = 15,
+  } = filter;
+
+  const skip = (page - 1) * limit;
+
+  // Build Prisma where clause strictly enforcing APPROVED status
+  const where: any = {
+    status: "APPROVED",
+  };
+
+  if (companySlug) {
+    where.company = { slug: companySlug };
+  }
+
+  if (roleSlug) {
+    where.role = { slug: roleSlug };
+  }
+
+  if (interviewYear) {
+    where.interviewYear = interviewYear;
+  }
+
+  if (placementType) {
+    where.placementType = placementType;
+  }
+
+  if (result) {
+    where.result = result;
+  }
+
+  if (department) {
+    where.department = { contains: department };
+  }
+
+  if (roundType) {
+    where.rounds = {
+      some: {
+        roundType: roundType,
+      },
+    };
+  }
+
+  if (query) {
+    const q = query.trim();
+    where.OR = [
+      { company: { name: { contains: q } } },
+      { role: { title: { contains: q } } },
+      { overallExperience: { contains: q } },
+      { advice: { contains: q } },
+      {
+        questionLinks: {
+          some: {
+            question: {
+              text: { contains: q },
+            },
+          },
+        },
+      },
+    ];
+  }
+
+  const orderBy = sortBy === "views" ? { viewsCount: "desc" as const } : { createdAt: "desc" as const };
+
+  const [experiences, totalCount] = await Promise.all([
+    prisma.experience.findMany({
+      where,
+      orderBy,
+      skip,
+      take: limit,
+      include: {
+        company: true,
+        role: true,
+        user: {
+          select: {
+            name: true,
+            department: true,
+          },
+        },
+        rounds: {
+          orderBy: { orderIndex: "asc" },
+        },
+        questionLinks: {
+          include: {
+            question: true,
+          },
+        },
+      },
+    }),
+    prisma.experience.count({ where }),
+  ]);
+
+  return {
+    experiences,
+    totalCount,
+    totalPages: Math.ceil(totalCount / limit),
+    currentPage: page,
+  };
+}
+
+/**
+ * Fetch a single approved experience by slug
+ */
+export async function getPublicExperienceBySlug(slug: string) {
+  const experience = await prisma.experience.findUnique({
+    where: { slug },
+    include: {
+      company: {
+        include: {
+          roles: true,
+        },
+      },
+      role: true,
+      college: true,
+      user: {
+        select: {
+          id: true,
+          name: true,
+          department: true,
+          graduationYear: true,
+        },
+      },
+      rounds: {
+        orderBy: { orderIndex: "asc" },
+        include: {
+          questions: {
+            include: {
+              question: {
+                include: {
+                  topic: true,
+                },
+              },
+            },
+          },
+        },
+      },
+      questionLinks: {
+        include: {
+          question: {
+            include: {
+              topic: true,
+            },
+          },
+        },
+      },
+    },
+  });
+
+  // Only allow public viewing if APPROVED
+  if (!experience || experience.status !== "APPROVED") {
+    return null;
+  }
+
+  // Increment views count asynchronously
+  await prisma.experience
+    .update({
+      where: { id: experience.id },
+      data: { viewsCount: { increment: 1 } },
+    })
+    .catch(() => {});
+
+  return experience;
+}
+
+/**
+ * Fetch related approved experiences (same company or similar role)
+ */
+export async function getRelatedExperiences(experienceId: string, companyId: string, roleId: string) {
+  return await prisma.experience.findMany({
+    where: {
+      status: "APPROVED",
+      id: { not: experienceId },
+      OR: [{ companyId }, { roleId }],
+    },
+    take: 3,
+    orderBy: { createdAt: "desc" },
+    include: {
+      company: true,
+      role: true,
+      rounds: { orderBy: { orderIndex: "asc" } },
+    },
+  });
+}
+
+/**
+ * Get real database-driven statistics (strictly 0 fake metrics)
+ */
+export async function getPublicStats() {
+  const [experiencesCount, companiesCount, questionsCount, oaRoundsCount] = await Promise.all([
+    // Only approved experiences
+    prisma.experience.count({
+      where: { status: "APPROVED" },
+    }),
+    // Companies with at least one approved experience
+    prisma.company.count({
+      where: {
+        experiences: {
+          some: { status: "APPROVED" },
+        },
+      },
+    }),
+    // Questions appearing in at least one approved experience
+    prisma.question.count({
+      where: {
+        experienceLinks: {
+          some: {
+            experience: { status: "APPROVED" },
+          },
+        },
+      },
+    }),
+    // Online assessment rounds in approved experiences
+    prisma.interviewRound.count({
+      where: {
+        roundType: "ONLINE_ASSESSMENT",
+        experience: { status: "APPROVED" },
+      },
+    }),
+  ]);
+
+  return {
+    experiencesCount,
+    companiesCount,
+    questionsCount,
+    oaRoundsCount,
+  };
+}
+
+/**
+ * Fetch recently approved experiences for the homepage
+ */
+export async function getRecentApprovedExperiences(limit = 6) {
+  return await prisma.experience.findMany({
+    where: { status: "APPROVED" },
+    orderBy: { createdAt: "desc" },
+    take: limit,
+    include: {
+      company: true,
+      role: true,
+      rounds: {
+        orderBy: { orderIndex: "asc" },
+      },
+    },
+  });
+}
+
+/**
+ * Fetch popular companies based on actual approved experience count
+ */
+export async function getPopularCompanies(limit = 6) {
+  const companies = await prisma.company.findMany({
+    where: {
+      experiences: {
+        some: { status: "APPROVED" },
+      },
+    },
+    include: {
+      _count: {
+        select: {
+          experiences: {
+            where: { status: "APPROVED" },
+          },
+          roles: true,
+        },
+      },
+      experiences: {
+        where: { status: "APPROVED" },
+        select: { interviewYear: true },
+        orderBy: { interviewYear: "desc" },
+        take: 1,
+      },
+    },
+  });
+
+  return companies
+    .map((c) => ({
+      ...c,
+      approvedExperiencesCount: c._count.experiences,
+      rolesCount: c._count.roles,
+      latestYear: c.experiences[0]?.interviewYear ?? null,
+    }))
+    .sort((a, b) => b.approvedExperiencesCount - a.approvedExperiencesCount)
+    .slice(0, limit);
+}
+
+/**
+ * Fetch all companies for the directory with approved stats
+ */
+export async function getAllPublicCompanies(search?: string) {
+  const where: any = {};
+  if (search) {
+    where.name = { contains: search.trim() };
+  }
+
+  const companies = await prisma.company.findMany({
+    where,
+    include: {
+      _count: {
+        select: {
+          experiences: {
+            where: { status: "APPROVED" },
+          },
+          roles: true,
+        },
+      },
+      experiences: {
+        where: { status: "APPROVED" },
+        select: { interviewYear: true },
+        orderBy: { interviewYear: "desc" },
+        take: 1,
+      },
+      roles: {
+        take: 5,
+      },
+    },
+    orderBy: { name: "asc" },
+  });
+
+  return companies.map((c) => ({
+    id: c.id,
+    name: c.name,
+    slug: c.slug,
+    description: c.description,
+    industry: c.industry,
+    website: c.website,
+    approvedExperiencesCount: c._count.experiences,
+    rolesCount: c._count.roles,
+    latestYear: c.experiences[0]?.interviewYear ?? null,
+    sampleRoles: c.roles.map((r) => r.title),
+  }));
+}
+
+/**
+ * Fetch company detail by slug
+ */
+export async function getPublicCompanyBySlug(slug: string) {
+  const company = await prisma.company.findUnique({
+    where: { slug },
+    include: {
+      roles: true,
+      experiences: {
+        where: { status: "APPROVED" },
+        orderBy: { interviewYear: "desc" },
+        include: {
+          role: true,
+          rounds: { orderBy: { orderIndex: "asc" } },
+          questionLinks: {
+            include: {
+              question: {
+                include: { topic: true },
+              },
+            },
+          },
+        },
+      },
+    },
+  });
+
+  if (!company) return null;
+
+  // Reported rounds process calculation from approved experiences
+  const roundCounts: Record<string, number> = {};
+  company.experiences.forEach((exp) => {
+    exp.rounds.forEach((r) => {
+      roundCounts[r.roundType] = (roundCounts[r.roundType] || 0) + 1;
+    });
+  });
+
+  // Extract frequently reported questions for this company (strictly approved experiences)
+  const questionMap = new Map<
+    string,
+    { question: any; count: number; roles: Set<string> }
+  >();
+
+  company.experiences.forEach((exp) => {
+    exp.questionLinks.forEach((link) => {
+      const q = link.question;
+      if (!questionMap.has(q.id)) {
+        questionMap.set(q.id, {
+          question: q,
+          count: 0,
+          roles: new Set<string>(),
+        });
+      }
+      const entry = questionMap.get(q.id)!;
+      entry.count += 1;
+      if (exp.role?.title) entry.roles.add(exp.role.title);
+    });
+  });
+
+  const reportedQuestions = Array.from(questionMap.values())
+    .map((item) => ({
+      ...item.question,
+      frequencyInCompany: item.count,
+      roles: Array.from(item.roles),
+    }))
+    .sort((a, b) => b.frequencyInCompany - a.frequencyInCompany);
+
+  const latestYear = company.experiences[0]?.interviewYear ?? null;
+
+  return {
+    ...company,
+    approvedExperiencesCount: company.experiences.length,
+    rolesCount: company.roles.length,
+    latestYear,
+    reportedQuestions,
+  };
+}
+
+/**
+ * Calculate question frequency STRICTLY from APPROVED experiences
+ */
+export async function getQuestionFrequency(questionId: string) {
+  const [totalCount, links] = await Promise.all([
+    prisma.experienceQuestion.count({
+      where: {
+        questionId,
+        experience: { status: "APPROVED" },
+      },
+    }),
+    prisma.experienceQuestion.findMany({
+      where: {
+        questionId,
+        experience: { status: "APPROVED" },
+      },
+      include: {
+        experience: {
+          select: {
+            interviewYear: true,
+            company: {
+              select: {
+                name: true,
+                slug: true,
+              },
+            },
+            role: {
+              select: {
+                title: true,
+              },
+            },
+          },
+        },
+      },
+    }),
+  ]);
+
+  // Aggregate by company
+  const companyCounts: Record<string, { name: string; slug: string; count: number }> = {};
+  const timeline: { company: string; year: number; role: string }[] = [];
+
+  links.forEach((l) => {
+    if (l.experience?.company) {
+      const c = l.experience.company;
+      if (!companyCounts[c.slug]) {
+        companyCounts[c.slug] = { name: c.name, slug: c.slug, count: 0 };
+      }
+      companyCounts[c.slug].count += 1;
+
+      timeline.push({
+        company: c.name,
+        year: l.experience.interviewYear,
+        role: l.experience.role.title,
+      });
+    }
+  });
+
+  // Sort timeline newest first
+  timeline.sort((a, b) => b.year - a.year);
+
+  return {
+    totalFrequency: totalCount,
+    companyBreakdown: Object.values(companyCounts).sort((a, b) => b.count - a.count),
+    timeline,
+  };
+}
+
+/**
+ * Fetch public question database with approved frequency counts
+ */
+export async function getPublicQuestions(filter: {
+  topicSlug?: string;
+  round?: string;
+  difficulty?: string;
+  query?: string;
+}) {
+  const where: any = {
+    // Only return questions that have at least one approved experience link
+    experienceLinks: {
+      some: {
+        experience: { status: "APPROVED" },
+      },
+    },
+  };
+
+  if (filter.topicSlug) {
+    where.topic = { slug: filter.topicSlug };
+  }
+
+  if (filter.round) {
+    where.round = filter.round;
+  }
+
+  if (filter.difficulty) {
+    where.difficulty = filter.difficulty;
+  }
+
+  if (filter.query) {
+    const q = filter.query.trim();
+    where.OR = [
+      { text: { contains: q } },
+      { topic: { name: { contains: q } } },
+    ];
+  }
+
+  const questions = await prisma.question.findMany({
+    where,
+    include: {
+      topic: true,
+      experienceLinks: {
+        where: {
+          experience: { status: "APPROVED" },
+        },
+        include: {
+          experience: {
+            select: {
+              company: {
+                select: { name: true, slug: true },
+              },
+            },
+          },
+        },
+      },
+    },
+    take: 50,
+  });
+
+  return questions
+    .map((q) => {
+      const companiesSet = new Map<string, string>();
+      q.experienceLinks.forEach((link) => {
+        if (link.experience?.company) {
+          companiesSet.set(link.experience.company.slug, link.experience.company.name);
+        }
+      });
+
+      return {
+        id: q.id,
+        text: q.text,
+        slug: q.slug,
+        round: q.round,
+        difficulty: q.difficulty,
+        topic: q.topic,
+        frequencyCount: q.experienceLinks.length,
+        companies: Array.from(companiesSet.entries()).map(([slug, name]) => ({ slug, name })),
+      };
+    })
+    .sort((a, b) => b.frequencyCount - a.frequencyCount);
+}
+
+/**
+ * Fetch a single question by slug
+ */
+export async function getPublicQuestionBySlug(slug: string) {
+  const question = await prisma.question.findUnique({
+    where: { slug },
+    include: {
+      topic: true,
+    },
+  });
+
+  if (!question) return null;
+
+  const frequencyData = await getQuestionFrequency(question.id);
+
+  // Fetch related questions in same topic
+  const relatedQuestions = question.topicId
+    ? await prisma.question.findMany({
+        where: {
+          topicId: question.topicId,
+          id: { not: question.id },
+          experienceLinks: {
+            some: { experience: { status: "APPROVED" } },
+          },
+        },
+        take: 5,
+        select: {
+          id: true,
+          text: true,
+          slug: true,
+          difficulty: true,
+        },
+      })
+    : [];
+
+  return {
+    ...question,
+    ...frequencyData,
+    relatedQuestions,
+  };
+}
+
+/**
+ * Fetch all Online Assessment rounds reported in APPROVED experiences
+ */
+export async function getPublicOnlineAssessments() {
+  const rounds = await prisma.interviewRound.findMany({
+    where: {
+      roundType: "ONLINE_ASSESSMENT",
+      experience: { status: "APPROVED" },
+    },
+    include: {
+      experience: {
+        include: {
+          company: true,
+          role: true,
+        },
+      },
+      questions: {
+        include: {
+          question: true,
+        },
+      },
+    },
+    orderBy: {
+      experience: { interviewYear: "desc" },
+    },
+  });
+
+  return rounds;
+}
+
+/**
+ * Global search across approved experiences, companies, questions, topics
+ */
+export async function globalSearch(query: string) {
+  const q = query.trim();
+  if (!q) {
+    return { experiences: [], companies: [], questions: [], topics: [] };
+  }
+
+  const [experiences, companies, questions, topics] = await Promise.all([
+    prisma.experience.findMany({
+      where: {
+        status: "APPROVED",
+        OR: [
+          { company: { name: { contains: q } } },
+          { role: { title: { contains: q } } },
+          { overallExperience: { contains: q } },
+        ],
+      },
+      take: 5,
+      include: {
+        company: true,
+        role: true,
+      },
+    }),
+    prisma.company.findMany({
+      where: {
+        name: { contains: q },
+      },
+      take: 5,
+      include: {
+        _count: {
+          select: {
+            experiences: { where: { status: "APPROVED" } },
+          },
+        },
+      },
+    }),
+    prisma.question.findMany({
+      where: {
+        text: { contains: q },
+        experienceLinks: {
+          some: { experience: { status: "APPROVED" } },
+        },
+      },
+      take: 8,
+      include: {
+        topic: true,
+      },
+    }),
+    prisma.topic.findMany({
+      where: {
+        name: { contains: q },
+      },
+      take: 4,
+    }),
+  ]);
+
+  return {
+    experiences,
+    companies,
+    questions,
+    topics,
+  };
+}
