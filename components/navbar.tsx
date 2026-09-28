@@ -63,7 +63,7 @@ export function Navbar({ currentUser }: NavbarProps) {
         {/* Brand Identity */}
         <div className="flex items-center gap-8">
           <Link href="/" className="flex items-center gap-2.5 group">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-600 text-white font-bold text-xs shadow-md shadow-blue-500/25 group-hover:scale-105 transition-transform">
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-600 text-white font-bold text-xs shadow-md shadow-blue-500/25 transition-transform duration-300 ease-out group-hover:scale-105">
               <span className="tracking-tighter">PR</span>
             </div>
             <div className="flex items-baseline">
@@ -81,9 +81,9 @@ export function Navbar({ currentUser }: NavbarProps) {
                 <Link
                   key={link.href}
                   href={link.href}
-                  className={`px-3 py-1.5 text-xs sm:text-sm font-medium transition-all rounded-lg ${
+                  className={`px-3 py-1.5 text-xs sm:text-sm font-medium transition-all duration-200 ease-out rounded-lg ${
                     isActive
-                      ? "text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/60 font-semibold border border-blue-200/60 dark:border-blue-800/50"
+                      ? "text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/60 font-semibold border border-blue-200/60 dark:border-blue-800/50 shadow-2xs"
                       : "text-slate-600 hover:text-slate-900 hover:bg-stone-100 dark:text-zinc-400 dark:hover:text-zinc-100 dark:hover:bg-zinc-800/70"
                   }`}
                 >
@@ -102,7 +102,7 @@ export function Navbar({ currentUser }: NavbarProps) {
           {/* Search Trigger */}
           <Link
             href="/search"
-            className="flex items-center gap-2 rounded-lg border border-stone-200 bg-stone-50/70 dark:border-zinc-800 dark:bg-zinc-900/70 px-3 py-1.5 text-xs text-slate-500 dark:text-zinc-400 hover:border-stone-300 dark:hover:border-zinc-700 hover:text-slate-700 dark:hover:text-zinc-200 transition-colors"
+            className="flex items-center gap-2 rounded-lg border border-stone-200 bg-stone-50/70 dark:border-zinc-800 dark:bg-zinc-900/70 px-3 py-1.5 text-xs text-slate-500 dark:text-zinc-400 hover:border-stone-300 dark:hover:border-zinc-700 hover:text-slate-700 dark:hover:text-zinc-200 transition-colors duration-200"
             title="Search companies, questions, experiences..."
           >
             <Search className="h-3.5 w-3.5" />
@@ -115,7 +115,7 @@ export function Navbar({ currentUser }: NavbarProps) {
           {/* Share Experience Button */}
           <Link
             href="/share"
-            className="hidden sm:inline-flex items-center gap-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 text-xs sm:text-sm font-medium transition-all hover:shadow-lg hover:shadow-blue-600/30 active:scale-95 shadow-md shadow-blue-600/20"
+            className="hidden sm:inline-flex items-center gap-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 text-xs sm:text-sm font-medium transition-all duration-300 ease-out hover:shadow-lg hover:shadow-blue-600/30 hover:scale-[1.02] active:scale-[0.98] shadow-md shadow-blue-600/20"
           >
             <PlusCircle className="h-4 w-4" />
             <span>Share Experience</span>

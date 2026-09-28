@@ -47,7 +47,7 @@ export function TopStoriesCarousel({ stories }: TopStoriesCarouselProps) {
         <button
           type="button"
           onClick={() => scroll("left")}
-          className="flex h-8 w-8 items-center justify-center rounded-full border border-stone-300 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-slate-700 dark:text-zinc-300 hover:bg-stone-100 dark:hover:bg-zinc-800 transition-all hover:scale-105 active:scale-95 shadow-xs"
+          className="flex h-8 w-8 items-center justify-center rounded-full border border-stone-300 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-slate-700 dark:text-zinc-300 hover:bg-stone-100 dark:hover:bg-zinc-800 transition-all duration-250 ease-out hover:scale-105 active:scale-95 shadow-xs"
           aria-label="Previous story"
         >
           <ChevronLeft className="h-4 w-4" />
@@ -55,7 +55,7 @@ export function TopStoriesCarousel({ stories }: TopStoriesCarouselProps) {
         <button
           type="button"
           onClick={() => scroll("right")}
-          className="flex h-8 w-8 items-center justify-center rounded-full border border-stone-300 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-slate-700 dark:text-zinc-300 hover:bg-stone-100 dark:hover:bg-zinc-800 transition-all hover:scale-105 active:scale-95 shadow-xs"
+          className="flex h-8 w-8 items-center justify-center rounded-full border border-stone-300 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-slate-700 dark:text-zinc-300 hover:bg-stone-100 dark:hover:bg-zinc-800 transition-all duration-250 ease-out hover:scale-105 active:scale-95 shadow-xs"
           aria-label="Next story"
         >
           <ChevronRight className="h-4 w-4" />
@@ -77,7 +77,7 @@ export function TopStoriesCarousel({ stories }: TopStoriesCarouselProps) {
             <Link
               key={story.id}
               href={`/experiences/${story.slug}`}
-              className="flex-none w-[280px] sm:w-[320px] snap-start rounded-2xl border border-stone-200 dark:border-zinc-800/90 bg-white dark:bg-[#121418] p-5 hover:border-blue-500/40 hover:-translate-y-1.5 transition-all duration-300 shadow-sm hover:shadow-xl hover:shadow-blue-950/20 group/card flex flex-col justify-between"
+              className="flex-none w-[280px] sm:w-[320px] snap-start rounded-2xl border border-stone-200 dark:border-zinc-800/90 bg-white dark:bg-[#121418] p-5 hover:border-blue-500/40 hover:-translate-y-1.5 transition-all duration-300 ease-out shadow-sm hover:shadow-xl hover:shadow-blue-950/20 group/card flex flex-col justify-between"
             >
               <div className="space-y-3">
                 {/* Card Top: Rank and View Count */}

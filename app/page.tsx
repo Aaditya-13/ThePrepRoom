@@ -93,7 +93,7 @@ export default async function HomePage() {
               <div className="pt-2 flex flex-wrap items-center justify-center lg:justify-start gap-3">
                 <Link
                   href="/experiences"
-                  className="h-11 sm:h-12 px-6 rounded-full bg-blue-600 hover:bg-blue-500 text-white font-semibold text-sm inline-flex items-center justify-center gap-2 shadow-lg shadow-blue-600/25 transition-all hover:scale-105 active:scale-95"
+                  className="h-11 sm:h-12 px-6 rounded-full bg-blue-600 hover:bg-blue-500 text-white font-semibold text-sm inline-flex items-center justify-center gap-2 shadow-lg shadow-blue-600/25 transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]"
                 >
                   <span>Explore Experiences</span>
                   <ArrowRight className="h-4 w-4" />
@@ -101,7 +101,7 @@ export default async function HomePage() {
 
                 <Link
                   href="/share"
-                  className="h-11 sm:h-12 px-6 rounded-full border border-stone-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-slate-900 dark:text-white font-medium text-sm inline-flex items-center justify-center gap-2 hover:bg-stone-50 dark:hover:bg-zinc-800 transition-all hover:scale-105 active:scale-95 shadow-xs"
+                  className="h-11 sm:h-12 px-6 rounded-full border border-stone-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-slate-900 dark:text-white font-medium text-sm inline-flex items-center justify-center gap-2 hover:bg-stone-50 dark:hover:bg-zinc-800 transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] shadow-xs"
                 >
                   <PenLine className="h-4 w-4 text-blue-500" />
                   <span>Share Your Journey</span>
@@ -109,7 +109,7 @@ export default async function HomePage() {
 
                 <Link
                   href="/companies"
-                  className="h-11 sm:h-12 px-5 rounded-full border border-stone-300 dark:border-zinc-800 bg-stone-100/90 dark:bg-zinc-800/80 hover:bg-stone-200 dark:hover:bg-zinc-800 text-slate-800 dark:text-zinc-200 font-medium text-sm inline-flex items-center justify-center gap-2 transition-all hover:scale-105 active:scale-95 shadow-xs"
+                  className="h-11 sm:h-12 px-5 rounded-full border border-stone-300 dark:border-zinc-800 bg-stone-100/90 dark:bg-zinc-800/80 hover:bg-stone-200 dark:hover:bg-zinc-800 text-slate-800 dark:text-zinc-200 font-medium text-sm inline-flex items-center justify-center gap-2 transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] shadow-xs"
                 >
                   <Building2 className="h-4 w-4 text-emerald-500" />
                   <span>Company Stats</span>
@@ -177,7 +177,7 @@ export default async function HomePage() {
                 <Link
                   key={exp.id}
                   href={`/experiences/${exp.slug}`}
-                  className="rounded-2xl border border-stone-200 dark:border-zinc-800/90 bg-white dark:bg-[#121418] p-5 hover:border-blue-500/40 hover:-translate-y-1.5 transition-all duration-300 shadow-xs hover:shadow-xl hover:shadow-blue-950/20 group flex flex-col justify-between"
+                  className="rounded-2xl border border-stone-200 dark:border-zinc-800/90 bg-white dark:bg-[#121418] p-5 hover:border-blue-500/40 hover:-translate-y-1.5 transition-all duration-300 ease-out shadow-xs hover:shadow-xl hover:shadow-blue-950/20 group flex flex-col justify-between"
                 >
                   <div className="space-y-3">
                     {/* Top Row: Year · Department and Tag */}
@@ -276,14 +276,14 @@ export default async function HomePage() {
                   <Link
                     key={c.id}
                     href={`/experiences?company=${c.slug}`}
-                    className="rounded-full border border-stone-300 dark:border-zinc-700/80 bg-white dark:bg-zinc-800/60 px-3.5 py-1.5 text-xs font-medium text-slate-700 dark:text-zinc-200 hover:border-blue-500 dark:hover:border-blue-400 hover:text-blue-600 dark:hover:text-blue-400 hover:scale-105 transition-all shadow-2xs"
+                    className="rounded-full border border-stone-300 dark:border-zinc-700/80 bg-white dark:bg-zinc-800/60 px-3.5 py-1.5 text-xs font-medium text-slate-700 dark:text-zinc-200 hover:border-blue-500 dark:hover:border-blue-400 hover:text-blue-600 dark:hover:text-blue-400 hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 shadow-2xs"
                   >
                     {c.name}
                   </Link>
                 ))}
                 <Link
                   href="/companies"
-                  className="rounded-full border border-dashed border-stone-300 dark:border-zinc-700 px-3 py-1.5 text-xs font-medium text-slate-500 dark:text-zinc-400 hover:text-slate-800 dark:hover:text-zinc-200"
+                  className="rounded-full border border-dashed border-stone-300 dark:border-zinc-700 px-3 py-1.5 text-xs font-medium text-slate-500 dark:text-zinc-400 hover:text-slate-800 dark:hover:text-zinc-200 transition-colors"
                 >
                   + More Companies
                 </Link>
@@ -302,7 +302,7 @@ export default async function HomePage() {
                   <Link
                     key={year}
                     href={`/experiences?year=${year}`}
-                    className="rounded-full border border-stone-300 dark:border-zinc-700/80 bg-white dark:bg-zinc-800/60 px-3.5 py-1.5 text-xs font-mono font-medium text-slate-700 dark:text-zinc-200 hover:border-blue-500 dark:hover:border-blue-400 hover:text-blue-600 dark:hover:text-blue-400 hover:scale-105 transition-all shadow-2xs"
+                    className="rounded-full border border-stone-300 dark:border-zinc-700/80 bg-white dark:bg-zinc-800/60 px-3.5 py-1.5 text-xs font-mono font-medium text-slate-700 dark:text-zinc-200 hover:border-blue-500 dark:hover:border-blue-400 hover:text-blue-600 dark:hover:text-blue-400 hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 shadow-2xs"
                   >
                     {year}
                   </Link>
@@ -328,7 +328,7 @@ export default async function HomePage() {
                   <Link
                     key={dept}
                     href={`/experiences?q=${encodeURIComponent(dept)}`}
-                    className="rounded-full border border-stone-300 dark:border-zinc-700/80 bg-white dark:bg-zinc-800/60 px-3.5 py-1.5 text-xs font-medium text-slate-700 dark:text-zinc-200 hover:border-blue-500 dark:hover:border-blue-400 hover:text-blue-600 dark:hover:text-blue-400 hover:scale-105 transition-all shadow-2xs"
+                    className="rounded-full border border-stone-300 dark:border-zinc-700/80 bg-white dark:bg-zinc-800/60 px-3.5 py-1.5 text-xs font-medium text-slate-700 dark:text-zinc-200 hover:border-blue-500 dark:hover:border-blue-400 hover:text-blue-600 dark:hover:text-blue-400 hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 shadow-2xs"
                   >
                     {dept}
                   </Link>
@@ -390,7 +390,7 @@ export default async function HomePage() {
               <Link
                 key={q.id}
                 href={`/questions/${q.slug}`}
-                className="rounded-xl border border-stone-200 dark:border-zinc-800/80 bg-stone-50/50 dark:bg-[#121418] p-4 sm:p-5 hover:border-blue-500/40 hover:-translate-y-1 transition-all group"
+                className="rounded-xl border border-stone-200 dark:border-zinc-800/80 bg-stone-50/50 dark:bg-[#121418] p-4 sm:p-5 hover:border-blue-500/40 hover:-translate-y-1 transition-all duration-300 ease-out group shadow-xs hover:shadow-lg hover:shadow-blue-950/20"
               >
                 <div className="flex items-start justify-between gap-3">
                   <h4 className="text-sm sm:text-base font-semibold text-slate-900 dark:text-zinc-100 group-hover:text-blue-500 transition-colors leading-snug">
@@ -404,7 +404,7 @@ export default async function HomePage() {
                   <span className="font-medium text-slate-700 dark:text-zinc-300">
                     {q.topic?.name || "General Technical"}
                   </span>
-                  <span className="group-hover:translate-x-0.5 transition-transform text-blue-500 font-medium">
+                  <span className="group-hover:translate-x-1 transition-transform duration-300 text-blue-500 font-medium">
                     View Asked-In Timeline →
                   </span>
                 </div>
@@ -426,7 +426,7 @@ export default async function HomePage() {
           <div className="pt-2">
             <Link
               href="/share"
-              className="rounded-full bg-blue-600 hover:bg-blue-500 text-white font-semibold px-8 py-3 text-sm inline-flex items-center gap-2 shadow-lg shadow-blue-600/25 transition-all hover:scale-105 active:scale-95"
+              className="rounded-full bg-blue-600 hover:bg-blue-500 text-white font-semibold px-8 py-3 text-sm inline-flex items-center gap-2 shadow-lg shadow-blue-600/25 transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]"
             >
               <PenLine className="h-4 w-4" />
               <span>Share Your Placement Experience</span>

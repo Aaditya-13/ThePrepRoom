@@ -51,7 +51,7 @@ export function ExperienceRow({ experience }: ExperienceRowProps) {
       : [];
 
   return (
-    <article className="group py-5 px-4 sm:px-6 border-b border-stone-200 dark:border-zinc-800/80 hover:bg-stone-50/70 dark:hover:bg-zinc-900/60 transition-all duration-200">
+    <article className="group py-5 px-4 sm:px-6 border-b border-stone-200 dark:border-zinc-800/80 hover:bg-stone-50/70 dark:hover:bg-zinc-900/60 transition-colors duration-250 ease-out">
       <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
         <div className="space-y-1.5 flex-1 min-w-0">
           {/* Header metadata row */}
