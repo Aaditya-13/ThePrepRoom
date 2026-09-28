@@ -1,14 +1,14 @@
 import type { Metadata } from "next";
-import { Plus_Jakarta_Sans, Inter, Geist_Mono } from "next/font/google";
+import { Outfit, Inter, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { Navbar } from "@/components/navbar";
 import { Footer } from "@/components/footer";
 import { getCurrentUser } from "@/lib/auth";
 
-const headingFont = Plus_Jakarta_Sans({
+const headingFont = Outfit({
   variable: "--font-heading",
   subsets: ["latin"],
-  weight: ["600", "700", "800"],
+  weight: ["700", "800", "900"],
   display: "swap",
 });
 
