@@ -37,13 +37,13 @@ export default async function QuestionsPage(props: PageProps) {
     <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 py-10 space-y-6">
       {/* Header */}
       <div className="space-y-1">
-        <div className="inline-flex items-center gap-1.5 rounded-full border border-blue-500/20 bg-blue-50/50 dark:bg-blue-950/30 px-3 py-0.5 text-xs font-semibold text-blue-600 dark:text-blue-400">
+        <div className="inline-flex items-center gap-1.5 rounded-full border border-blue-500/20 bg-blue-950/30 px-3 py-0.5 text-xs font-semibold text-blue-400">
           <span>Question Repository</span>
         </div>
-        <h1 className="text-2xl sm:text-4xl font-extrabold tracking-tight text-slate-900 dark:text-white pt-1">
+        <h1 className="text-2xl sm:text-4xl font-extrabold tracking-tight text-white pt-1">
           Interview Questions
         </h1>
-        <p className="text-sm text-slate-600 dark:text-zinc-400 max-w-2xl leading-relaxed">
+        <p className="text-sm text-zinc-400 max-w-2xl leading-relaxed">
           Canonical question bank compiled from verified student placement reports, with real company asked-in timelines.
         </p>
       </div>

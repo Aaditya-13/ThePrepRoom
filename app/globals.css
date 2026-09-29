@@ -126,11 +126,6 @@ select:focus-visible {
   outline-offset: 1px !important;
 }
 
-/* Smooth anchor scrolling for in-page section jumps */
-html {
-  scroll-behavior: smooth;
-}
-
 /* Ensure section anchor targets have proper navbar offset and no focus ring */
 [id] {
   scroll-margin-top: 5.5rem;
@@ -151,11 +146,11 @@ html {
   }
 }
 
-/* Pure Silk Page Transition (continuous visibility, zero black screen flicker, snappy 140ms micro-glide) */
+/* Smooth editorial page entrance: slight, graceful vertical glide and fade without sudden snap */
 @keyframes pageEnter {
   0% {
-    opacity: 0.82;
-    transform: translateY(3px);
+    opacity: 0;
+    transform: translateY(8px);
   }
   100% {
     opacity: 1;
@@ -164,7 +159,7 @@ html {
 }
 
 .page-enter {
-  animation: pageEnter 140ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation: pageEnter 260ms cubic-bezier(0.16, 1, 0.3, 1) both;
   will-change: opacity, transform;
 }
 

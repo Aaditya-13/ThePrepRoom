@@ -19,13 +19,13 @@ export default async function CompaniesPage(props: PageProps) {
     <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 py-10 space-y-8">
       {/* Header */}
       <div className="space-y-1">
-        <div className="inline-flex items-center gap-1.5 rounded-full border border-blue-500/20 bg-blue-50/50 dark:bg-blue-950/30 px-3 py-0.5 text-xs font-semibold text-blue-600 dark:text-blue-400">
+        <div className="inline-flex items-center gap-1.5 rounded-full border border-blue-500/20 bg-blue-950/30 px-3 py-0.5 text-xs font-semibold text-blue-400">
           <span>Recruiting Organizations</span>
         </div>
-        <h1 className="text-2xl sm:text-4xl font-extrabold tracking-tight text-slate-900 dark:text-white pt-1">
+        <h1 className="text-2xl sm:text-4xl font-extrabold tracking-tight text-white pt-1">
           Companies
         </h1>
-        <p className="text-sm text-slate-600 dark:text-zinc-400 max-w-2xl leading-relaxed">
+        <p className="text-sm text-zinc-400 max-w-2xl leading-relaxed">
           Explore placement experiences, reported interview questions, and selection processes organized by company.
         </p>
       </div>
@@ -33,23 +33,23 @@ export default async function CompaniesPage(props: PageProps) {
       {/* Search Input */}
       <form action="/companies" method="GET" className="max-w-md">
         <div className="relative">
-          <Search className="absolute left-3.5 top-3 h-4 w-4 text-slate-400 dark:text-zinc-500" />
+          <Search className="absolute left-3.5 top-3 h-4 w-4 text-zinc-500" />
           <input
             type="text"
             name="q"
             defaultValue={searchParams.q || ""}
             placeholder="Search companies by name..."
-            className="w-full rounded-xl border border-stone-300 dark:border-zinc-700 bg-white dark:bg-zinc-900/80 py-2.5 pl-10 pr-4 text-xs sm:text-sm text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-zinc-500 focus:border-blue-500 dark:focus:border-blue-400 focus:outline-hidden transition-all shadow-xs"
+            className="w-full rounded-xl border border-zinc-700 bg-zinc-900/80 py-2.5 pl-10 pr-4 text-xs sm:text-sm text-white placeholder:text-zinc-500 focus:border-blue-400 focus:outline-hidden transition-all shadow-xs"
           />
         </div>
       </form>
 
       {/* Companies Grid */}
       {companies.length === 0 ? (
-        <div className="text-center py-16 border border-dashed border-stone-300 dark:border-zinc-800 rounded-2xl bg-white dark:bg-[#111317] p-8 shadow-xs">
-          <Building2 className="mx-auto h-8 w-8 text-slate-400 dark:text-zinc-500 mb-2" />
-          <h3 className="text-base font-bold text-slate-900 dark:text-white">No companies found</h3>
-          <p className="text-xs text-slate-500 dark:text-zinc-400 mt-1">
+        <div className="text-center py-16 border border-dashed border-zinc-800 rounded-2xl bg-[#111317] p-8 shadow-xs">
+          <Building2 className="mx-auto h-8 w-8 text-zinc-500 mb-2" />
+          <h3 className="text-base font-bold text-white">No companies found</h3>
+          <p className="text-xs text-zinc-400 mt-1">
             {searchParams.q ? `No companies matching "${searchParams.q}"` : "No companies registered yet."}
           </p>
         </div>

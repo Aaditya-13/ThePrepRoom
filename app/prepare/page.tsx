@@ -98,7 +98,7 @@ export default async function PreparePage() {
             Master the core concepts frequently tested in technical screenings, online assessments, and interview panels. Every topic links directly to verified real-world interview questions asked by hiring teams.
           </p>
 
-          <div className="pt-2 flex flex-wrap items-center gap-4 text-xs text-slate-500 dark:text-zinc-400 font-medium">
+          <div className="pt-2 flex flex-wrap items-center gap-4 text-xs text-zinc-400 font-medium">
             <span className="flex items-center gap-1.5">
               <CheckCircle2 className="h-4 w-4 text-emerald-500" />
               Categorized by round importance

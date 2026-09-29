@@ -61,13 +61,13 @@ export default async function ExperiencesPage(props: PageProps) {
     <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 py-10 space-y-6">
       {/* Editorial Header */}
       <div className="space-y-1">
-        <div className="inline-flex items-center gap-1.5 rounded-full border border-blue-500/20 bg-blue-50/50 dark:bg-blue-950/30 px-3 py-0.5 text-xs font-semibold text-blue-600 dark:text-blue-400">
+        <div className="inline-flex items-center gap-1.5 rounded-full border border-blue-500/20 bg-blue-950/30 px-3 py-0.5 text-xs font-semibold text-blue-400">
           <span>Placement Directory</span>
         </div>
-        <h1 className="text-2xl sm:text-4xl font-extrabold tracking-tight text-slate-900 dark:text-white pt-1">
+        <h1 className="text-2xl sm:text-4xl font-extrabold tracking-tight text-white pt-1">
           Interview Experiences
         </h1>
-        <p className="text-sm text-slate-600 dark:text-zinc-400 max-w-2xl leading-relaxed">
+        <p className="text-sm text-zinc-400 max-w-2xl leading-relaxed">
           Real placement experiences shared by students. Filter by company, year, rounds, or outcome to inspect what came before you.
         </p>
       </div>
@@ -88,9 +88,9 @@ export default async function ExperiencesPage(props: PageProps) {
       />
 
       {/* Results Count & Meta */}
-      <div className="flex items-center justify-between text-xs text-slate-500 dark:text-zinc-400 px-1 font-mono">
+      <div className="flex items-center justify-between text-xs text-zinc-400 px-1 font-mono">
         <span>
-          Showing <span className="font-semibold text-slate-800 dark:text-zinc-200">{data.experiences.length}</span> of {data.totalCount} approved experiences
+          Showing <span className="font-semibold text-zinc-200">{data.experiences.length}</span> of {data.totalCount} approved experiences
         </span>
         {data.totalPages > 1 && (
           <span>
