@@ -177,7 +177,7 @@ export default async function HomePage() {
                 <Link
                   key={exp.id}
                   href={`/experiences/${exp.slug}`}
-                  className="rounded-2xl border border-stone-200 dark:border-zinc-800/90 bg-white dark:bg-[#121418] p-5 hover:border-blue-500/40 hover:-translate-y-1.5 transition-all duration-300 ease-out shadow-xs hover:shadow-xl hover:shadow-blue-950/20 group flex flex-col justify-between"
+                  className="rounded-2xl border border-stone-200 dark:border-zinc-800/90 bg-white dark:bg-[#121418] p-5 hover:border-blue-500/50 hover:-translate-y-1 active:translate-y-0 active:scale-[0.99] transition-all duration-200 ease-out shadow-xs hover:shadow-xl hover:shadow-blue-950/30 group flex flex-col justify-between cursor-pointer"
                 >
                   <div className="space-y-3">
                     {/* Top Row: Year · Department and Tag */}

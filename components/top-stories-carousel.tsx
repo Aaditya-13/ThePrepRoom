@@ -77,7 +77,7 @@ export function TopStoriesCarousel({ stories }: TopStoriesCarouselProps) {
             <Link
               key={story.id}
               href={`/experiences/${story.slug}`}
-              className="flex-none w-[280px] sm:w-[320px] snap-start rounded-2xl border border-stone-200 dark:border-zinc-800/90 bg-white dark:bg-[#121418] p-5 hover:border-blue-500/40 hover:-translate-y-1.5 transition-all duration-300 ease-out shadow-sm hover:shadow-xl hover:shadow-blue-950/20 group/card flex flex-col justify-between"
+              className="flex-none w-[280px] sm:w-[320px] snap-start rounded-2xl border border-stone-200 dark:border-zinc-800/90 bg-white dark:bg-[#121418] p-5 hover:border-blue-500/50 hover:-translate-y-1 active:translate-y-0 active:scale-[0.99] transition-all duration-200 ease-out shadow-sm hover:shadow-xl hover:shadow-blue-950/30 group/card flex flex-col justify-between cursor-pointer"
             >
               <div className="space-y-3">
                 {/* Card Top: Rank and View Count */}
