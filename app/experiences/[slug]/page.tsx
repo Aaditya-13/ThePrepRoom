@@ -12,6 +12,8 @@ import {
   AlertTriangle,
   ArrowRight,
   Sparkles,
+  Eye,
+  ExternalLink,
 } from "lucide-react";
 import {
   getPublicExperienceBySlug,
@@ -26,6 +28,11 @@ import {
 import { BookmarkButton } from "@/components/bookmark-button";
 import { ReportModal } from "@/components/report-modal";
 import { TableOfContents } from "@/components/table-of-contents";
+import { UserAvatar } from "@/components/user-avatar";
+import { PLACEMENT_STATUS_CONFIG } from "@/lib/profile-constants";
+
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
 interface PageProps {
   params: Promise<{ slug: string }>;
@@ -153,18 +160,35 @@ export default async function ExperienceDetailPage(props: PageProps) {
               {experience.role.title}
             </h1>
 
-            {/* Sub-bar: Student-Reported label & Outcome badge */}
+            {/* Sub-bar: Student-Reported label, Author Avatar & Outcome badge */}
             <div className="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-stone-100 dark:border-zinc-800/80">
-              <div className="flex flex-wrap items-center gap-2 text-xs text-slate-500 dark:text-zinc-400">
+              <div className="flex flex-wrap items-center gap-2.5 text-xs text-slate-500 dark:text-zinc-400">
                 <span className="rounded-md bg-stone-100 dark:bg-zinc-800 px-2 py-0.5 font-medium text-slate-700 dark:text-zinc-300">
                   Student-reported
                 </span>
                 <span>•</span>
-                <span className="font-medium text-slate-800 dark:text-zinc-200">
-                  {experience.isAnonymous
-                    ? "Anonymous Student"
-                    : experience.user?.name || "Student"}
-                </span>
+                {experience.isAnonymous ? (
+                  <div className="inline-flex items-center gap-1.5 font-medium text-slate-700 dark:text-zinc-300">
+                    <UserAvatar name="Anonymous" size="xs" />
+                    <span>Anonymous Student</span>
+                  </div>
+                ) : (
+                  <Link
+                    href={`/profile/${experience.user?.id || ""}`}
+                    className="inline-flex items-center gap-1.5 font-medium text-slate-900 dark:text-zinc-200 hover:text-blue-500 dark:hover:text-blue-400 transition-colors group"
+                  >
+                    <UserAvatar
+                      name={experience.user?.name || "Student"}
+                      image={experience.user?.image}
+                      size="xs"
+                      className="ring-1 ring-zinc-700/50"
+                    />
+                    <span className="group-hover:underline underline-offset-2 font-semibold">
+                      {experience.user?.name || "Student"}
+                    </span>
+                  </Link>
+                )}
+
                 {experience.department && (
                   <>
                     <span>•</span>
@@ -177,6 +201,13 @@ export default async function ExperienceDetailPage(props: PageProps) {
                     <span>Class of {experience.graduationYear}</span>
                   </>
                 )}
+
+                {/* Real-time Views Count */}
+                <span>•</span>
+                <span className="inline-flex items-center gap-1 text-slate-600 dark:text-zinc-400 font-mono">
+                  <Eye className="h-3.5 w-3.5 text-blue-400" />
+                  <span>{experience.viewsCount} {experience.viewsCount === 1 ? "view" : "views"}</span>
+                </span>
               </div>
 
               <div className="flex items-center gap-2">
@@ -484,6 +515,134 @@ export default async function ExperienceDetailPage(props: PageProps) {
 
         {/* Right Sticky Sidebar (4 cols on desktop) */}
         <aside className="lg:col-span-4 space-y-6">
+          {/* Contributor Profile Card */}
+          {!experience.isAnonymous && experience.user ? (
+            <div className="rounded-3xl border border-stone-200 dark:border-zinc-800/90 bg-white dark:bg-[#111317] p-6 space-y-4 shadow-xs">
+              <div className="flex items-center justify-between border-b border-stone-100 dark:border-zinc-800 pb-3">
+                <h4 className="text-xs font-bold uppercase tracking-wider text-slate-900 dark:text-zinc-100">
+                  Shared by Student
+                </h4>
+                <span className="inline-flex items-center gap-1 text-[11px] font-mono text-zinc-400">
+                  <Eye className="h-3.5 w-3.5 text-blue-400" />
+                  {experience.viewsCount} {experience.viewsCount === 1 ? "view" : "views"}
+                </span>
+              </div>
+
+              <div className="flex items-start gap-3.5">
+                <Link href={`/profile/${experience.user.id}`} className="shrink-0 group">
+                  <UserAvatar
+                    name={experience.user.name}
+                    image={experience.user.image}
+                    size="lg"
+                    showRing={true}
+                    className="group-hover:scale-105 transition-transform"
+                  />
+                </Link>
+                <div className="space-y-1 min-w-0">
+                  <Link
+                    href={`/profile/${experience.user.id}`}
+                    className="font-bold text-sm sm:text-base text-slate-900 dark:text-zinc-100 hover:text-blue-500 dark:hover:text-blue-400 transition-colors block truncate"
+                  >
+                    {experience.user.name}
+                  </Link>
+                  {(experience.user.department || experience.department) && (
+                    <p className="text-xs text-slate-500 dark:text-zinc-400 truncate">
+                      {experience.user.department || experience.department}
+                    </p>
+                  )}
+                  {(experience.user.graduationYear || experience.graduationYear) && (
+                    <p className="text-xs text-slate-500 dark:text-zinc-400">
+                      Class of {experience.user.graduationYear || experience.graduationYear}
+                    </p>
+                  )}
+                </div>
+              </div>
+
+              {/* Placement Status Badge if available */}
+              {experience.user.placementStatus && (
+                <div>
+                  {(() => {
+                    const cfg =
+                      PLACEMENT_STATUS_CONFIG[experience.user.placementStatus] ||
+                      PLACEMENT_STATUS_CONFIG.PREPARING;
+                    return (
+                      <div
+                        className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-semibold ${cfg.badgeBg} ${cfg.badgeBorder} ${cfg.textColor}`}
+                      >
+                        <span className={`h-1.5 w-1.5 rounded-full ${cfg.dotColor}`} />
+                        <span>
+                          {experience.user.placementStatus === "OFFER_ACCEPTED" &&
+                          experience.user.placedCompany
+                            ? `Offer • ${experience.user.placedCompany}`
+                            : cfg.label}
+                        </span>
+                      </div>
+                    );
+                  })()}
+                </div>
+              )}
+
+              {/* Bio quote if available */}
+              {experience.user.bio && (
+                <p className="text-xs text-slate-600 dark:text-zinc-400 italic line-clamp-2 leading-relaxed border-l-2 border-blue-500/40 pl-2.5">
+                  "{experience.user.bio}"
+                </p>
+              )}
+
+              {/* Action: Link to full student profile */}
+              <div className="pt-2 flex items-center justify-between gap-2 border-t border-stone-100 dark:border-zinc-800">
+                <Link
+                  href={`/profile/${experience.user.id}`}
+                  className="inline-flex items-center gap-1.5 text-xs font-semibold text-blue-500 hover:text-blue-400 transition-colors"
+                >
+                  <span>View Student Profile</span>
+                  <ArrowRight className="h-3.5 w-3.5" />
+                </Link>
+                {experience.user.linkedinUrl && (
+                  <a
+                    href={experience.user.linkedinUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1 text-xs font-semibold text-[#0A66C2] hover:underline"
+                  >
+                    <span>LinkedIn</span>
+                    <ExternalLink className="h-3 w-3" />
+                  </a>
+                )}
+              </div>
+            </div>
+          ) : (
+            <div className="rounded-3xl border border-stone-200 dark:border-zinc-800/90 bg-white dark:bg-[#111317] p-6 space-y-3 shadow-xs">
+              <div className="flex items-center justify-between border-b border-stone-100 dark:border-zinc-800 pb-2.5">
+                <h4 className="text-xs font-bold uppercase tracking-wider text-slate-900 dark:text-zinc-100">
+                  Contributor
+                </h4>
+                <span className="inline-flex items-center gap-1 text-[11px] font-mono text-zinc-400">
+                  <Eye className="h-3.5 w-3.5 text-blue-400" />
+                  {experience.viewsCount} {experience.viewsCount === 1 ? "view" : "views"}
+                </span>
+              </div>
+              <div className="flex items-center gap-3">
+                <div className="h-10 w-10 rounded-full bg-zinc-800 flex items-center justify-center text-zinc-400">
+                  <User className="h-5 w-5" />
+                </div>
+                <div>
+                  <p className="text-sm font-bold text-slate-800 dark:text-zinc-200">
+                    Anonymous Student
+                  </p>
+                  <p className="text-xs text-slate-500 dark:text-zinc-400">
+                    {experience.department ? `${experience.department} • ` : ""}Class of{" "}
+                    {experience.interviewYear}
+                  </p>
+                </div>
+              </div>
+              <p className="text-xs text-slate-500 dark:text-zinc-400 leading-relaxed">
+                Shared anonymously to protect candidate privacy while helping junior students
+                prepare.
+              </p>
+            </div>
+          )}
+
           {/* Interactive Table of Contents with smooth section transitions */}
           <TableOfContents
             sections={sections}

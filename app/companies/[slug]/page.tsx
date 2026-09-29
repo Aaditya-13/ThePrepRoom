@@ -21,6 +21,9 @@ export async function generateMetadata(props: PageProps) {
   };
 }
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 export default async function CompanyDetailPage(props: PageProps) {
   const params = await props.params;
   const company = await getPublicCompanyBySlug(params.slug);

@@ -148,8 +148,21 @@ export async function getPublicExperiences(filter: GetExperiencesFilter = {}) {
  * Fetch a single approved experience by slug
  */
 export async function getPublicExperienceBySlug(slug: string) {
-  const experience = await prisma.experience.findUnique({
+  // First verify existence and public status
+  const existing = await prisma.experience.findUnique({
     where: { slug },
+    select: { id: true, status: true },
+  });
+
+  // Allow public viewing if APPROVED or PENDING
+  if (!existing || (existing.status !== "APPROVED" && existing.status !== "PENDING")) {
+    return null;
+  }
+
+  // Atomically increment viewsCount AND fetch the fresh record in one atomic operation
+  const experience = await prisma.experience.update({
+    where: { id: existing.id },
+    data: { viewsCount: { increment: 1 } },
     include: {
       company: {
         include: {
@@ -162,8 +175,13 @@ export async function getPublicExperienceBySlug(slug: string) {
         select: {
           id: true,
           name: true,
+          image: true,
           department: true,
           graduationYear: true,
+          placementStatus: true,
+          placedCompany: true,
+          linkedinUrl: true,
+          bio: true,
         },
       },
       rounds: {
@@ -191,19 +209,6 @@ export async function getPublicExperienceBySlug(slug: string) {
       },
     },
   });
-
-  // Allow public viewing if APPROVED or PENDING
-  if (!experience || (experience.status !== "APPROVED" && experience.status !== "PENDING")) {
-    return null;
-  }
-
-  // Increment views count asynchronously
-  await prisma.experience
-    .update({
-      where: { id: experience.id },
-      data: { viewsCount: { increment: 1 } },
-    })
-    .catch(() => {});
 
   return experience;
 }

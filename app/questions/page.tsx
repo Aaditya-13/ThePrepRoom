@@ -4,6 +4,9 @@ import { prisma } from "@/lib/prisma";
 import { getPublicQuestions } from "@/lib/public-queries";
 import { BookmarkButton } from "@/components/bookmark-button";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 export const metadata = {
   title: "Interview Questions Bank",
   description: "Search and explore questions asked in actual campus placement interviews.",

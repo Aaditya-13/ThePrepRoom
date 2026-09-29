@@ -5,6 +5,9 @@ import { getPublicQuestionBySlug } from "@/lib/public-queries";
 import { BookmarkButton } from "@/components/bookmark-button";
 import { ReportModal } from "@/components/report-modal";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 interface PageProps {
   params: Promise<{ slug: string }>;
 }

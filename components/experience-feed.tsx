@@ -10,6 +10,7 @@ export interface ExperienceFeedItem {
   id: string;
   slug: string;
   status?: string;
+  viewsCount?: number;
   company: { name: string; slug: string };
   role: { title: string; slug: string };
   interviewYear: number;

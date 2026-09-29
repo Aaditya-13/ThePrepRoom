@@ -325,6 +325,10 @@ export async function submitExperienceAction(data: ExperienceSubmissionData) {
 
   revalidatePath("/profile");
   revalidatePath("/admin");
+  revalidatePath("/experiences");
+  revalidatePath("/");
+  revalidatePath("/companies");
+  revalidatePath("/questions");
   return { success: true, slug: submitted.slug, experienceId: submitted.id };
 }
 
@@ -399,6 +403,8 @@ export async function loadMoreExperiencesAction(params: {
     experiences: result.experiences.map((exp) => ({
       id: exp.id,
       slug: exp.slug,
+      status: exp.status,
+      viewsCount: exp.viewsCount,
       company: {
         name: exp.company.name,
         slug: exp.company.slug,

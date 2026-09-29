@@ -22,6 +22,7 @@ import { HeroIllustration } from "@/components/hero-illustration";
 import { TopStoriesCarousel } from "@/components/top-stories-carousel";
 import { getUserInitials } from "@/lib/user-utils";
 
+export const dynamic = "force-dynamic";
 export const revalidate = 0; // Fresh on navigation
 
 export default async function HomePage() {

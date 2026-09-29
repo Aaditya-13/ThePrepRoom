@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { Eye } from "lucide-react";
 import { formatPlacementType, formatResultStatus } from "@/lib/utils";
 import { BookmarkButton } from "./bookmark-button";
 
@@ -10,6 +11,7 @@ interface ExperienceRowProps {
     id: string;
     slug: string;
     status?: string;
+    viewsCount?: number;
     company: { name: string; slug: string };
     role: { title: string; slug: string };
     interviewYear: number;
@@ -83,6 +85,16 @@ export function ExperienceRow({ experience }: ExperienceRowProps) {
             <span className="text-xs text-slate-500 dark:text-zinc-400 font-mono">
               {experience.interviewYear} · {formatPlacementType(experience.placementType)}
             </span>
+
+            {typeof experience.viewsCount === "number" && (
+              <>
+                <span className="text-stone-300 dark:text-zinc-700">•</span>
+                <span className="inline-flex items-center gap-1 text-xs text-slate-500 dark:text-zinc-400 font-mono">
+                  <Eye className="h-3 w-3 text-blue-400" />
+                  <span>{experience.viewsCount} {experience.viewsCount === 1 ? "view" : "views"}</span>
+                </span>
+              </>
+            )}
 
             {/* Verification Status Badge */}
             {experience.status === "APPROVED" ? (
