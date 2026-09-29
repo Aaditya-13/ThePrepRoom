@@ -80,39 +80,11 @@ export default async function PreparePage() {
 
   return (
     <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 py-10 sm:py-12 space-y-12">
-      {/* Top Banner Header */}
-      <div className="relative overflow-hidden rounded-3xl border border-zinc-800/80 bg-[#111317] p-8 sm:p-12 shadow-sm">
-        <div className="absolute top-0 right-0 -mt-10 -mr-10 h-72 w-72 rounded-full bg-blue-500/10 blur-3xl pointer-events-none" />
-        <div className="absolute bottom-0 left-1/3 -mb-10 h-60 w-60 rounded-full bg-emerald-500/10 blur-3xl pointer-events-none" />
-
-        <div className="relative z-10 max-w-3xl space-y-4">
-          <div className="inline-flex items-center gap-2 rounded-full border border-blue-500/20 bg-blue-500/10 px-3.5 py-1 text-xs font-medium text-blue-400">
-            <Sparkles className="h-3.5 w-3.5" />
-            <span>Placement Roadmaps & Topic Guides</span>
-          </div>
-
-          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-white">
-            High-Yield Preparation Hub
-          </h1>
-          <p className="text-sm sm:text-base text-zinc-400 leading-relaxed max-w-2xl">
-            Master the core concepts frequently tested in technical screenings, online assessments, and interview panels. Every topic links directly to verified real-world interview questions asked by hiring teams.
-          </p>
-
-          <div className="pt-2 flex flex-wrap items-center gap-4 text-xs text-zinc-400 font-medium">
-            <span className="flex items-center gap-1.5">
-              <CheckCircle2 className="h-4 w-4 text-emerald-500" />
-              Categorized by round importance
-            </span>
-            <span className="flex items-center gap-1.5">
-              <CheckCircle2 className="h-4 w-4 text-blue-500" />
-              Linked to campus experiences
-            </span>
-            <span className="flex items-center gap-1.5">
-              <CheckCircle2 className="h-4 w-4 text-purple-500" />
-              Includes real candidate notes
-            </span>
-          </div>
-        </div>
+      {/* Header */}
+      <div>
+        <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white">
+          Placement Preparation Hub
+        </h1>
       </div>
 
       {/* Categories Grid */}

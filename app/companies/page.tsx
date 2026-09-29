@@ -18,16 +18,10 @@ export default async function CompaniesPage(props: PageProps) {
   return (
     <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 py-10 space-y-8">
       {/* Header */}
-      <div className="space-y-1">
-        <div className="inline-flex items-center gap-1.5 rounded-full border border-blue-500/20 bg-blue-950/30 px-3 py-0.5 text-xs font-semibold text-blue-400">
-          <span>Recruiting Organizations</span>
-        </div>
-        <h1 className="text-2xl sm:text-4xl font-extrabold tracking-tight text-white pt-1">
+      <div>
+        <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white">
           Companies
         </h1>
-        <p className="text-sm text-zinc-400 max-w-2xl leading-relaxed">
-          Explore placement experiences, reported interview questions, and selection processes organized by company.
-        </p>
       </div>
 
       {/* Search Input */}
