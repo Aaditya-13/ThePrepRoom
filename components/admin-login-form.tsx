@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState, useTransition, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import {
@@ -13,8 +13,6 @@ import {
   Download,
   AlertCircle,
   ArrowLeft,
-  ShieldAlert,
-  Sparkles,
   Smartphone,
   Eye,
   EyeOff,
@@ -32,6 +30,7 @@ export function AdminLoginForm() {
   const next = searchParams.get("next") || "/admin";
   const urlError = searchParams.get("error");
 
+  const [mounted, setMounted] = useState(false);
   const [step, setStep] = useState<AdminAuthStep>("CREDENTIALS");
   const [email, setEmail] = useState("");
   const [error, setError] = useState<string | null>(urlError || null);
@@ -52,6 +51,10 @@ export function AdminLoginForm() {
   const [totpToken, setTotpToken] = useState("");
   const [useRecoveryCode, setUseRecoveryCode] = useState(false);
   const [recoveryCodeInput, setRecoveryCodeInput] = useState("");
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   // Handle Step 1: Verify Credentials
   const handleCredentialsSubmit = (e: React.FormEvent<HTMLFormElement>) => {
@@ -185,10 +188,10 @@ export function AdminLoginForm() {
         <div className="flex items-center justify-between">
           <div className="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1 text-[11px] font-semibold text-emerald-400">
             <ShieldCheck className="h-3.5 w-3.5" />
-            <span>Admin Clearance Portal</span>
+            <span>Administrator Access</span>
           </div>
           <span className="text-[10px] font-mono tracking-wider uppercase text-zinc-500">
-            RFC 6238 TOTP 2FA
+            2FA Enforced
           </span>
         </div>
 
@@ -199,7 +202,7 @@ export function AdminLoginForm() {
         </h1>
         <p className="text-xs text-zinc-400">
           {step === "CREDENTIALS" &&
-            "Authorized administration access. Single-session credentials with required hardware/app two-factor authentication."}
+            "Authorized administration access. Single-session credentials with required two-factor authentication."}
           {step === "SETUP_TOTP" &&
             "Scan the QR code below using Google Authenticator, Authy, or 1Password to activate your admin account."}
           {step === "VERIFY_TOTP" &&
@@ -215,7 +218,7 @@ export function AdminLoginForm() {
             <p className="font-medium">{error}</p>
             {typeof remainingAttempts === "number" && remainingAttempts > 0 && (
               <p className="text-[11px] text-rose-400/80">
-                Security notice: {remainingAttempts} attempt{remainingAttempts === 1 ? "" : "s"} remaining before temporary IP lockout.
+                Security notice: {remainingAttempts} attempt{remainingAttempts === 1 ? "" : "s"} remaining before temporary lockout.
               </p>
             )}
           </div>
@@ -224,7 +227,11 @@ export function AdminLoginForm() {
 
       {/* STEP 1: CREDENTIALS */}
       {step === "CREDENTIALS" && (
-        <form onSubmit={handleCredentialsSubmit} className="space-y-4 text-xs relative z-10">
+        <form
+          onSubmit={handleCredentialsSubmit}
+          suppressHydrationWarning={true}
+          className="space-y-4 text-xs relative z-10"
+        >
           <div>
             <label className="block font-semibold text-zinc-300 mb-1.5">
               Administrator Email
@@ -234,6 +241,7 @@ export function AdminLoginForm() {
               name="email"
               required
               defaultValue={email}
+              suppressHydrationWarning={true}
               placeholder="admin@thepreproom.internal"
               className="w-full rounded-xl border border-zinc-700/80 bg-[#0c0d10] px-4 py-3 text-zinc-100 placeholder:text-zinc-600 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 focus:outline-hidden transition-all text-sm font-sans"
             />
@@ -262,6 +270,7 @@ export function AdminLoginForm() {
               type={showPassword ? "text" : "password"}
               name="password"
               required
+              suppressHydrationWarning={true}
               placeholder="••••••••••••"
               className="w-full rounded-xl border border-zinc-700/80 bg-[#0c0d10] px-4 py-3 text-zinc-100 placeholder:text-zinc-600 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 focus:outline-hidden transition-all text-sm font-mono"
             />
@@ -281,30 +290,6 @@ export function AdminLoginForm() {
               </>
             )}
           </button>
-
-          {/* Security Notice */}
-          <div className="rounded-xl border border-zinc-800 bg-[#0c0d10]/60 p-3 space-y-1.5 text-[11px] text-zinc-400">
-            <div className="flex items-center gap-1.5 text-zinc-300 font-medium">
-              <ShieldAlert className="h-3.5 w-3.5 text-amber-400" />
-              <span>Multi-Factor Authentication Enforced</span>
-            </div>
-            <p>
-              Admins must confirm identity via TOTP authenticator (Google Authenticator / Authy).
-              Social logins and public signup are strictly prohibited on this portal.
-            </p>
-          </div>
-
-          {/* Seed admin credentials reminder for evaluation */}
-          {process.env.NODE_ENV !== "production" && (
-            <div className="rounded-xl border border-dashed border-zinc-800 bg-zinc-900/50 p-3 text-xs space-y-1">
-              <span className="font-semibold text-zinc-300 text-[11px] uppercase tracking-wider">
-                Dev Seed Admin Credentials:
-              </span>
-              <p className="text-[11px] font-mono text-emerald-400">
-                admin@thepreproom.internal / admin123
-              </p>
-            </div>
-          )}
         </form>
       )}
 
@@ -414,7 +399,7 @@ export function AdminLoginForm() {
           )}
 
           {/* Confirm TOTP Code Input */}
-          <form onSubmit={handleConfirmSetup} className="space-y-4">
+          <form onSubmit={handleConfirmSetup} suppressHydrationWarning={true} className="space-y-4">
             <div>
               <label className="block font-semibold text-zinc-300 mb-1.5">
                 Confirm 6-Digit Authenticator Code
@@ -423,6 +408,7 @@ export function AdminLoginForm() {
                 type="text"
                 maxLength={6}
                 value={totpToken}
+                suppressHydrationWarning={true}
                 onChange={(e) => setTotpToken(e.target.value.replace(/\D/g, ""))}
                 placeholder="123456"
                 autoFocus
@@ -443,7 +429,7 @@ export function AdminLoginForm() {
 
       {/* STEP 2B: VERIFY TOTP (Normal Login) */}
       {step === "VERIFY_TOTP" && (
-        <form onSubmit={handleVerifyTotp} className="space-y-5 text-xs relative z-10">
+        <form onSubmit={handleVerifyTotp} suppressHydrationWarning={true} className="space-y-5 text-xs relative z-10">
           {!useRecoveryCode ? (
             <div>
               <div className="flex items-center justify-between mb-1.5">
@@ -456,6 +442,7 @@ export function AdminLoginForm() {
                 type="text"
                 maxLength={6}
                 value={totpToken}
+                suppressHydrationWarning={true}
                 onChange={(e) => setTotpToken(e.target.value.replace(/\D/g, ""))}
                 placeholder="000000"
                 autoFocus
@@ -474,6 +461,7 @@ export function AdminLoginForm() {
                 type="text"
                 maxLength={9}
                 value={recoveryCodeInput}
+                suppressHydrationWarning={true}
                 onChange={(e) => setRecoveryCodeInput(e.target.value.toUpperCase())}
                 placeholder="XXXX-XXXX"
                 autoFocus
@@ -528,19 +516,13 @@ export function AdminLoginForm() {
         </form>
       )}
 
-      {/* Footer navigation */}
-      <div className="text-center text-xs text-zinc-500 border-t border-zinc-800/80 pt-4 relative z-10 flex items-center justify-between">
+      {/* Standalone minimal footer */}
+      <div className="text-center text-xs text-zinc-500 border-t border-zinc-800/80 pt-4 relative z-10">
         <Link
           href="/"
           className="text-zinc-400 hover:text-zinc-200 inline-flex items-center gap-1 transition-colors"
         >
           <ArrowLeft className="h-3 w-3" /> Back to ThePrepRoom
-        </Link>
-        <Link
-          href="/login"
-          className="text-zinc-400 hover:text-blue-400 transition-colors"
-        >
-          Student Login &rarr;
         </Link>
       </div>
     </div>

@@ -30,10 +30,10 @@ export async function loginAction(prevState: any, formData: FormData) {
     return { error: "Invalid email or password." };
   }
 
-  // Prevent admin from bypassing TOTP 2FA through student login form
+  // Reject admin from student login form without revealing admin role
   if (user.role === "ADMIN") {
     return {
-      error: "Administrator accounts must authenticate via the dedicated Admin Portal at /admin/login.",
+      error: "Invalid email or password.",
     };
   }
 
@@ -92,6 +92,7 @@ export async function registerAction(prevState: any, formData: FormData) {
     email: user.email,
     role: user.role,
     name: user.name,
+    authMethod: "credentials",
   });
 
   revalidatePath("/", "layout");
@@ -102,42 +103,4 @@ export async function logoutAction() {
   await clearSessionCookie();
   revalidatePath("/", "layout");
   return { success: true };
-}
-
-/**
- * DEVELOPMENT/DEMO ONLY LOGIN ACTION
- * Strictly blocked in production environments.
- */
-export async function demoLoginAction(role: "student" | "admin") {
-  if (process.env.NODE_ENV === "production") {
-    return { error: "Demo login is strictly disabled in production." };
-  }
-
-  if (role === "admin") {
-    return {
-      error: "Administrator accounts must authenticate at /admin/login with TOTP 2FA. Direct demo bypass is disabled for security.",
-      redirectTo: "/admin/login",
-    };
-  }
-
-  const email = "student@thepreproom.internal";
-
-  const user = await prisma.user.findUnique({
-    where: { email },
-  });
-
-  if (!user) {
-    return { error: `Demo student user not found. Please run database seed.` };
-  }
-
-  await createSessionCookie({
-    userId: user.id,
-    email: user.email,
-    role: user.role,
-    name: user.name,
-    authMethod: "credentials",
-  });
-
-  revalidatePath("/", "layout");
-  return { success: true, role: user.role };
 }

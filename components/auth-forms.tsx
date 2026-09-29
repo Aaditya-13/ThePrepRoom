@@ -6,10 +6,9 @@ import Link from "next/link";
 import {
   AlertCircle,
   Sparkles,
-  ShieldCheck,
   Info,
 } from "lucide-react";
-import { loginAction, registerAction, demoLoginAction } from "@/actions/auth";
+import { loginAction, registerAction } from "@/actions/auth";
 
 // SVG Logos for OAuth Providers
 function GoogleIcon({ className = "h-4 w-4" }: { className?: string }) {
@@ -66,19 +65,6 @@ export function LoginForm() {
 
     startTransition(async () => {
       const res = await loginAction(null, formData);
-      if (res?.error) {
-        setError(res.error);
-      } else {
-        router.push(next);
-        router.refresh();
-      }
-    });
-  };
-
-  const handleDemoStudent = () => {
-    setError(null);
-    startTransition(async () => {
-      const res = await demoLoginAction("student");
       if (res?.error) {
         setError(res.error);
       } else {
@@ -150,7 +136,11 @@ export function LoginForm() {
       </div>
 
       {/* Email / Password Form */}
-      <form onSubmit={handleSubmit} className="space-y-4 text-xs relative z-10">
+      <form
+        onSubmit={handleSubmit}
+        suppressHydrationWarning={true}
+        className="space-y-4 text-xs relative z-10"
+      >
         <div>
           <label className="block font-semibold text-zinc-300 mb-1.5">
             College / Registered Email
@@ -159,6 +149,7 @@ export function LoginForm() {
             type="email"
             name="email"
             required
+            suppressHydrationWarning={true}
             placeholder="student@college.edu"
             className="w-full rounded-xl border border-zinc-700/80 bg-[#0c0d10] px-4 py-2.5 text-zinc-100 placeholder:text-zinc-600 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-hidden transition-all text-sm"
           />
@@ -172,6 +163,7 @@ export function LoginForm() {
             type="password"
             name="password"
             required
+            suppressHydrationWarning={true}
             placeholder="••••••••"
             className="w-full rounded-xl border border-zinc-700/80 bg-[#0c0d10] px-4 py-2.5 text-zinc-100 placeholder:text-zinc-600 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-hidden transition-all text-sm"
           />
@@ -186,49 +178,15 @@ export function LoginForm() {
         </button>
       </form>
 
-      {/* Quick Demo Student Button */}
-      {process.env.NODE_ENV !== "production" && (
-        <div className="rounded-2xl border border-dashed border-zinc-800 bg-[#16181e]/80 p-3.5 space-y-2 text-xs relative z-10">
-          <div className="flex items-center justify-between">
-            <span className="font-bold text-zinc-300 text-[11px] uppercase tracking-wider">
-              Quick Evaluation:
-            </span>
-            <span className="text-[10px] text-zinc-500">Student Account</span>
-          </div>
-          <button
-            type="button"
-            onClick={handleDemoStudent}
-            disabled={isPending}
-            className="w-full rounded-xl border border-zinc-700 bg-[#111317] py-2 text-xs font-semibold text-zinc-200 hover:border-blue-500/50 hover:text-blue-400 transition-colors shadow-xs"
-          >
-            Sign in as Demo Student (Ved K.)
-          </button>
-        </div>
-      )}
-
       {/* Footer Navigation */}
-      <div className="space-y-3 pt-2 text-center text-xs text-zinc-400 border-t border-zinc-800/80 relative z-10">
-        <div>
-          Don&apos;t have an account?{" "}
-          <Link
-            href={`/register?next=${encodeURIComponent(next)}`}
-            className="font-bold text-blue-400 hover:underline"
-          >
-            Create an account
-          </Link>
-        </div>
-
-        {/* Dedicated Admin Portal Link */}
-        <div className="pt-2 border-t border-zinc-800/50 flex items-center justify-center gap-1.5 text-zinc-500 text-[11px]">
-          <ShieldCheck className="h-3.5 w-3.5 text-emerald-400" />
-          <span>Administrator?</span>
-          <Link
-            href="/admin/login"
-            className="font-semibold text-emerald-400 hover:text-emerald-300 hover:underline"
-          >
-            Admin 2FA Portal &rarr;
-          </Link>
-        </div>
+      <div className="pt-2 text-center text-xs text-zinc-400 border-t border-zinc-800/80 relative z-10">
+        Don&apos;t have an account?{" "}
+        <Link
+          href={`/register?next=${encodeURIComponent(next)}`}
+          className="font-bold text-blue-400 hover:underline"
+        >
+          Create an account
+        </Link>
       </div>
     </div>
   );
@@ -312,13 +270,18 @@ export function RegisterForm() {
       </div>
 
       {/* Form */}
-      <form onSubmit={handleSubmit} className="space-y-3.5 text-xs relative z-10">
+      <form
+        onSubmit={handleSubmit}
+        suppressHydrationWarning={true}
+        className="space-y-3.5 text-xs relative z-10"
+      >
         <div>
           <label className="block font-semibold text-zinc-300 mb-1">Full Name *</label>
           <input
             type="text"
             name="name"
             required
+            suppressHydrationWarning={true}
             placeholder="Ved K."
             className="w-full rounded-xl border border-zinc-700/80 bg-[#0c0d10] px-4 py-2.5 text-zinc-100 placeholder:text-zinc-600 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-hidden transition-all text-sm"
           />
@@ -330,6 +293,7 @@ export function RegisterForm() {
             type="email"
             name="email"
             required
+            suppressHydrationWarning={true}
             placeholder="student@college.edu"
             className="w-full rounded-xl border border-zinc-700/80 bg-[#0c0d10] px-4 py-2.5 text-zinc-100 placeholder:text-zinc-600 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-hidden transition-all text-sm"
           />
@@ -341,6 +305,7 @@ export function RegisterForm() {
             <input
               type="text"
               name="department"
+              suppressHydrationWarning={true}
               placeholder="e.g. IT, CS, Mech"
               className="w-full rounded-xl border border-zinc-700/80 bg-[#0c0d10] px-4 py-2.5 text-zinc-100 placeholder:text-zinc-600 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-hidden transition-all text-sm"
             />
@@ -350,6 +315,7 @@ export function RegisterForm() {
             <input
               type="number"
               name="graduationYear"
+              suppressHydrationWarning={true}
               placeholder="e.g. 2027"
               className="w-full rounded-xl border border-zinc-700/80 bg-[#0c0d10] px-4 py-2.5 text-zinc-100 placeholder:text-zinc-600 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-hidden transition-all text-sm"
             />
@@ -363,6 +329,7 @@ export function RegisterForm() {
             name="password"
             required
             minLength={6}
+            suppressHydrationWarning={true}
             placeholder="Minimum 6 characters"
             className="w-full rounded-xl border border-zinc-700/80 bg-[#0c0d10] px-4 py-2.5 text-zinc-100 placeholder:text-zinc-600 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-hidden transition-all text-sm"
           />
@@ -378,28 +345,14 @@ export function RegisterForm() {
       </form>
 
       {/* Footer Navigation */}
-      <div className="space-y-3 pt-2 text-center text-xs text-zinc-400 border-t border-zinc-800/80 relative z-10">
-        <div>
-          Already have an account?{" "}
-          <Link
-            href={`/login?next=${encodeURIComponent(next)}`}
-            className="font-bold text-blue-400 hover:underline"
-          >
-            Sign in
-          </Link>
-        </div>
-
-        {/* Dedicated Admin Portal Link */}
-        <div className="pt-2 border-t border-zinc-800/50 flex items-center justify-center gap-1.5 text-zinc-500 text-[11px]">
-          <ShieldCheck className="h-3.5 w-3.5 text-emerald-400" />
-          <span>Administrator?</span>
-          <Link
-            href="/admin/login"
-            className="font-semibold text-emerald-400 hover:text-emerald-300 hover:underline"
-          >
-            Admin 2FA Portal &rarr;
-          </Link>
-        </div>
+      <div className="pt-2 text-center text-xs text-zinc-400 border-t border-zinc-800/80 relative z-10">
+        Already have an account?{" "}
+        <Link
+          href={`/login?next=${encodeURIComponent(next)}`}
+          className="font-bold text-blue-400 hover:underline"
+        >
+          Sign in
+        </Link>
       </div>
     </div>
   );
