@@ -264,12 +264,16 @@ export function ShareExperienceWizard({
       } else {
         setStatusMessage({
           type: "success",
-          text: "Experience submitted for review! Redirecting to your profile...",
+          text: "Experience added successfully! Marked as 'Unverified' on top. Redirecting to your live experience...",
         });
         setTimeout(() => {
-          router.push("/profile");
+          if (res?.slug) {
+            router.push(`/experiences/${res.slug}`);
+          } else {
+            router.push("/profile");
+          }
           router.refresh();
-        }, 1500);
+        }, 1200);
       }
     });
   };

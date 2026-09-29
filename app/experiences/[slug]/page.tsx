@@ -126,13 +126,28 @@ export default async function ExperienceDetailPage(props: PageProps) {
                 {experience.interviewYear} · {formatPlacementType(experience.placementType)}
               </span>
 
-              {/* Sample/Demo Badge */}
-              {experience.isDemo && (
-                <span className="rounded-full border border-amber-500/30 bg-amber-500/10 px-2.5 py-1 text-xs font-medium text-amber-600 dark:text-amber-400">
-                  Sample / Demo Experience
+              {/* Verification Status Badge */}
+              {experience.status === "APPROVED" ? (
+                <span className="inline-flex items-center gap-1 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2.5 py-1 text-xs font-semibold text-emerald-400">
+                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
+                  Verified
                 </span>
-              )}
+              ) : experience.status === "PENDING" ? (
+                <span className="inline-flex items-center gap-1 rounded-full border border-amber-500/30 bg-amber-500/10 px-2.5 py-1 text-xs font-semibold text-amber-400">
+                  <span className="h-1.5 w-1.5 rounded-full bg-amber-400" />
+                  Unverified
+                </span>
+              ) : null}
             </div>
+
+            {experience.status === "PENDING" && (
+              <div className="rounded-xl bg-amber-500/10 border border-amber-500/30 p-3 text-xs text-amber-300 flex items-center gap-2.5">
+                <span className="h-2 w-2 rounded-full bg-amber-400 shrink-0" />
+                <span>
+                  <strong>Unverified Submission:</strong> This interview experience was submitted by a student and is awaiting coordinator verification.
+                </span>
+              </div>
+            )}
 
             <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-slate-900 dark:text-zinc-100 leading-tight">
               {experience.role.title}

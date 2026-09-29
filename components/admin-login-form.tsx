@@ -92,6 +92,9 @@ export function AdminLoginForm() {
         if (typeof res.remainingAttempts === "number") {
           setRemainingAttempts(res.remainingAttempts);
         }
+      } else if (res.success) {
+        router.push(next);
+        router.refresh();
       } else if (res.step === "SETUP_TOTP") {
         setStep("SETUP_TOTP");
         setQrCodeDataUrl(res.qrCodeDataUrl || null);

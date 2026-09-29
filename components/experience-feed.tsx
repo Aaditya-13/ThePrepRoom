@@ -9,6 +9,7 @@ import { loadMoreExperiencesAction } from "@/actions/experience";
 export interface ExperienceFeedItem {
   id: string;
   slug: string;
+  status?: string;
   company: { name: string; slug: string };
   role: { title: string; slug: string };
   interviewYear: number;
@@ -81,7 +82,7 @@ export function ExperienceFeed({
       <div className="text-center py-16 border border-dashed border-zinc-800 rounded-2xl bg-[#111317] p-8 shadow-xs">
         <h3 className="text-base font-semibold text-white">No experiences found</h3>
         <p className="text-xs text-zinc-400 mt-1 max-w-sm mx-auto">
-          No approved experiences matched your current filter criteria. Try clearing some filters or be the first to share one.
+          No experiences matched your current filter criteria. Be the first to share your interview experience and help your peers!
         </p>
         <div className="mt-4">
           <Link

@@ -9,6 +9,7 @@ interface ExperienceRowProps {
   experience: {
     id: string;
     slug: string;
+    status?: string;
     company: { name: string; slug: string };
     role: { title: string; slug: string };
     interviewYear: number;
@@ -82,6 +83,19 @@ export function ExperienceRow({ experience }: ExperienceRowProps) {
             <span className="text-xs text-slate-500 dark:text-zinc-400 font-mono">
               {experience.interviewYear} · {formatPlacementType(experience.placementType)}
             </span>
+
+            {/* Verification Status Badge */}
+            {experience.status === "APPROVED" ? (
+              <span className="inline-flex items-center gap-1 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2 py-0.5 text-[10px] font-semibold text-emerald-400">
+                <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
+                Verified
+              </span>
+            ) : experience.status === "PENDING" ? (
+              <span className="inline-flex items-center gap-1 rounded-full border border-amber-500/30 bg-amber-500/10 px-2 py-0.5 text-[10px] font-semibold text-amber-400">
+                <span className="h-1.5 w-1.5 rounded-full bg-amber-400" />
+                Unverified
+              </span>
+            ) : null}
 
             {/* Explicit Sample/Demo Indicator */}
             {experience.isDemo && (

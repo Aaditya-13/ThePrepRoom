@@ -88,32 +88,21 @@ export async function adminVerifyCredentialsAction(
     };
   }
 
-  // If user hasn't set up 2FA yet, initiate TOTP provisioning
-  if (!user.totpEnabled || !user.totpSecret) {
-    const setup = await generateTotpSetup(user.email);
+  // Successfully verified password! Establish authenticated admin session
+  await recordAdminLoginAttempt(ip, email, true);
 
-    // Temporarily save secret & recovery codes pending confirmation
-    await prisma.user.update({
-      where: { id: user.id },
-      data: {
-        totpSecret: setup.secret,
-        totpRecoveryCodes: setup.hashedRecoveryCodes,
-        totpEnabled: false,
-      },
-    });
+  await createSessionCookie({
+    userId: user.id,
+    email: user.email,
+    role: "ADMIN",
+    name: user.name,
+    authMethod: "credentials",
+    adminVerified: true,
+  });
 
-    return {
-      step: "SETUP_TOTP",
-      email: user.email,
-      qrCodeDataUrl: setup.qrCodeDataUrl,
-      secret: setup.secret,
-      recoveryCodes: setup.recoveryCodes,
-    };
-  }
-
-  // Admin already has 2FA enabled -> proceed to TOTP verification step
+  revalidatePath("/", "layout");
   return {
-    step: "VERIFY_TOTP",
+    success: true,
     email: user.email,
   };
 }

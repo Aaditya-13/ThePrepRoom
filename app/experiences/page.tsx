@@ -61,7 +61,7 @@ export default async function ExperiencesPage(props: PageProps) {
         _count: {
           select: {
             experiences: {
-              where: { status: "APPROVED" },
+              where: { status: { in: ["APPROVED", "PENDING"] } },
             },
           },
         },
@@ -71,7 +71,7 @@ export default async function ExperiencesPage(props: PageProps) {
     prisma.companyRole.findMany({
       where: {
         experiences: {
-          some: { status: "APPROVED" },
+          some: { status: { in: ["APPROVED", "PENDING"] } },
         },
       },
       select: {
@@ -80,7 +80,7 @@ export default async function ExperiencesPage(props: PageProps) {
         _count: {
           select: {
             experiences: {
-              where: { status: "APPROVED" },
+              where: { status: { in: ["APPROVED", "PENDING"] } },
             },
           },
         },
@@ -88,13 +88,13 @@ export default async function ExperiencesPage(props: PageProps) {
       orderBy: { title: "asc" },
     }),
     prisma.experience.findMany({
-      where: { status: "APPROVED" },
+      where: { status: { in: ["APPROVED", "PENDING"] } },
       select: { interviewYear: true },
       distinct: ["interviewYear"],
       orderBy: { interviewYear: "desc" },
     }),
     prisma.experience.findMany({
-      where: { status: "APPROVED" },
+      where: { status: { in: ["APPROVED", "PENDING"] } },
       take: 3,
       orderBy: { viewsCount: "desc" },
       include: {
@@ -105,7 +105,7 @@ export default async function ExperiencesPage(props: PageProps) {
     prisma.company.findMany({
       where: {
         experiences: {
-          some: { status: "APPROVED" },
+          some: { status: { in: ["APPROVED", "PENDING"] } },
         },
       },
       take: 6,
@@ -115,7 +115,7 @@ export default async function ExperiencesPage(props: PageProps) {
         _count: {
           select: {
             experiences: {
-              where: { status: "APPROVED" },
+              where: { status: { in: ["APPROVED", "PENDING"] } },
             },
           },
         },

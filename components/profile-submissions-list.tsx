@@ -82,7 +82,7 @@ export function ProfileSubmissionsList({ experiences }: ProfileSubmissionsListPr
                     : "text-zinc-400 hover:text-emerald-400 hover:bg-zinc-800/50"
                 }`}
               >
-                Live ({approved.length})
+                Verified ({approved.length})
               </button>
             )}
 
@@ -96,7 +96,7 @@ export function ProfileSubmissionsList({ experiences }: ProfileSubmissionsListPr
                     : "text-zinc-400 hover:text-amber-400 hover:bg-zinc-800/50"
                 }`}
               >
-                In Review ({pending.length})
+                Unverified ({pending.length})
               </button>
             )}
 
@@ -149,10 +149,10 @@ export function ProfileSubmissionsList({ experiences }: ProfileSubmissionsListPr
 
             if (exp.status === "APPROVED") {
               badgeBg = "bg-emerald-500/10 text-emerald-400 border-emerald-500/20";
-              statusLabel = "Approved & Live";
+              statusLabel = "Verified";
             } else if (exp.status === "PENDING") {
               badgeBg = "bg-amber-500/10 text-amber-400 border-amber-500/20";
-              statusLabel = "Under Review";
+              statusLabel = "Unverified (Public)";
             } else if (exp.status === "DRAFT") {
               badgeBg = "bg-blue-500/10 text-blue-400 border-blue-500/20";
               statusLabel = "Draft";

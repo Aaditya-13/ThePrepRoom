@@ -40,9 +40,9 @@ export async function getPublicExperiences(filter: GetExperiencesFilter = {}) {
 
   const skip = (page - 1) * limit;
 
-  // Build Prisma where clause strictly enforcing APPROVED status
+  // Include both APPROVED (Verified) and PENDING (Unverified) experiences in public catalog
   const where: any = {
-    status: "APPROVED",
+    status: { in: ["APPROVED", "PENDING"] },
   };
 
   if (companySlug) {
@@ -192,8 +192,8 @@ export async function getPublicExperienceBySlug(slug: string) {
     },
   });
 
-  // Only allow public viewing if APPROVED
-  if (!experience || experience.status !== "APPROVED") {
+  // Allow public viewing if APPROVED or PENDING
+  if (!experience || (experience.status !== "APPROVED" && experience.status !== "PENDING")) {
     return null;
   }
 
@@ -214,7 +214,7 @@ export async function getPublicExperienceBySlug(slug: string) {
 export async function getRelatedExperiences(experienceId: string, companyId: string, roleId: string) {
   return await prisma.experience.findMany({
     where: {
-      status: "APPROVED",
+      status: { in: ["APPROVED", "PENDING"] },
       id: { not: experienceId },
       OR: [{ companyId }, { roleId }],
     },
@@ -233,33 +233,33 @@ export async function getRelatedExperiences(experienceId: string, companyId: str
  */
 export async function getPublicStats() {
   const [experiencesCount, companiesCount, questionsCount, oaRoundsCount] = await Promise.all([
-    // Only approved experiences
+    // Public experiences (approved & pending)
     prisma.experience.count({
-      where: { status: "APPROVED" },
+      where: { status: { in: ["APPROVED", "PENDING"] } },
     }),
-    // Companies with at least one approved experience
+    // Companies with at least one public experience
     prisma.company.count({
       where: {
         experiences: {
-          some: { status: "APPROVED" },
+          some: { status: { in: ["APPROVED", "PENDING"] } },
         },
       },
     }),
-    // Questions appearing in at least one approved experience
+    // Questions appearing in public experiences
     prisma.question.count({
       where: {
         experienceLinks: {
           some: {
-            experience: { status: "APPROVED" },
+            experience: { status: { in: ["APPROVED", "PENDING"] } },
           },
         },
       },
     }),
-    // Online assessment rounds in approved experiences
+    // Online assessment rounds in public experiences
     prisma.interviewRound.count({
       where: {
         roundType: "ONLINE_ASSESSMENT",
-        experience: { status: "APPROVED" },
+        experience: { status: { in: ["APPROVED", "PENDING"] } },
       },
     }),
   ]);
@@ -277,7 +277,7 @@ export async function getPublicStats() {
  */
 export async function getRecentApprovedExperiences(limit = 6) {
   return await prisma.experience.findMany({
-    where: { status: "APPROVED" },
+    where: { status: { in: ["APPROVED", "PENDING"] } },
     orderBy: { createdAt: "desc" },
     take: limit,
     include: {
@@ -297,20 +297,20 @@ export async function getPopularCompanies(limit = 6) {
   const companies = await prisma.company.findMany({
     where: {
       experiences: {
-        some: { status: "APPROVED" },
+        some: { status: { in: ["APPROVED", "PENDING"] } },
       },
     },
     include: {
       _count: {
         select: {
           experiences: {
-            where: { status: "APPROVED" },
+            where: { status: { in: ["APPROVED", "PENDING"] } },
           },
           roles: true,
         },
       },
       experiences: {
-        where: { status: "APPROVED" },
+        where: { status: { in: ["APPROVED", "PENDING"] } },
         select: { interviewYear: true },
         orderBy: { interviewYear: "desc" },
         take: 1,
@@ -344,13 +344,13 @@ export async function getAllPublicCompanies(search?: string) {
       _count: {
         select: {
           experiences: {
-            where: { status: "APPROVED" },
+            where: { status: { in: ["APPROVED", "PENDING"] } },
           },
           roles: true,
         },
       },
       experiences: {
-        where: { status: "APPROVED" },
+        where: { status: { in: ["APPROVED", "PENDING"] } },
         select: { interviewYear: true },
         orderBy: { interviewYear: "desc" },
         take: 1,
@@ -385,7 +385,7 @@ export async function getPublicCompanyBySlug(slug: string) {
     include: {
       roles: true,
       experiences: {
-        where: { status: "APPROVED" },
+        where: { status: { in: ["APPROVED", "PENDING"] } },
         orderBy: { interviewYear: "desc" },
         include: {
           role: true,
@@ -461,13 +461,13 @@ export async function getQuestionFrequency(questionId: string) {
     prisma.experienceQuestion.count({
       where: {
         questionId,
-        experience: { status: "APPROVED" },
+        experience: { status: { in: ["APPROVED", "PENDING"] } },
       },
     }),
     prisma.experienceQuestion.findMany({
       where: {
         questionId,
-        experience: { status: "APPROVED" },
+        experience: { status: { in: ["APPROVED", "PENDING"] } },
       },
       include: {
         experience: {
@@ -530,10 +530,10 @@ export async function getPublicQuestions(filter: {
   query?: string;
 }) {
   const where: any = {
-    // Only return questions that have at least one approved experience link
+    // Return questions that have at least one public experience link
     experienceLinks: {
       some: {
-        experience: { status: "APPROVED" },
+        experience: { status: { in: ["APPROVED", "PENDING"] } },
       },
     },
   };
@@ -564,7 +564,7 @@ export async function getPublicQuestions(filter: {
       topic: true,
       experienceLinks: {
         where: {
-          experience: { status: "APPROVED" },
+          experience: { status: { in: ["APPROVED", "PENDING"] } },
         },
         include: {
           experience: {
@@ -625,7 +625,7 @@ export async function getPublicQuestionBySlug(slug: string) {
           topicId: question.topicId,
           id: { not: question.id },
           experienceLinks: {
-            some: { experience: { status: "APPROVED" } },
+            some: { experience: { status: { in: ["APPROVED", "PENDING"] } } },
           },
         },
         take: 5,
@@ -646,13 +646,13 @@ export async function getPublicQuestionBySlug(slug: string) {
 }
 
 /**
- * Fetch all Online Assessment rounds reported in APPROVED experiences
+ * Fetch all Online Assessment rounds reported in public experiences
  */
 export async function getPublicOnlineAssessments() {
   const rounds = await prisma.interviewRound.findMany({
     where: {
       roundType: "ONLINE_ASSESSMENT",
-      experience: { status: "APPROVED" },
+      experience: { status: { in: ["APPROVED", "PENDING"] } },
     },
     include: {
       experience: {
@@ -676,7 +676,7 @@ export async function getPublicOnlineAssessments() {
 }
 
 /**
- * Global search across approved experiences, companies, questions, topics
+ * Global search across public experiences, companies, questions, topics
  */
 export async function globalSearch(query: string) {
   const q = query.trim();
@@ -687,7 +687,7 @@ export async function globalSearch(query: string) {
   const [experiences, companies, questions, topics] = await Promise.all([
     prisma.experience.findMany({
       where: {
-        status: "APPROVED",
+        status: { in: ["APPROVED", "PENDING"] },
         OR: [
           { company: { name: { contains: q } } },
           { role: { title: { contains: q } } },
@@ -708,7 +708,7 @@ export async function globalSearch(query: string) {
       include: {
         _count: {
           select: {
-            experiences: { where: { status: "APPROVED" } },
+            experiences: { where: { status: { in: ["APPROVED", "PENDING"] } } },
           },
         },
       },
@@ -717,7 +717,7 @@ export async function globalSearch(query: string) {
       where: {
         text: { contains: q },
         experienceLinks: {
-          some: { experience: { status: "APPROVED" } },
+          some: { experience: { status: { in: ["APPROVED", "PENDING"] } } },
         },
       },
       take: 8,

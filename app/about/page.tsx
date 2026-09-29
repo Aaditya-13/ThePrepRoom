@@ -25,7 +25,7 @@ export const metadata = {
 export default async function AboutPage() {
   // Fetch real-time platform statistics
   const [experiencesCount, questionsCount, companiesCount] = await Promise.all([
-    prisma.experience.count({ where: { status: "APPROVED" } }),
+    prisma.experience.count({ where: { status: { in: ["APPROVED", "PENDING"] } } }),
     prisma.question.count(),
     prisma.company.count(),
   ]);
@@ -47,11 +47,6 @@ export default async function AboutPage() {
 
         {/* Hero Header */}
         <div className="space-y-4 max-w-3xl">
-          <div className="inline-flex items-center gap-2 rounded-full border border-blue-500/30 bg-blue-500/10 px-3 py-1 text-xs font-semibold text-blue-400">
-            <Sparkles className="h-3.5 w-3.5" />
-            <span>Behind ThePrepRoom</span>
-          </div>
-
           <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-white font-heading leading-tight">
             Built by a Student, for Every Student Preparing for Placements.
           </h1>

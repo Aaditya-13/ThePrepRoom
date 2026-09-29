@@ -226,7 +226,7 @@ export function AdminDashboard({
                           {exp.company.name} — {exp.role.title}
                         </span>
                         <span className="rounded-full bg-amber-500/10 border border-amber-500/30 px-2.5 py-0.5 text-[11px] font-semibold text-amber-600 dark:text-amber-400">
-                          Pending Moderation
+                          Unverified (Live)
                         </span>
                       </div>
                       <p className="text-xs text-slate-500 dark:text-zinc-400 mt-1">
@@ -239,10 +239,10 @@ export function AdminDashboard({
                         type="button"
                         onClick={() => handleModerate(exp.id, "APPROVE")}
                         disabled={isPending}
-                        className="rounded-xl bg-emerald-600 hover:bg-emerald-500 px-4 py-2 text-xs font-semibold text-white inline-flex items-center gap-1.5 shadow-sm shadow-emerald-500/20 transition-all active:scale-95"
+                        className="rounded-xl bg-emerald-600 hover:bg-emerald-500 px-4 py-2 text-xs font-semibold text-white inline-flex items-center gap-1.5 shadow-sm shadow-emerald-500/20 transition-all active:scale-95 cursor-pointer"
                       >
                         <CheckCircle className="h-4 w-4" />
-                        <span>Approve & Publish</span>
+                        <span>Verify Experience</span>
                       </button>
 
                       <button

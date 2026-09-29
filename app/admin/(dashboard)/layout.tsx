@@ -11,8 +11,8 @@ export default async function AdminProtectedLayout({
 }) {
   const session = await getSessionPayload();
 
-  // Strictly enforce ADMIN role AND adminVerified (2FA passed)
-  if (!session || session.role !== "ADMIN" || !session.adminVerified) {
+  // Enforce ADMIN role
+  if (!session || session.role !== "ADMIN") {
     redirect("/admin/login?next=/admin");
   }
 

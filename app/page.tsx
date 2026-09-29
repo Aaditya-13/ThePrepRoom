@@ -31,7 +31,7 @@ export default async function HomePage() {
       getPopularCompanies(8),
       getPublicQuestions({}),
       prisma.experience.findMany({
-        where: { status: "APPROVED" },
+        where: { status: { in: ["APPROVED", "PENDING"] } },
         take: 4,
         orderBy: [{ isFeatured: "desc" }, { createdAt: "desc" }],
         include: {
@@ -42,7 +42,7 @@ export default async function HomePage() {
         },
       }),
       prisma.experience.findMany({
-        where: { status: "APPROVED" },
+        where: { status: { in: ["APPROVED", "PENDING"] } },
         take: 6,
         orderBy: { viewsCount: "desc" },
         include: {
