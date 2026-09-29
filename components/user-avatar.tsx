@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { getUserInitials } from "@/lib/user-utils";
 
 interface UserAvatarProps {
@@ -29,34 +29,44 @@ export function UserAvatar({
   statusDotColor,
   showRing = false,
 }: UserAvatarProps) {
-  const [imageError, setImageError] = useState(false);
+  const [hasError, setHasError] = useState(false);
+  const [isLoaded, setIsLoaded] = useState(false);
+
+  // Reset state if image prop changes
+  useEffect(() => {
+    setHasError(false);
+    setIsLoaded(false);
+  }, [image]);
+
   const initials = getUserInitials(name);
   const sizeClass = SIZE_MAP[size] || SIZE_MAP.md;
 
-  const hasValidImage = Boolean(image && !imageError);
+  const showImage = Boolean(image && !hasError && image.trim().length > 0 && image !== "null" && image !== "undefined");
 
   return (
     <div className={`relative inline-block shrink-0 ${className}`}>
       <div
-        className={`${sizeClass} flex items-center justify-center overflow-hidden transition-all duration-150 select-none ${
-          showRing
-            ? "ring-2 ring-blue-500/40 shadow-sm"
-            : ""
+        className={`${sizeClass} flex items-center justify-center overflow-hidden select-none bg-gradient-to-tr from-blue-600 via-indigo-600 to-blue-500 font-heading font-black tracking-tight text-white shadow-inner relative ${
+          showRing ? "ring-2 ring-blue-500/40 shadow-sm" : ""
         }`}
       >
-        {hasValidImage ? (
+        {/* Always render 2-letter initials underneath so there is NEVER a blank or broken state */}
+        <span className="select-none leading-none uppercase">{initials}</span>
+
+        {/* If image is provided, overlay the image once loaded. If it fails, hide it completely */}
+        {showImage && (
           // eslint-disable-next-line @next/next/no-img-element
           <img
             src={image!}
-            alt={name || "User Avatar"}
-            onError={() => setImageError(true)}
-            className="h-full w-full object-cover"
-            loading="lazy"
+            alt=""
+            referrerPolicy="no-referrer"
+            crossOrigin="anonymous"
+            onLoad={() => setIsLoaded(true)}
+            onError={() => setHasError(true)}
+            className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-150 ${
+              isLoaded ? "opacity-100" : "opacity-0 pointer-events-none"
+            }`}
           />
-        ) : (
-          <div className="flex h-full w-full items-center justify-center bg-gradient-to-tr from-blue-600 via-indigo-600 to-blue-500 font-heading font-black tracking-tight text-white shadow-inner">
-            <span>{initials}</span>
-          </div>
         )}
       </div>
 

@@ -14,10 +14,9 @@ import {
   Upload,
   Trash2,
   Link as LinkIcon,
-  Sparkles,
 } from "lucide-react";
 import { updateUserProfileAction } from "@/actions/user";
-import { PLACEMENT_STATUS_CONFIG, COMMON_DEPARTMENTS } from "@/lib/profile-constants";
+import { PLACEMENT_STATUS_CONFIG } from "@/lib/profile-constants";
 import { UserAvatar } from "@/components/user-avatar";
 
 function LinkedInIcon({ className = "h-4 w-4" }: { className?: string }) {
@@ -74,6 +73,16 @@ function compressImageClient(file: File): Promise<string> {
     reader.readAsDataURL(file);
   });
 }
+
+const COMMON_BRANCHES = [
+  "Information Technology",
+  "Computer Science & Engineering",
+  "Artificial Intelligence & Data Science",
+  "Electronics & Telecommunication",
+  "Mechanical Engineering",
+  "Electrical Engineering",
+  "Civil Engineering",
+];
 
 interface ProfileEditFormProps {
   user: {
@@ -142,7 +151,6 @@ export function ProfileEditModal({ user, isOpen, onClose, onProfileUpdated }: Pr
       return;
     }
 
-    // Limit raw upload to 5MB before compression
     if (file.size > 5 * 1024 * 1024) {
       setError("Image file is too large. Please select an image under 5MB.");
       return;
@@ -209,34 +217,32 @@ export function ProfileEditModal({ user, isOpen, onClose, onProfileUpdated }: Pr
         router.refresh();
         setTimeout(() => {
           onClose();
-        }, 400);
+        }, 300);
       }
     });
   };
 
   const currentGradYear = new Date().getFullYear();
+  // 8 years: from currentYear-2 up to currentYear+5
   const yearOptions = Array.from({ length: 8 }, (_, i) => currentGradYear - 2 + i);
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/80 backdrop-blur-xs transition-opacity duration-150"
+      className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 bg-black/80 transition-opacity duration-150"
       onClick={onClose}
     >
-      <div
-        className="relative w-full max-w-2xl rounded-2xl sm:rounded-3xl border border-zinc-800 bg-[#111317] p-5 sm:p-7 shadow-2xl shadow-black/90 overflow-hidden max-h-[92vh] flex flex-col transform-gpu animate-popover"
+      <form
+        onSubmit={handleSubmit}
         onClick={(e) => e.stopPropagation()}
+        className="relative w-full max-w-xl h-[85vh] max-h-[640px] rounded-2xl sm:rounded-3xl border border-zinc-800 bg-[#111317] shadow-2xl shadow-black overflow-hidden flex flex-col animate-popover"
       >
-        {/* Header */}
-        <div className="flex items-center justify-between pb-4 border-b border-zinc-800/80 shrink-0">
-          <div className="space-y-1">
-            <div className="inline-flex items-center gap-1.5 rounded-full border border-blue-500/20 bg-blue-500/10 px-2.5 py-0.5 text-[11px] font-semibold text-blue-400">
-              <Sparkles className="h-3 w-3" />
-              <span>Student Profile Settings</span>
-            </div>
-            <h2 className="text-xl font-bold text-white tracking-tight font-heading">
+        {/* 1. FIXED TOP HEADER (NO Student Profile Settings badge) */}
+        <div className="shrink-0 flex items-center justify-between px-5 sm:px-6 py-4 border-b border-zinc-800 bg-[#111317]">
+          <div>
+            <h2 className="text-lg sm:text-xl font-bold text-white tracking-tight font-heading">
               Edit Your Information
             </h2>
-            <p className="text-xs text-zinc-400">
+            <p className="text-xs text-zinc-400 mt-0.5">
               Customize your profile photo, academic credentials, and career status.
             </p>
           </div>
@@ -244,14 +250,14 @@ export function ProfileEditModal({ user, isOpen, onClose, onProfileUpdated }: Pr
           <button
             type="button"
             onClick={onClose}
-            className="rounded-full p-2 text-zinc-400 hover:text-white hover:bg-zinc-800 transition-colors"
+            className="rounded-full p-2 text-zinc-400 hover:text-white hover:bg-zinc-800 transition-colors cursor-pointer"
           >
             <X className="h-5 w-5" />
           </button>
         </div>
 
-        {/* Scrollable Form Body */}
-        <form onSubmit={handleSubmit} className="space-y-5 py-4 overflow-y-auto pr-1 text-xs">
+        {/* 2. SCROLLABLE FORM BODY (Completely Independent & Smooth) */}
+        <div className="flex-1 min-h-0 overflow-y-auto px-5 sm:px-6 py-4 space-y-4 text-xs overscroll-contain">
           {error && (
             <div className="rounded-xl bg-rose-500/10 border border-rose-500/30 p-3 text-xs text-rose-300 flex items-start gap-2">
               <AlertCircle className="h-4 w-4 shrink-0 mt-0.5 text-rose-400" />
@@ -266,34 +272,32 @@ export function ProfileEditModal({ user, isOpen, onClose, onProfileUpdated }: Pr
             </div>
           )}
 
-          {/* 1. PROFILE PHOTO SECTION */}
-          <div className="rounded-2xl border border-zinc-800/90 bg-[#0e1014] p-4 space-y-3">
+          {/* Profile Photo Section */}
+          <div className="rounded-2xl border border-zinc-800/90 bg-[#0e1014] p-3.5 space-y-2.5">
             <label className="block font-semibold text-zinc-200">
               Profile Photo
             </label>
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-              {/* Photo / 2-Letter Initials Preview */}
-              <div className="flex items-center gap-3.5">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div className="flex items-center gap-3">
                 <UserAvatar
                   name={name}
                   image={previewImage}
-                  size="xl"
+                  size="lg"
                   showRing={true}
                 />
-                <div className="space-y-1">
+                <div className="space-y-0.5">
                   <p className="text-xs font-semibold text-zinc-200">
                     {previewImage ? "Custom Photo Active" : "Default 2-Letter Initials"}
                   </p>
-                  <p className="text-[11px] text-zinc-500 max-w-[240px] leading-tight">
+                  <p className="text-[11px] text-zinc-500 leading-tight">
                     {previewImage
-                      ? "Your photo is visible on your profile and experiences."
-                      : "Without a photo, your first and last initials represent your account."}
+                      ? "Photo displayed across your profile and experiences."
+                      : "Without a photo, your first & last initials represent you."}
                   </p>
                 </div>
               </div>
 
-              {/* Upload & Action Controls */}
-              <div className="flex flex-wrap items-center gap-2">
+              <div className="flex flex-wrap items-center gap-2 shrink-0">
                 <input
                   type="file"
                   ref={fileInputRef}
@@ -305,7 +309,7 @@ export function ProfileEditModal({ user, isOpen, onClose, onProfileUpdated }: Pr
                 <button
                   type="button"
                   onClick={() => fileInputRef.current?.click()}
-                  className="inline-flex items-center gap-1.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white px-3.5 py-2 text-xs font-semibold shadow-xs transition-all cursor-pointer active:scale-95"
+                  className="inline-flex items-center gap-1.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white px-3 py-1.5 text-xs font-semibold shadow-xs transition-all cursor-pointer active:scale-95"
                 >
                   <Upload className="h-3.5 w-3.5" />
                   <span>Upload Photo</span>
@@ -315,7 +319,7 @@ export function ProfileEditModal({ user, isOpen, onClose, onProfileUpdated }: Pr
                   <button
                     type="button"
                     onClick={handleRemovePhoto}
-                    className="inline-flex items-center gap-1.5 rounded-xl border border-zinc-700 bg-zinc-800/80 hover:bg-rose-500/20 hover:border-rose-500/40 hover:text-rose-300 text-zinc-300 px-3 py-2 text-xs font-medium transition-all cursor-pointer"
+                    className="inline-flex items-center gap-1.5 rounded-xl border border-zinc-700 bg-zinc-800/80 hover:bg-rose-500/20 hover:border-rose-500/40 hover:text-rose-300 text-zinc-300 px-2.5 py-1.5 text-xs font-medium transition-all cursor-pointer"
                   >
                     <Trash2 className="h-3.5 w-3.5 text-zinc-400" />
                     <span>Remove</span>
@@ -325,7 +329,7 @@ export function ProfileEditModal({ user, isOpen, onClose, onProfileUpdated }: Pr
                 <button
                   type="button"
                   onClick={() => setShowUrlInput(!showUrlInput)}
-                  className="inline-flex items-center gap-1 rounded-xl border border-zinc-800 bg-[#14161c] hover:bg-zinc-800 text-zinc-400 hover:text-zinc-200 px-2.5 py-2 text-[11px] transition-colors"
+                  className="inline-flex items-center gap-1 rounded-xl border border-zinc-800 bg-[#14161c] hover:bg-zinc-800 text-zinc-400 hover:text-zinc-200 px-2 py-1.5 text-[11px] transition-colors cursor-pointer"
                 >
                   <LinkIcon className="h-3 w-3" />
                   <span>URL</span>
@@ -333,7 +337,6 @@ export function ProfileEditModal({ user, isOpen, onClose, onProfileUpdated }: Pr
               </div>
             </div>
 
-            {/* Optional URL input toggle */}
             {showUrlInput && (
               <div className="pt-2 flex items-center gap-2">
                 <input
@@ -341,12 +344,12 @@ export function ProfileEditModal({ user, isOpen, onClose, onProfileUpdated }: Pr
                   value={customImageUrl}
                   onChange={(e) => setCustomImageUrl(e.target.value)}
                   placeholder="https://example.com/avatar.jpg"
-                  className="flex-1 rounded-xl border border-zinc-700 bg-[#0c0d10] px-3 py-2 text-xs text-zinc-100 placeholder:text-zinc-600 focus:border-blue-500 focus:outline-hidden"
+                  className="flex-1 rounded-xl border border-zinc-700 bg-[#0c0d10] px-3 py-1.5 text-xs text-zinc-100 placeholder:text-zinc-600 focus:border-blue-500 focus:outline-hidden"
                 />
                 <button
                   type="button"
                   onClick={handleApplyUrl}
-                  className="rounded-xl bg-zinc-800 hover:bg-zinc-700 text-white px-3 py-2 text-xs font-semibold transition-colors"
+                  className="rounded-xl bg-zinc-800 hover:bg-zinc-700 text-white px-3 py-1.5 text-xs font-semibold transition-colors cursor-pointer"
                 >
                   Apply
                 </button>
@@ -354,9 +357,9 @@ export function ProfileEditModal({ user, isOpen, onClose, onProfileUpdated }: Pr
             )}
           </div>
 
-          {/* 2. FULL NAME */}
+          {/* Full Name */}
           <div>
-            <label className="block font-semibold text-zinc-300 mb-1.5">
+            <label className="block font-semibold text-zinc-300 mb-1">
               Full Name *
             </label>
             <div className="relative">
@@ -367,64 +370,93 @@ export function ProfileEditModal({ user, isOpen, onClose, onProfileUpdated }: Pr
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder="e.g. Ved Kalantri"
-                className="w-full rounded-xl border border-zinc-800 bg-[#0c0d10] py-2.5 pl-10 pr-4 text-zinc-100 placeholder:text-zinc-600 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-hidden transition-all text-xs sm:text-sm"
+                className="w-full rounded-xl border border-zinc-800 bg-[#0c0d10] py-2 pl-10 pr-4 text-zinc-100 placeholder:text-zinc-600 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-hidden transition-all text-xs sm:text-sm"
               />
             </div>
           </div>
 
-          {/* 3. DEPARTMENT & GRADUATION YEAR */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <label className="block font-semibold text-zinc-300 mb-1.5">
+          {/* Modern Department / Branch Selector */}
+          <div>
+            <div className="flex items-center justify-between mb-1">
+              <label className="font-semibold text-zinc-300">
                 Department / Branch
               </label>
-              <div className="relative">
-                <Building2 className="absolute left-3.5 top-3 h-4 w-4 text-zinc-500" />
-                <input
-                  type="text"
-                  list="department-options"
-                  value={department}
-                  onChange={(e) => setDepartment(e.target.value)}
-                  placeholder="e.g. Information Technology"
-                  className="w-full rounded-xl border border-zinc-800 bg-[#0c0d10] py-2.5 pl-10 pr-4 text-zinc-100 placeholder:text-zinc-600 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-hidden transition-all text-xs sm:text-sm"
-                />
-                <datalist id="department-options">
-                  {COMMON_DEPARTMENTS.map((dept) => (
-                    <option key={dept} value={dept} />
-                  ))}
-                </datalist>
-              </div>
+              {department && (
+                <button
+                  type="button"
+                  onClick={() => setDepartment("")}
+                  className="text-[11px] text-zinc-500 hover:text-zinc-300 transition-colors cursor-pointer"
+                >
+                  Clear
+                </button>
+              )}
+            </div>
+            <div className="relative">
+              <Building2 className="absolute left-3.5 top-3 h-4 w-4 text-zinc-500" />
+              <input
+                type="text"
+                value={department}
+                onChange={(e) => setDepartment(e.target.value)}
+                placeholder="Type or select a branch below..."
+                className="w-full rounded-xl border border-zinc-800 bg-[#0c0d10] py-2 pl-10 pr-4 text-zinc-100 placeholder:text-zinc-600 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-hidden transition-all text-xs sm:text-sm"
+              />
             </div>
 
-            <div>
-              <label className="block font-semibold text-zinc-300 mb-1.5">
-                Graduation Year (Batch)
-              </label>
-              <div className="relative">
-                <Calendar className="absolute left-3.5 top-3 h-4 w-4 text-zinc-500" />
-                <select
-                  value={graduationYear}
-                  onChange={(e) => setGraduationYear(e.target.value)}
-                  className="w-full rounded-xl border border-zinc-800 bg-[#0c0d10] py-2.5 pl-10 pr-4 text-zinc-100 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-hidden transition-all text-xs sm:text-sm cursor-pointer"
-                >
-                  <option value="">Select Year</option>
-                  {yearOptions.map((year) => (
-                    <option key={year} value={year}>
-                      Class of {year}
-                    </option>
-                  ))}
-                </select>
-              </div>
+            {/* Quick-Pick Branch Chips */}
+            <div className="mt-1.5 flex flex-wrap gap-1.5">
+              {COMMON_BRANCHES.map((dept) => {
+                const isSelected = department.toLowerCase() === dept.toLowerCase();
+                return (
+                  <button
+                    key={dept}
+                    type="button"
+                    onClick={() => setDepartment(dept)}
+                    className={`px-2.5 py-1 rounded-lg border text-[11px] transition-all cursor-pointer ${
+                      isSelected
+                        ? "bg-blue-600/20 border-blue-500/50 text-blue-300 font-semibold"
+                        : "bg-[#0c0d10] border-zinc-800/80 text-zinc-400 hover:border-zinc-700 hover:text-zinc-200"
+                    }`}
+                  >
+                    {dept}
+                  </button>
+                );
+              })}
             </div>
           </div>
 
-          {/* 4. LINKEDIN PROFILE URL */}
+          {/* Modern Graduation Year Selector (Aesthetic 1-Tap Pills) */}
           <div>
-            <label className="block font-semibold text-zinc-300 mb-1.5">
+            <label className="block font-semibold text-zinc-300 mb-1">
+              Graduation Year (Batch)
+            </label>
+            <div className="grid grid-cols-4 sm:grid-cols-8 gap-1.5">
+              {yearOptions.map((year) => {
+                const isSelected = graduationYear === year.toString();
+                return (
+                  <button
+                    key={year}
+                    type="button"
+                    onClick={() => setGraduationYear(year.toString())}
+                    className={`py-1.5 px-1 rounded-xl border text-center text-xs font-semibold transition-all cursor-pointer ${
+                      isSelected
+                        ? "bg-blue-600 border-blue-500 text-white shadow-md shadow-blue-600/30"
+                        : "bg-[#0c0d10] border-zinc-800 text-zinc-400 hover:border-zinc-700 hover:text-zinc-200 hover:bg-[#14161c]"
+                    }`}
+                  >
+                    {year}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* LinkedIn Profile URL */}
+          <div>
+            <label className="block font-semibold text-zinc-300 mb-1">
               LinkedIn Profile URL
             </label>
             <div className="relative">
-              <div className="absolute left-3.5 top-3">
+              <div className="absolute left-3.5 top-2.5">
                 <LinkedInIcon className="h-4 w-4" />
               </div>
               <input
@@ -432,20 +464,17 @@ export function ProfileEditModal({ user, isOpen, onClose, onProfileUpdated }: Pr
                 value={linkedinUrl}
                 onChange={(e) => setLinkedinUrl(e.target.value)}
                 placeholder="https://linkedin.com/in/username"
-                className="w-full rounded-xl border border-zinc-800 bg-[#0c0d10] py-2.5 pl-10 pr-4 text-zinc-100 placeholder:text-zinc-600 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-hidden transition-all text-xs sm:text-sm"
+                className="w-full rounded-xl border border-zinc-800 bg-[#0c0d10] py-2 pl-10 pr-4 text-zinc-100 placeholder:text-zinc-600 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-hidden transition-all text-xs sm:text-sm"
               />
             </div>
-            <p className="text-[11px] text-zinc-500 mt-1">
-              Enables peers and recruiters to connect with you directly.
-            </p>
           </div>
 
-          {/* 5. PLACEMENT STATUS */}
-          <div className="space-y-2">
+          {/* Placement / Career Status */}
+          <div className="space-y-1.5">
             <label className="block font-semibold text-zinc-300">
               Placement / Career Status *
             </label>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
               {Object.values(PLACEMENT_STATUS_CONFIG).map((option) => {
                 const isSelected = placementStatus === option.value;
                 return (
@@ -453,18 +482,18 @@ export function ProfileEditModal({ user, isOpen, onClose, onProfileUpdated }: Pr
                     key={option.value}
                     type="button"
                     onClick={() => setPlacementStatus(option.value)}
-                    className={`flex items-start gap-3 p-3 rounded-xl border text-left transition-all cursor-pointer ${
+                    className={`flex items-start gap-2.5 p-2.5 rounded-xl border text-left transition-all cursor-pointer ${
                       isSelected
                         ? `${option.badgeBorder} ${option.badgeBg} ring-1 ring-blue-500/40`
-                        : "border-zinc-800/80 bg-[#0c0d10] hover:border-zinc-700 hover:bg-[#15171d]"
+                        : "border-zinc-800/80 bg-[#0c0d10] hover:border-zinc-700 hover:bg-[#14161c]"
                     }`}
                   >
                     <div className={`h-2.5 w-2.5 rounded-full mt-1 shrink-0 ${option.dotColor}`} />
-                    <div className="space-y-0.5">
-                      <p className={`font-semibold text-xs ${isSelected ? option.textColor : "text-zinc-200"}`}>
+                    <div className="space-y-0.5 min-w-0">
+                      <p className={`font-semibold text-xs truncate ${isSelected ? option.textColor : "text-zinc-200"}`}>
                         {option.label}
                       </p>
-                      <p className="text-[11px] text-zinc-500 leading-tight">
+                      <p className="text-[10px] text-zinc-500 line-clamp-1 leading-tight">
                         {option.description}
                       </p>
                     </div>
@@ -474,65 +503,62 @@ export function ProfileEditModal({ user, isOpen, onClose, onProfileUpdated }: Pr
             </div>
           </div>
 
-          {/* 6. PLACED COMPANY & ROLE (Conditional) */}
+          {/* Placed Company & Role (Conditional) */}
           {placementStatus === "OFFER_ACCEPTED" && (
-            <div className="p-4 rounded-xl border border-emerald-500/30 bg-emerald-500/5 space-y-2">
-              <label className="block font-semibold text-emerald-300 mb-1">
+            <div className="p-3 rounded-xl border border-emerald-500/30 bg-emerald-500/5 space-y-1.5">
+              <label className="block font-semibold text-emerald-300">
                 Company & Role Secured
               </label>
               <div className="relative">
-                <Briefcase className="absolute left-3.5 top-3 h-4 w-4 text-emerald-400" />
+                <Briefcase className="absolute left-3.5 top-2.5 h-4 w-4 text-emerald-400" />
                 <input
                   type="text"
                   value={placedCompany}
                   onChange={(e) => setPlacedCompany(e.target.value)}
                   placeholder="e.g. Microsoft - Software Engineer, TCS - Digital"
-                  className="w-full rounded-xl border border-emerald-500/30 bg-[#0c0d10] py-2.5 pl-10 pr-4 text-emerald-100 placeholder:text-zinc-600 focus:border-emerald-500 focus:outline-hidden transition-all text-xs sm:text-sm"
+                  className="w-full rounded-xl border border-emerald-500/30 bg-[#0c0d10] py-2 pl-10 pr-4 text-emerald-100 placeholder:text-zinc-600 focus:border-emerald-500 focus:outline-hidden transition-all text-xs sm:text-sm"
                 />
               </div>
-              <p className="text-[11px] text-zinc-400">
-                Displays on your profile badge to inspire juniors and peers.
-              </p>
             </div>
           )}
 
-          {/* 7. BIO */}
+          {/* Bio */}
           <div>
-            <label className="block font-semibold text-zinc-300 mb-1.5">
+            <label className="block font-semibold text-zinc-300 mb-1">
               Bio / Placement Advice
             </label>
             <div className="relative">
-              <FileText className="absolute left-3.5 top-3 h-4 w-4 text-zinc-500" />
+              <FileText className="absolute left-3.5 top-2.5 h-4 w-4 text-zinc-500" />
               <textarea
-                rows={3}
+                rows={2.5}
                 value={bio}
                 onChange={(e) => setBio(e.target.value)}
                 placeholder="Share a short intro, your tech focus, or advice for juniors..."
-                className="w-full rounded-xl border border-zinc-800 bg-[#0c0d10] py-2.5 pl-10 pr-4 text-zinc-100 placeholder:text-zinc-600 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-hidden transition-all text-xs sm:text-sm resize-none"
+                className="w-full rounded-xl border border-zinc-800 bg-[#0c0d10] py-2 pl-10 pr-4 text-zinc-100 placeholder:text-zinc-600 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-hidden transition-all text-xs sm:text-sm resize-none"
               />
             </div>
           </div>
+        </div>
 
-          {/* Modal Footer Actions */}
-          <div className="flex items-center justify-end gap-3 pt-3 border-t border-zinc-800 shrink-0">
-            <button
-              type="button"
-              onClick={onClose}
-              className="rounded-xl border border-zinc-800 bg-transparent px-4 py-2 text-xs font-semibold text-zinc-300 hover:bg-zinc-800 hover:text-white transition-colors cursor-pointer"
-            >
-              Cancel
-            </button>
+        {/* 3. DOCKED BOTTOM ACTION BAR (PERMANENTLY VISIBLE & ACCESSIBLE) */}
+        <div className="shrink-0 flex items-center justify-end gap-3 px-5 sm:px-6 py-3.5 border-t border-zinc-800 bg-[#111317]">
+          <button
+            type="button"
+            onClick={onClose}
+            className="rounded-xl border border-zinc-700 bg-zinc-800/80 hover:bg-zinc-700 hover:text-white text-zinc-200 px-4 py-2 text-xs font-semibold transition-colors cursor-pointer"
+          >
+            Cancel
+          </button>
 
-            <button
-              type="submit"
-              disabled={isPending}
-              className="rounded-xl bg-blue-600 hover:bg-blue-500 px-5 py-2 text-xs font-semibold text-white shadow-md shadow-blue-600/20 hover:shadow-blue-600/30 transition-all active:scale-95 disabled:opacity-50 flex items-center gap-1.5 cursor-pointer"
-            >
-              <span>{isPending ? "Saving..." : "Save Changes"}</span>
-            </button>
-          </div>
-        </form>
-      </div>
+          <button
+            type="submit"
+            disabled={isPending}
+            className="rounded-xl bg-blue-600 hover:bg-blue-500 px-5 py-2 text-xs font-semibold text-white shadow-md shadow-blue-600/20 hover:shadow-blue-600/30 transition-all active:scale-95 disabled:opacity-50 flex items-center gap-1.5 cursor-pointer"
+          >
+            <span>{isPending ? "Saving..." : "Save Changes"}</span>
+          </button>
+        </div>
+      </form>
     </div>
   );
 }
