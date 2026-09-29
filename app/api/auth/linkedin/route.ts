@@ -14,7 +14,7 @@ export async function GET(request: NextRequest) {
     const returnUrl = new URL("/login", appUrl);
     returnUrl.searchParams.set(
       "oauth_notice",
-      "LinkedIn OAuth credentials (LINKEDIN_CLIENT_ID) are not configured in .env. You can use the Demo Student button or configure LinkedIn developer credentials."
+      "LinkedIn OAuth credentials (LINKEDIN_CLIENT_ID) are not configured in .env. Please sign in with your email or configure LinkedIn developer credentials."
     );
     return NextResponse.redirect(returnUrl);
   }

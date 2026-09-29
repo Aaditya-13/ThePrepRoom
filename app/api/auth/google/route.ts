@@ -16,7 +16,7 @@ export async function GET(request: NextRequest) {
     const returnUrl = new URL("/login", appUrl);
     returnUrl.searchParams.set(
       "oauth_notice",
-      "Google OAuth credentials (GOOGLE_CLIENT_ID) are not configured in .env. You can use the Demo Student button or configure Google Cloud credentials."
+      "Google OAuth credentials (GOOGLE_CLIENT_ID) are not configured in .env. Please sign in with your email or configure Google Cloud credentials."
     );
     return NextResponse.redirect(returnUrl);
   }
