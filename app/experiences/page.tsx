@@ -101,15 +101,15 @@ export default async function ExperiencesPage(props: PageProps) {
 
       {/* Experiences List */}
       {data.experiences.length === 0 ? (
-        <div className="text-center py-16 border border-dashed border-stone-300 dark:border-zinc-800 rounded-2xl bg-white dark:bg-[#111317] p-8 shadow-xs">
-          <h3 className="text-base font-bold text-slate-900 dark:text-white">No experiences found</h3>
-          <p className="text-xs text-slate-500 dark:text-zinc-400 mt-1 max-w-sm mx-auto">
+        <div className="text-center py-16 border border-dashed border-zinc-800 rounded-2xl bg-[#111317] p-8 shadow-xs">
+          <h3 className="text-base font-bold text-white">No experiences found</h3>
+          <p className="text-xs text-zinc-400 mt-1 max-w-sm mx-auto">
             No approved experiences matched your current filter criteria. Try clearing some filters or be the first to share one.
           </p>
           <div className="mt-4">
             <Link
               href="/share"
-              className="rounded-full bg-blue-600 hover:bg-blue-500 px-5 py-2 text-xs font-semibold text-white shadow-md shadow-blue-600/25 transition-all hover:scale-105 active:scale-95"
+              className="rounded-full bg-blue-600 hover:bg-blue-500 px-5 py-2 text-xs font-semibold text-white shadow-md shadow-blue-600/25 transition-all hover:scale-105 active:scale-95 outline-none"
             >
               Share Your Experience
             </Link>
@@ -142,10 +142,10 @@ export default async function ExperiencesPage(props: PageProps) {
               <Link
                 key={p}
                 href={`/experiences?${params.toString()}`}
-                className={`min-w-9 h-9 px-2 flex items-center justify-center rounded-xl text-xs font-mono font-semibold transition-all ${
+                className={`min-w-9 h-9 px-2 flex items-center justify-center rounded-xl text-xs font-mono font-semibold transition-all outline-none ${
                   isCurrent
                     ? "bg-blue-600 text-white shadow-md shadow-blue-600/25 scale-105"
-                    : "border border-stone-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-slate-700 dark:text-zinc-300 hover:border-blue-500 hover:text-blue-500"
+                    : "border border-zinc-700 bg-zinc-800 text-zinc-300 hover:border-blue-500 hover:text-blue-400"
                 }`}
               >
                 {p}

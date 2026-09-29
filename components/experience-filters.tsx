@@ -62,37 +62,37 @@ export function ExperienceFilters({ companies, years, initialFilters }: FilterPr
     searchParams.has("sort");
 
   return (
-    <div className="bg-white dark:bg-[#111317] border border-stone-200 dark:border-zinc-800/90 rounded-2xl p-5 sm:p-6 mb-8 space-y-5 shadow-xs transition-colors">
+    <div className="bg-[#111317] border border-zinc-800/80 rounded-2xl p-5 sm:p-6 mb-8 space-y-5 shadow-xs transition-colors">
       {/* Search Input */}
       <form onSubmit={handleSearchSubmit} className="flex gap-2">
         <div className="relative flex-1">
-          <Search className="absolute left-3.5 top-3 h-4 w-4 text-slate-400 dark:text-zinc-500" />
+          <Search className="absolute left-3.5 top-3 h-4 w-4 text-zinc-500" />
           <input
             type="text"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Search within experiences (role, tech stack, notes)..."
-            className="w-full rounded-xl border border-stone-300 dark:border-zinc-700 bg-stone-50/50 dark:bg-zinc-800/70 py-2.5 pl-10 pr-3.5 text-xs sm:text-sm text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-zinc-500 focus:border-blue-500 dark:focus:border-blue-400 focus:outline-hidden transition-all shadow-2xs"
+            className="w-full rounded-xl border border-zinc-700/80 bg-zinc-800/70 py-2.5 pl-10 pr-3.5 text-xs sm:text-sm text-white placeholder:text-zinc-500 focus:border-blue-400 focus:outline-none transition-all shadow-2xs"
           />
         </div>
         <button
           type="submit"
           disabled={isPending}
-          className="rounded-xl bg-blue-600 hover:bg-blue-500 px-5 py-2.5 text-xs sm:text-sm font-semibold text-white transition-all hover:scale-105 active:scale-95 shadow-md shadow-blue-600/20"
+          className="rounded-xl bg-blue-600 hover:bg-blue-500 px-5 py-2.5 text-xs sm:text-sm font-semibold text-white transition-all hover:scale-105 active:scale-95 shadow-md shadow-blue-600/20 outline-none"
         >
           Search
         </button>
       </form>
 
       {/* Multi-parameter Filter Row */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3 pt-3 border-t border-stone-100 dark:border-zinc-800/80 text-xs">
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3 pt-3 border-t border-zinc-800/80 text-xs">
         {/* Company Filter */}
         <div>
-          <label className="block text-[11px] font-semibold uppercase tracking-wider text-slate-400 dark:text-zinc-500 mb-1.5">Company</label>
+          <label className="block text-[11px] font-semibold uppercase tracking-wider text-zinc-400 mb-1.5">Company</label>
           <select
             value={searchParams.get("company") || "ALL"}
             onChange={(e) => updateParam("company", e.target.value)}
-            className="w-full rounded-lg border border-stone-300 dark:border-zinc-700 bg-white dark:bg-zinc-800/80 py-1.5 px-2.5 text-xs text-slate-800 dark:text-zinc-200 focus:border-blue-500 focus:outline-hidden"
+            className="w-full rounded-lg border border-zinc-700/80 bg-zinc-800/80 py-1.5 px-2.5 text-xs text-zinc-200 focus:border-blue-500 focus:outline-none"
           >
             <option value="ALL">All Companies</option>
             {companies.map((c) => (
@@ -105,11 +105,11 @@ export function ExperienceFilters({ companies, years, initialFilters }: FilterPr
 
         {/* Interview Year Filter */}
         <div>
-          <label className="block text-[11px] font-semibold uppercase tracking-wider text-slate-400 dark:text-zinc-500 mb-1.5">Interview Year</label>
+          <label className="block text-[11px] font-semibold uppercase tracking-wider text-zinc-400 mb-1.5">Interview Year</label>
           <select
             value={searchParams.get("year") || "ALL"}
             onChange={(e) => updateParam("year", e.target.value)}
-            className="w-full rounded-lg border border-stone-300 dark:border-zinc-700 bg-white dark:bg-zinc-800/80 py-1.5 px-2.5 text-xs text-slate-800 dark:text-zinc-200 focus:border-blue-500 focus:outline-hidden"
+            className="w-full rounded-lg border border-zinc-700/80 bg-zinc-800/80 py-1.5 px-2.5 text-xs text-zinc-200 focus:border-blue-500 focus:outline-none"
           >
             <option value="ALL">All Years</option>
             {years.map((y) => (
@@ -122,11 +122,11 @@ export function ExperienceFilters({ companies, years, initialFilters }: FilterPr
 
         {/* Placement Type Filter */}
         <div>
-          <label className="block text-[11px] font-semibold uppercase tracking-wider text-slate-400 dark:text-zinc-500 mb-1.5">Placement Type</label>
+          <label className="block text-[11px] font-semibold uppercase tracking-wider text-zinc-400 mb-1.5">Placement Type</label>
           <select
             value={searchParams.get("placement") || "ALL"}
             onChange={(e) => updateParam("placement", e.target.value)}
-            className="w-full rounded-lg border border-stone-300 dark:border-zinc-700 bg-white dark:bg-zinc-800/80 py-1.5 px-2.5 text-xs text-slate-800 dark:text-zinc-200 focus:border-blue-500 focus:outline-hidden"
+            className="w-full rounded-lg border border-zinc-700/80 bg-zinc-800/80 py-1.5 px-2.5 text-xs text-zinc-200 focus:border-blue-500 focus:outline-none"
           >
             <option value="ALL">All Types</option>
             <option value="CAMPUS">Campus Placement</option>
@@ -138,11 +138,11 @@ export function ExperienceFilters({ companies, years, initialFilters }: FilterPr
 
         {/* Round Filter */}
         <div>
-          <label className="block text-[11px] font-semibold uppercase tracking-wider text-slate-400 dark:text-zinc-500 mb-1.5">Round Included</label>
+          <label className="block text-[11px] font-semibold uppercase tracking-wider text-zinc-400 mb-1.5">Round Included</label>
           <select
             value={searchParams.get("round") || "ALL"}
             onChange={(e) => updateParam("round", e.target.value)}
-            className="w-full rounded-lg border border-stone-300 dark:border-zinc-700 bg-white dark:bg-zinc-800/80 py-1.5 px-2.5 text-xs text-slate-800 dark:text-zinc-200 focus:border-blue-500 focus:outline-hidden"
+            className="w-full rounded-lg border border-zinc-700/80 bg-zinc-800/80 py-1.5 px-2.5 text-xs text-zinc-200 focus:border-blue-500 focus:outline-none"
           >
             <option value="ALL">Any Round</option>
             <option value="ONLINE_ASSESSMENT">Online Assessment</option>
@@ -155,11 +155,11 @@ export function ExperienceFilters({ companies, years, initialFilters }: FilterPr
 
         {/* Result Filter */}
         <div>
-          <label className="block text-[11px] font-semibold uppercase tracking-wider text-slate-400 dark:text-zinc-500 mb-1.5">Outcome</label>
+          <label className="block text-[11px] font-semibold uppercase tracking-wider text-zinc-400 mb-1.5">Outcome</label>
           <select
             value={searchParams.get("result") || "ALL"}
             onChange={(e) => updateParam("result", e.target.value)}
-            className="w-full rounded-lg border border-stone-300 dark:border-zinc-700 bg-white dark:bg-zinc-800/80 py-1.5 px-2.5 text-xs text-slate-800 dark:text-zinc-200 focus:border-blue-500 focus:outline-hidden"
+            className="w-full rounded-lg border border-zinc-700/80 bg-zinc-800/80 py-1.5 px-2.5 text-xs text-zinc-200 focus:border-blue-500 focus:outline-none"
           >
             <option value="ALL">All Results</option>
             <option value="SELECTED">Selected</option>
@@ -171,11 +171,11 @@ export function ExperienceFilters({ companies, years, initialFilters }: FilterPr
 
         {/* Sort Order */}
         <div>
-          <label className="block text-[11px] font-semibold uppercase tracking-wider text-slate-400 dark:text-zinc-500 mb-1.5">Sort By</label>
+          <label className="block text-[11px] font-semibold uppercase tracking-wider text-zinc-400 mb-1.5">Sort By</label>
           <select
             value={searchParams.get("sort") || "newest"}
             onChange={(e) => updateParam("sort", e.target.value)}
-            className="w-full rounded-lg border border-stone-300 dark:border-zinc-700 bg-white dark:bg-zinc-800/80 py-1.5 px-2.5 text-xs text-slate-800 dark:text-zinc-200 focus:border-blue-500 focus:outline-hidden"
+            className="w-full rounded-lg border border-zinc-700/80 bg-zinc-800/80 py-1.5 px-2.5 text-xs text-zinc-200 focus:border-blue-500 focus:outline-none"
           >
             <option value="newest">Newest First</option>
             <option value="views">Most Viewed</option>

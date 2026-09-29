@@ -59,21 +59,21 @@ export default async function CompaniesPage(props: PageProps) {
             <Link
               key={company.id}
               href={`/companies/${company.slug}`}
-              className="rounded-2xl border border-stone-200 dark:border-zinc-800/90 bg-white dark:bg-[#121418] p-5 hover:border-blue-500/40 hover:-translate-y-1.5 transition-all duration-300 shadow-xs hover:shadow-xl hover:shadow-blue-950/20 group flex flex-col justify-between"
+              className="rounded-2xl border border-zinc-800/80 bg-[#121418] p-5 hover:border-blue-500/40 hover:-translate-y-0.5 active:scale-[0.995] transition-[transform,border-color,background-color,box-shadow] duration-200 shadow-xs hover:shadow-xl hover:shadow-black/40 group flex flex-col justify-between outline-none"
             >
               <div>
                 <div className="flex items-start justify-between gap-2">
-                  <h3 className="text-lg font-bold text-slate-900 dark:text-white group-hover:text-blue-500 transition-colors">
+                  <h3 className="text-lg font-bold text-white group-hover:text-blue-400 transition-colors">
                     {company.name}
                   </h3>
                   {company.latestYear && (
-                    <span className="text-[11px] font-mono text-blue-700 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/60 border border-blue-200/50 dark:border-blue-800/40 px-2 py-0.5 rounded-full font-semibold">
+                    <span className="text-[11px] font-mono text-blue-400 bg-blue-950/60 border border-blue-800/40 px-2 py-0.5 rounded-full font-semibold">
                       Hiring {company.latestYear}
                     </span>
                   )}
                 </div>
 
-                <p className="text-xs text-slate-500 dark:text-zinc-400 mt-1 line-clamp-1">
+                <p className="text-xs text-zinc-400 mt-1 line-clamp-1">
                   {company.industry || "Technology & Services"}
                 </p>
 
@@ -82,7 +82,7 @@ export default async function CompaniesPage(props: PageProps) {
                     {company.sampleRoles.slice(0, 2).map((role) => (
                       <span
                         key={role}
-                        className="rounded-full border border-stone-200 dark:border-zinc-700/60 bg-stone-50 dark:bg-zinc-800/60 px-2.5 py-0.5 text-[11px] text-slate-600 dark:text-zinc-300 truncate max-w-[150px]"
+                        className="rounded-full border border-zinc-700/60 bg-zinc-800/60 px-2.5 py-0.5 text-[11px] text-zinc-300 truncate max-w-[150px]"
                       >
                         {role}
                       </span>
@@ -91,13 +91,13 @@ export default async function CompaniesPage(props: PageProps) {
                 )}
               </div>
 
-              <div className="mt-6 pt-3.5 border-t border-stone-100 dark:border-zinc-800/80 flex items-center justify-between text-xs text-slate-500 dark:text-zinc-400 font-mono">
+              <div className="mt-6 pt-3.5 border-t border-zinc-800/80 flex items-center justify-between text-xs text-zinc-400 font-mono">
                 <span>
                   {company.approvedExperiencesCount}{" "}
                   {company.approvedExperiencesCount === 1 ? "experience" : "experiences"} ·{" "}
                   {company.rolesCount} {company.rolesCount === 1 ? "role" : "roles"}
                 </span>
-                <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform text-slate-400 group-hover:text-blue-500" />
+                <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform text-zinc-500 group-hover:text-blue-400" />
               </div>
             </Link>
           ))}

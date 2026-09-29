@@ -81,20 +81,20 @@ export default async function PreparePage() {
   return (
     <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 py-10 sm:py-12 space-y-12">
       {/* Top Banner Header */}
-      <div className="relative overflow-hidden rounded-3xl border border-stone-200 dark:border-zinc-800/90 bg-white dark:bg-[#111317] p-8 sm:p-12 shadow-sm">
+      <div className="relative overflow-hidden rounded-3xl border border-zinc-800/80 bg-[#111317] p-8 sm:p-12 shadow-sm">
         <div className="absolute top-0 right-0 -mt-10 -mr-10 h-72 w-72 rounded-full bg-blue-500/10 blur-3xl pointer-events-none" />
         <div className="absolute bottom-0 left-1/3 -mb-10 h-60 w-60 rounded-full bg-emerald-500/10 blur-3xl pointer-events-none" />
 
         <div className="relative z-10 max-w-3xl space-y-4">
-          <div className="inline-flex items-center gap-2 rounded-full border border-blue-500/20 bg-blue-500/10 px-3.5 py-1 text-xs font-medium text-blue-500 dark:text-blue-400">
+          <div className="inline-flex items-center gap-2 rounded-full border border-blue-500/20 bg-blue-500/10 px-3.5 py-1 text-xs font-medium text-blue-400">
             <Sparkles className="h-3.5 w-3.5" />
             <span>Placement Roadmaps & Topic Guides</span>
           </div>
 
-          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-slate-900 dark:text-zinc-100">
+          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-white">
             High-Yield Preparation Hub
           </h1>
-          <p className="text-sm sm:text-base text-slate-600 dark:text-zinc-400 leading-relaxed max-w-2xl">
+          <p className="text-sm sm:text-base text-zinc-400 leading-relaxed max-w-2xl">
             Master the core concepts frequently tested in technical screenings, online assessments, and interview panels. Every topic links directly to verified real-world interview questions asked by hiring teams.
           </p>
 
@@ -147,24 +147,24 @@ export default async function PreparePage() {
                     <Link
                       key={t.slug}
                       href={`/questions?topic=${t.slug}`}
-                      className="group relative flex flex-col justify-between rounded-2xl border border-stone-200 dark:border-zinc-800/90 bg-white dark:bg-[#111317] p-5 sm:p-6 shadow-xs hover:border-blue-500/50 hover:-translate-y-1.5 hover:shadow-xl hover:shadow-blue-500/5 transition-all duration-300"
+                      className="group relative flex flex-col justify-between rounded-2xl border border-zinc-800/80 bg-[#111317] p-5 sm:p-6 shadow-xs hover:border-blue-500/40 hover:-translate-y-0.5 active:scale-[0.995] hover:shadow-xl hover:shadow-black/40 transition-[transform,border-color,background-color,box-shadow] duration-200 outline-none"
                     >
                       <div className="space-y-3">
                         <div className="flex items-start justify-between gap-3">
-                          <h3 className="text-base sm:text-lg font-bold text-slate-900 dark:text-zinc-100 group-hover:text-blue-500 dark:group-hover:text-blue-400 transition-colors">
+                          <h3 className="text-base sm:text-lg font-bold text-white group-hover:text-blue-400 transition-colors">
                             {t.name}
                           </h3>
-                          <span className="shrink-0 rounded-full border border-stone-200 dark:border-zinc-700 bg-stone-100 dark:bg-zinc-800/80 px-2.5 py-1 text-xs font-mono font-medium text-slate-700 dark:text-zinc-300">
+                          <span className="shrink-0 rounded-full border border-zinc-700 bg-zinc-800/80 px-2.5 py-1 text-xs font-mono font-medium text-zinc-300">
                             {qCount} {qCount === 1 ? "question" : "questions"}
                           </span>
                         </div>
-                        <p className="text-xs sm:text-sm text-slate-600 dark:text-zinc-400 leading-relaxed">
-                          <span className="font-semibold text-slate-900 dark:text-zinc-200">High-Yield Focus: </span>
+                        <p className="text-xs sm:text-sm text-zinc-400 leading-relaxed">
+                          <span className="font-semibold text-zinc-200">High-Yield Focus: </span>
                           {t.focus}
                         </p>
                       </div>
 
-                      <div className="mt-5 pt-4 border-t border-stone-100 dark:border-zinc-800/80 flex items-center justify-between text-xs font-medium text-blue-600 dark:text-blue-400">
+                      <div className="mt-5 pt-4 border-t border-zinc-800/80 flex items-center justify-between text-xs font-medium text-blue-400">
                         <span>Explore topic questions</span>
                         <div className="flex h-7 w-7 items-center justify-center rounded-full bg-blue-500/10 group-hover:bg-blue-600 group-hover:text-white transition-all">
                           <ArrowRight className="h-3.5 w-3.5 group-hover:translate-x-0.5 transition-transform" />
@@ -180,26 +180,26 @@ export default async function PreparePage() {
       </div>
 
       {/* Revision Strategy Card */}
-      <div className="rounded-3xl border border-stone-200 dark:border-zinc-800/90 bg-stone-50/50 dark:bg-[#111317] p-6 sm:p-8 space-y-4">
-        <h3 className="text-base sm:text-lg font-bold text-slate-900 dark:text-zinc-100">
+      <div className="rounded-3xl border border-zinc-800/80 bg-[#111317] p-6 sm:p-8 space-y-4">
+        <h3 className="text-base sm:text-lg font-bold text-white">
           Pro-Tip: How to Prepare Using ThePrepRoom
         </h3>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs sm:text-sm">
-          <div className="rounded-xl border border-stone-200 dark:border-zinc-800 bg-white dark:bg-[#16181e] p-4 space-y-2">
-            <span className="font-bold text-blue-500">1. Start with Targeted Companies</span>
-            <p className="text-slate-600 dark:text-zinc-400 text-xs leading-relaxed">
+          <div className="rounded-xl border border-zinc-800 bg-[#16181e] p-4 space-y-2">
+            <span className="font-bold text-blue-400">1. Start with Targeted Companies</span>
+            <p className="text-zinc-400 text-xs leading-relaxed">
               Check the Companies section for the upcoming recruiters on your campus. Study their specific selection rounds and typical OA cutoff patterns.
             </p>
           </div>
-          <div className="rounded-xl border border-stone-200 dark:border-zinc-800 bg-white dark:bg-[#16181e] p-4 space-y-2">
-            <span className="font-bold text-emerald-500">2. Master the Core Topics</span>
-            <p className="text-slate-600 dark:text-zinc-400 text-xs leading-relaxed">
+          <div className="rounded-xl border border-zinc-800 bg-[#16181e] p-4 space-y-2">
+            <span className="font-bold text-emerald-400">2. Master the Core Topics</span>
+            <p className="text-zinc-400 text-xs leading-relaxed">
               Brush up on OS, Networks, and DBMS questions. Recruiters consistently test fundamental computer science understanding across all branches.
             </p>
           </div>
-          <div className="rounded-xl border border-stone-200 dark:border-zinc-800 bg-white dark:bg-[#16181e] p-4 space-y-2">
-            <span className="font-bold text-purple-500">3. Rehearse Candidate Advice</span>
-            <p className="text-slate-600 dark:text-zinc-400 text-xs leading-relaxed">
+          <div className="rounded-xl border border-zinc-800 bg-[#16181e] p-4 space-y-2">
+            <span className="font-bold text-purple-400">3. Rehearse Candidate Advice</span>
+            <p className="text-zinc-400 text-xs leading-relaxed">
               Read through the "Advice for Juniors" on verified experiences. Seniors frequently share critical details about interviewer demeanor and common pitfalls.
             </p>
           </div>

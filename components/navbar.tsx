@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useState, useTransition } from "react";
+import { useEffect, useState, useTransition } from "react";
 import {
   PlusCircle,
   Bookmark,
@@ -31,6 +31,15 @@ export function Navbar({ currentUser }: NavbarProps) {
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
 
+  // Optimistic path highlight so navbar tab responds with 0ms delay on click
+  const [optimisticPath, setOptimisticPath] = useState<string | null>(null);
+
+  useEffect(() => {
+    setOptimisticPath(null);
+  }, [pathname]);
+
+  const currentPath = optimisticPath || pathname;
+
   const navLinks = [
     { label: "Home", href: "/" },
     { label: "Experiences", href: "/experiences" },
@@ -56,16 +65,16 @@ export function Navbar({ currentUser }: NavbarProps) {
   };
 
   return (
-    <header className="sticky top-0 z-40 w-full border-b border-stone-200 bg-white/95 dark:border-zinc-800/80 dark:bg-[#090a0d]/90 backdrop-blur-md transition-colors">
+    <header className="sticky top-0 z-40 w-full border-b border-zinc-800/80 bg-[#090a0d]/90 backdrop-blur-md transition-colors select-none">
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
         {/* Brand Identity */}
         <div className="flex items-center gap-8">
-          <Link href="/" className="flex items-center gap-2.5 group">
+          <Link href="/" className="flex items-center gap-2.5 group outline-none focus:outline-none">
             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-600 text-white font-bold text-xs shadow-md shadow-blue-500/25 transition-transform duration-300 ease-out group-hover:scale-105">
               <span className="tracking-tighter">PR</span>
             </div>
             <div className="flex items-baseline">
-              <span className="font-bold tracking-tight text-slate-900 dark:text-white text-lg">
+              <span className="font-bold tracking-tight text-white text-lg">
                 the<span className="text-blue-500">PrepRoom</span>
               </span>
             </div>
@@ -74,15 +83,17 @@ export function Navbar({ currentUser }: NavbarProps) {
           {/* Desktop Navigation Links */}
           <nav className="hidden md:flex items-center space-x-1" aria-label="Main Navigation">
             {navLinks.map((link) => {
-              const isActive = link.href === "/" ? pathname === "/" : pathname.startsWith(link.href);
+              const isActive =
+                link.href === "/" ? currentPath === "/" : currentPath.startsWith(link.href);
               return (
                 <Link
                   key={link.href}
                   href={link.href}
-                  className={`px-3 py-1.5 text-xs sm:text-sm font-medium transition-all duration-200 ease-out rounded-lg ${
+                  onClick={() => setOptimisticPath(link.href)}
+                  className={`px-3 py-1.5 text-xs sm:text-sm font-medium transition-colors duration-150 rounded-lg outline-none focus:outline-none focus-visible:outline-none border-0 ${
                     isActive
-                      ? "text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/60 font-semibold border border-blue-200/60 dark:border-blue-800/50 shadow-2xs"
-                      : "text-slate-600 hover:text-slate-900 hover:bg-stone-100 dark:text-zinc-400 dark:hover:text-zinc-100 dark:hover:bg-zinc-800/70"
+                      ? "text-blue-400 bg-blue-500/15 font-semibold"
+                      : "text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800/60 font-medium"
                   }`}
                 >
                   {link.label}
@@ -97,7 +108,7 @@ export function Navbar({ currentUser }: NavbarProps) {
           {/* Share Experience Button */}
           <Link
             href="/share"
-            className="hidden sm:inline-flex items-center gap-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 text-xs sm:text-sm font-medium transition-all duration-300 ease-out hover:shadow-lg hover:shadow-blue-600/30 hover:scale-[1.02] active:scale-[0.98] shadow-md shadow-blue-600/20"
+            className="hidden sm:inline-flex items-center gap-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 text-xs sm:text-sm font-medium transition-all duration-200 ease-out hover:shadow-lg hover:shadow-blue-600/30 hover:scale-[1.02] active:scale-[0.98] shadow-md shadow-blue-600/20 outline-none focus:outline-none"
           >
             <PlusCircle className="h-4 w-4" />
             <span>Share Experience</span>
@@ -109,14 +120,14 @@ export function Navbar({ currentUser }: NavbarProps) {
               <button
                 type="button"
                 onClick={() => setUserMenuOpen(!userMenuOpen)}
-                className="flex items-center gap-2 rounded-full border border-stone-200 dark:border-stone-800 bg-stone-100 dark:bg-stone-900 px-2.5 py-1 text-xs font-medium text-slate-800 dark:text-stone-200 hover:bg-stone-200 dark:hover:bg-stone-800 transition-colors focus:outline-hidden"
+                className="flex items-center gap-2 rounded-full border border-zinc-800 bg-[#14161f] px-2.5 py-1 text-xs font-medium text-zinc-200 hover:bg-zinc-800 transition-colors outline-none focus:outline-none cursor-pointer"
               >
-                <div className="flex h-6 w-6 items-center justify-center rounded-full bg-slate-900 dark:bg-stone-100 text-[11px] font-semibold text-white dark:text-stone-900">
+                <div className="flex h-6 w-6 items-center justify-center rounded-full bg-zinc-100 text-[11px] font-semibold text-zinc-900">
                   {currentUser.name.charAt(0).toUpperCase()}
                 </div>
                 <span className="hidden md:inline max-w-[100px] truncate">{currentUser.name}</span>
                 {currentUser.role === "ADMIN" && (
-                  <span className="hidden md:inline rounded bg-slate-200 dark:bg-stone-800 px-1.5 py-0.2 text-[10px] font-semibold text-slate-800 dark:text-stone-200 uppercase">
+                  <span className="hidden md:inline rounded bg-zinc-800 px-1.5 py-0.2 text-[10px] font-semibold text-zinc-200 uppercase">
                     Admin
                   </span>
                 )}
@@ -124,32 +135,32 @@ export function Navbar({ currentUser }: NavbarProps) {
 
               {userMenuOpen && (
                 <div
-                  className="absolute right-0 mt-2 w-56 rounded-md border border-stone-200 dark:border-stone-800 bg-white dark:bg-stone-900 py-1 shadow-lg z-50 animate-in fade-in-50"
+                  className="absolute right-0 mt-2 w-56 rounded-xl border border-zinc-800 bg-[#111317] py-1 shadow-xl z-50 animate-in fade-in-50"
                   onBlur={() => setTimeout(() => setUserMenuOpen(false), 200)}
                 >
-                  <div className="px-4 py-2 border-b border-stone-100 dark:border-stone-800">
-                    <p className="text-xs font-medium text-slate-900 dark:text-stone-100 truncate">{currentUser.name}</p>
-                    <p className="text-[11px] text-slate-500 dark:text-stone-400 truncate">{currentUser.email}</p>
+                  <div className="px-4 py-2 border-b border-zinc-800">
+                    <p className="text-xs font-medium text-zinc-100 truncate">{currentUser.name}</p>
+                    <p className="text-[11px] text-zinc-400 truncate">{currentUser.email}</p>
                     {currentUser.department && (
-                      <p className="text-[10px] text-slate-400 dark:text-stone-500 mt-0.5">{currentUser.department}</p>
+                      <p className="text-[10px] text-zinc-500 mt-0.5">{currentUser.department}</p>
                     )}
                   </div>
 
                   <Link
                     href="/profile"
                     onClick={() => setUserMenuOpen(false)}
-                    className="flex items-center gap-2 px-4 py-2 text-xs text-slate-700 dark:text-stone-300 hover:bg-stone-50 dark:hover:bg-stone-800"
+                    className="flex items-center gap-2 px-4 py-2 text-xs text-zinc-300 hover:bg-zinc-800/80 outline-none"
                   >
-                    <User className="h-3.5 w-3.5 text-slate-500 dark:text-stone-400" />
+                    <User className="h-3.5 w-3.5 text-zinc-400" />
                     <span>My Profile & Drafts</span>
                   </Link>
 
                   <Link
                     href="/bookmarks"
                     onClick={() => setUserMenuOpen(false)}
-                    className="flex items-center gap-2 px-4 py-2 text-xs text-slate-700 dark:text-stone-300 hover:bg-stone-50 dark:hover:bg-stone-800"
+                    className="flex items-center gap-2 px-4 py-2 text-xs text-zinc-300 hover:bg-zinc-800/80 outline-none"
                   >
-                    <Bookmark className="h-3.5 w-3.5 text-slate-500 dark:text-stone-400" />
+                    <Bookmark className="h-3.5 w-3.5 text-zinc-400" />
                     <span>Saved Bookmarks</span>
                   </Link>
 
@@ -157,20 +168,20 @@ export function Navbar({ currentUser }: NavbarProps) {
                     <Link
                       href="/admin"
                       onClick={() => setUserMenuOpen(false)}
-                      className="flex items-center gap-2 px-4 py-2 text-xs font-medium text-blue-700 dark:text-blue-400 bg-blue-50/50 dark:bg-blue-950/40 hover:bg-blue-50 dark:hover:bg-blue-950/60"
+                      className="flex items-center gap-2 px-4 py-2 text-xs font-medium text-blue-400 bg-blue-950/40 hover:bg-blue-950/60 outline-none"
                     >
-                      <Shield className="h-3.5 w-3.5 text-blue-600 dark:text-blue-400" />
+                      <Shield className="h-3.5 w-3.5 text-blue-400" />
                       <span>Admin Moderation</span>
                     </Link>
                   )}
 
-                  <div className="border-t border-stone-100 dark:border-stone-800 my-1" />
+                  <div className="border-t border-zinc-800 my-1" />
 
                   <button
                     type="button"
                     onClick={handleLogout}
                     disabled={isPending}
-                    className="flex w-full items-center gap-2 px-4 py-2 text-xs text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 text-left"
+                    className="flex w-full items-center gap-2 px-4 py-2 text-xs text-rose-400 hover:bg-rose-950/40 text-left outline-none cursor-pointer"
                   >
                     <LogOut className="h-3.5 w-3.5" />
                     <span>Sign Out</span>
@@ -182,16 +193,16 @@ export function Navbar({ currentUser }: NavbarProps) {
             <div className="flex items-center gap-2">
               <Link
                 href="/login"
-                className="text-xs sm:text-sm font-medium text-slate-700 dark:text-stone-300 hover:text-slate-900 dark:hover:text-stone-100 px-2 py-1"
+                className="text-xs sm:text-sm font-medium text-zinc-300 hover:text-white px-2 py-1 outline-none"
               >
                 Sign In
               </Link>
               {process.env.NODE_ENV !== "production" && (
-                <div className="hidden lg:flex items-center gap-1 border-l border-stone-200 dark:border-stone-800 pl-2">
+                <div className="hidden lg:flex items-center gap-1 border-l border-zinc-800 pl-2">
                   <button
                     onClick={() => handleDemoLogin("student")}
                     disabled={isPending}
-                    className="rounded border border-stone-200 dark:border-stone-800 bg-stone-50 dark:bg-stone-900 px-2 py-0.5 text-[11px] text-slate-600 dark:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-800"
+                    className="rounded-md border border-zinc-800 bg-[#16181e] px-2 py-0.5 text-[11px] text-zinc-300 hover:bg-zinc-800 outline-none cursor-pointer transition-colors"
                     title="Dev: Login as Student"
                   >
                     Demo Student
@@ -199,7 +210,7 @@ export function Navbar({ currentUser }: NavbarProps) {
                   <button
                     onClick={() => handleDemoLogin("admin")}
                     disabled={isPending}
-                    className="rounded border border-slate-300 dark:border-stone-700 bg-slate-100 dark:bg-stone-800 px-2 py-0.5 text-[11px] font-semibold text-slate-800 dark:text-stone-200 hover:bg-slate-200 dark:hover:bg-stone-700"
+                    className="rounded-md border border-zinc-800 bg-[#16181e] px-2 py-0.5 text-[11px] font-semibold text-zinc-200 hover:bg-zinc-800 outline-none cursor-pointer transition-colors"
                     title="Dev: Login as Admin"
                   >
                     Demo Admin
@@ -213,7 +224,7 @@ export function Navbar({ currentUser }: NavbarProps) {
           <button
             type="button"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="md:hidden rounded-md p-1.5 text-slate-600 dark:text-stone-400 hover:bg-stone-100 dark:hover:bg-stone-800"
+            className="md:hidden rounded-lg p-1.5 text-zinc-400 hover:bg-zinc-800 outline-none cursor-pointer"
             aria-label="Toggle navigation menu"
           >
             {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
@@ -223,42 +234,49 @@ export function Navbar({ currentUser }: NavbarProps) {
 
       {/* Mobile Drawer */}
       {mobileMenuOpen && (
-        <div className="border-t border-stone-200 dark:border-zinc-800 bg-white dark:bg-[#090a0d] px-4 pt-3 pb-6 md:hidden">
+        <div className="border-t border-zinc-800 bg-[#090a0d] px-4 pt-3 pb-6 md:hidden">
           <div className="flex flex-col space-y-1">
-            {navLinks.map((link) => (
-              <Link
-                key={link.href}
-                href={link.href}
-                onClick={() => setMobileMenuOpen(false)}
-                className={`rounded-lg px-3 py-2 text-sm font-medium ${
-                  (link.href === "/" ? pathname === "/" : pathname.startsWith(link.href))
-                    ? "bg-blue-50 dark:bg-blue-950/60 font-semibold text-blue-600 dark:text-blue-400"
-                    : "text-slate-600 dark:text-zinc-400"
-                }`}
-              >
-                {link.label}
-              </Link>
-            ))}
+            {navLinks.map((link) => {
+              const isActive =
+                link.href === "/" ? currentPath === "/" : currentPath.startsWith(link.href);
+              return (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  onClick={() => {
+                    setOptimisticPath(link.href);
+                    setMobileMenuOpen(false);
+                  }}
+                  className={`rounded-lg px-3 py-2 text-sm font-medium border-0 outline-none ${
+                    isActive
+                      ? "bg-blue-500/15 font-semibold text-blue-400"
+                      : "text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800/60"
+                  }`}
+                >
+                  {link.label}
+                </Link>
+              );
+            })}
             <Link
               href="/share"
               onClick={() => setMobileMenuOpen(false)}
-              className="mt-2 flex items-center justify-center gap-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 py-2.5 text-sm font-medium text-white shadow-md shadow-blue-600/20"
+              className="mt-2 flex items-center justify-center gap-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 py-2.5 text-sm font-medium text-white shadow-md shadow-blue-600/20 outline-none"
             >
               <PlusCircle className="h-4 w-4" />
               <span>Share Experience</span>
             </Link>
 
             {process.env.NODE_ENV !== "production" && !currentUser && (
-              <div className="pt-3 border-t border-stone-100 dark:border-stone-800 mt-2 flex gap-2">
+              <div className="pt-3 border-t border-zinc-800 mt-2 flex gap-2">
                 <button
                   onClick={() => handleDemoLogin("student")}
-                  className="flex-1 rounded border border-stone-200 dark:border-stone-800 py-1.5 text-xs text-slate-700 dark:text-stone-300 bg-stone-50 dark:bg-stone-900"
+                  className="flex-1 rounded-md border border-zinc-800 py-1.5 text-xs text-zinc-300 bg-[#16181e] outline-none"
                 >
                   Demo Student
                 </button>
                 <button
                   onClick={() => handleDemoLogin("admin")}
-                  className="flex-1 rounded border border-slate-300 dark:border-stone-700 py-1.5 text-xs font-semibold text-slate-800 dark:text-stone-200 bg-slate-100 dark:bg-stone-800"
+                  className="flex-1 rounded-md border border-zinc-800 py-1.5 text-xs font-semibold text-zinc-200 bg-[#16181e] outline-none"
                 >
                   Demo Admin
                 </button>
