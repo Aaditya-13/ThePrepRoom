@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useEffect, useState, useTransition } from "react";
+import { useEffect, useState, useTransition, useRef } from "react";
 import {
   PlusCircle,
   Bookmark,
@@ -11,8 +11,12 @@ import {
   LogOut,
   Menu,
   X,
+  ChevronDown,
+  Sparkles,
+  ExternalLink,
 } from "lucide-react";
 import { logoutAction } from "@/actions/auth";
+import { PLACEMENT_STATUS_CONFIG } from "@/lib/profile-constants";
 
 interface NavbarProps {
   currentUser: {
@@ -21,6 +25,11 @@ interface NavbarProps {
     email: string;
     role: string;
     department?: string | null;
+    graduationYear?: number | null;
+    image?: string | null;
+    placementStatus?: string | null;
+    placedCompany?: string | null;
+    linkedinUrl?: string | null;
   } | null;
 }
 
@@ -30,6 +39,22 @@ export function Navbar({ currentUser }: NavbarProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
+  const userMenuRef = useRef<HTMLDivElement>(null);
+
+  // Close dropdown on outside click
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (userMenuRef.current && !userMenuRef.current.contains(e.target as Node)) {
+        setUserMenuOpen(false);
+      }
+    };
+    if (userMenuOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [userMenuOpen]);
 
   // Optimistic path highlight so navbar tab responds with 0ms delay on click
   const [optimisticPath, setOptimisticPath] = useState<string | null>(null);
@@ -55,6 +80,9 @@ export function Navbar({ currentUser }: NavbarProps) {
       router.refresh();
     });
   };
+
+  const statusKey = currentUser?.placementStatus || "PREPARING";
+  const statusConfig = PLACEMENT_STATUS_CONFIG[statusKey] || PLACEMENT_STATUS_CONFIG.PREPARING;
 
   return (
     <header className="sticky top-0 z-40 w-full border-b border-zinc-800/80 bg-[#090a0d]/90 backdrop-blur-md transition-colors select-none">
@@ -108,75 +136,186 @@ export function Navbar({ currentUser }: NavbarProps) {
 
           {/* User Account / Login */}
           {currentUser ? (
-            <div className="relative">
+            <div className="relative" ref={userMenuRef}>
+              {/* Modern Glassmorphic Trigger Chip */}
               <button
                 type="button"
                 onClick={() => setUserMenuOpen(!userMenuOpen)}
-                className="flex items-center gap-2 rounded-full border border-zinc-800 bg-[#14161f] px-2.5 py-1 text-xs font-medium text-zinc-200 hover:bg-zinc-800 transition-colors outline-none focus:outline-none cursor-pointer"
+                className={`flex items-center gap-2.5 rounded-full border py-1 pl-1.5 pr-3 transition-all duration-200 outline-none cursor-pointer group active:scale-95 ${
+                  userMenuOpen
+                    ? "border-blue-500/50 bg-[#161922] shadow-lg shadow-blue-500/10"
+                    : "border-zinc-800/90 bg-[#111317]/90 hover:border-zinc-700 hover:bg-[#161820]"
+                }`}
               >
-                <div className="flex h-6 w-6 items-center justify-center rounded-full bg-zinc-100 text-[11px] font-semibold text-zinc-900">
-                  {currentUser.name.charAt(0).toUpperCase()}
+                {/* Avatar with Gradient Ring */}
+                <div className="relative">
+                  <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-gradient-to-tr from-blue-600 via-indigo-500 to-cyan-400 p-[1.5px] shadow-sm">
+                    {currentUser.image ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={currentUser.image}
+                        alt={currentUser.name}
+                        className="h-full w-full rounded-full object-cover"
+                      />
+                    ) : (
+                      <div className="flex h-full w-full items-center justify-center rounded-full bg-[#0c0d10] text-[11px] font-bold text-white">
+                        {currentUser.name.charAt(0).toUpperCase()}
+                      </div>
+                    )}
+                  </div>
+                  {/* Status Indicator Dot */}
+                  <span
+                    className={`absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full border-2 border-[#111317] ${statusConfig.dotColor}`}
+                  />
                 </div>
-                <span className="hidden md:inline max-w-[100px] truncate">{currentUser.name}</span>
+
+                {/* Name */}
+                <span className="hidden md:inline max-w-[120px] truncate text-xs font-semibold text-zinc-100 group-hover:text-white transition-colors">
+                  {currentUser.name}
+                </span>
+
+                {/* Admin Chip */}
                 {currentUser.role === "ADMIN" && (
-                  <span className="hidden md:inline rounded bg-zinc-800 px-1.5 py-0.2 text-[10px] font-semibold text-zinc-200 uppercase">
+                  <span className="hidden md:inline rounded-full bg-emerald-500/10 border border-emerald-500/30 px-1.5 py-0.2 text-[9px] font-bold text-emerald-400 uppercase tracking-wider">
                     Admin
                   </span>
                 )}
+
+                {/* Smooth Rotating Chevron */}
+                <ChevronDown
+                  className={`h-3.5 w-3.5 transition-transform duration-200 ${
+                    userMenuOpen ? "rotate-180 text-blue-400" : "text-zinc-400 group-hover:text-zinc-200"
+                  }`}
+                />
               </button>
 
+              {/* Modern Glass Dropdown Menu */}
               {userMenuOpen && (
-                <div
-                  className="absolute right-0 mt-2 w-56 rounded-xl border border-zinc-800 bg-[#111317] py-1 shadow-xl z-50 animate-in fade-in-50"
-                  onBlur={() => setTimeout(() => setUserMenuOpen(false), 200)}
-                >
-                  <div className="px-4 py-2 border-b border-zinc-800">
-                    <p className="text-xs font-medium text-zinc-100 truncate">{currentUser.name}</p>
-                    <p className="text-[11px] text-zinc-400 truncate">{currentUser.email}</p>
-                    {currentUser.department && (
-                      <p className="text-[10px] text-zinc-500 mt-0.5">{currentUser.department}</p>
-                    )}
-                  </div>
-
+                <div className="absolute right-0 mt-2.5 w-72 rounded-2xl border border-zinc-800/90 bg-[#111317]/95 backdrop-blur-xl shadow-2xl p-2 z-50 animate-in fade-in zoom-in-95 duration-150">
+                  {/* User Profile Header Card inside Dropdown */}
                   <Link
                     href="/profile"
                     onClick={() => setUserMenuOpen(false)}
-                    className="flex items-center gap-2 px-4 py-2 text-xs text-zinc-300 hover:bg-zinc-800/80 outline-none"
+                    className="block p-3 rounded-xl bg-gradient-to-b from-[#181a22] to-[#12141a] border border-zinc-800/80 hover:border-zinc-700/80 transition-all group"
                   >
-                    <User className="h-3.5 w-3.5 text-zinc-400" />
-                    <span>My Profile & Drafts</span>
+                    <div className="flex items-center gap-3">
+                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-600 text-sm font-bold text-white shadow-md">
+                        {currentUser.image ? (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img
+                            src={currentUser.image}
+                            alt={currentUser.name}
+                            className="h-full w-full rounded-xl object-cover"
+                          />
+                        ) : (
+                          currentUser.name.charAt(0).toUpperCase()
+                        )}
+                      </div>
+
+                      <div className="space-y-0.5 overflow-hidden">
+                        <div className="flex items-center gap-1.5">
+                          <p className="text-xs font-bold text-white truncate group-hover:text-blue-400 transition-colors">
+                            {currentUser.name}
+                          </p>
+                          <ExternalLink className="h-3 w-3 text-zinc-500 opacity-0 group-hover:opacity-100 transition-opacity shrink-0" />
+                        </div>
+                        <p className="text-[11px] text-zinc-400 truncate font-mono">
+                          {currentUser.email}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Status Pill in Menu Header */}
+                    <div className="mt-2.5 pt-2 border-t border-zinc-800/60 flex items-center justify-between text-[11px]">
+                      <div className="inline-flex items-center gap-1.5">
+                        <span className={`h-1.5 w-1.5 rounded-full ${statusConfig.dotColor} animate-pulse`} />
+                        <span className={`font-semibold ${statusConfig.textColor}`}>
+                          {statusKey === "OFFER_ACCEPTED" && currentUser.placedCompany
+                            ? currentUser.placedCompany
+                            : statusConfig.shortLabel}
+                        </span>
+                      </div>
+
+                      {currentUser.department && (
+                        <span className="text-[10px] text-zinc-500 truncate max-w-[120px]">
+                          {currentUser.department}
+                        </span>
+                      )}
+                    </div>
                   </Link>
 
-                  <Link
-                    href="/bookmarks"
-                    onClick={() => setUserMenuOpen(false)}
-                    className="flex items-center gap-2 px-4 py-2 text-xs text-zinc-300 hover:bg-zinc-800/80 outline-none"
-                  >
-                    <Bookmark className="h-3.5 w-3.5 text-zinc-400" />
-                    <span>Saved Bookmarks</span>
-                  </Link>
-
-                  {currentUser.role === "ADMIN" && (
+                  {/* Navigation Links */}
+                  <div className="py-1 space-y-0.5 text-xs">
                     <Link
-                      href="/admin"
+                      href="/profile"
                       onClick={() => setUserMenuOpen(false)}
-                      className="flex items-center gap-2 px-4 py-2 text-xs font-medium text-blue-400 bg-blue-950/40 hover:bg-blue-950/60 outline-none"
+                      className="flex items-center gap-3 px-3 py-2 rounded-xl text-zinc-300 hover:text-white hover:bg-zinc-800/70 transition-colors outline-none group"
                     >
-                      <Shield className="h-3.5 w-3.5 text-blue-400" />
-                      <span>Admin Moderation</span>
+                      <User className="h-4 w-4 text-zinc-400 group-hover:text-blue-400 transition-colors" />
+                      <div className="flex flex-col">
+                        <span className="font-semibold text-xs">My Profile</span>
+                        <span className="text-[10px] text-zinc-500 leading-tight">
+                          Edit information, status & bio
+                        </span>
+                      </div>
                     </Link>
-                  )}
 
-                  <div className="border-t border-zinc-800 my-1" />
+                    <Link
+                      href="/bookmarks"
+                      onClick={() => setUserMenuOpen(false)}
+                      className="flex items-center gap-3 px-3 py-2 rounded-xl text-zinc-300 hover:text-white hover:bg-zinc-800/70 transition-colors outline-none group"
+                    >
+                      <Bookmark className="h-4 w-4 text-zinc-400 group-hover:text-blue-400 transition-colors" />
+                      <div className="flex flex-col">
+                        <span className="font-semibold text-xs">Saved Bookmarks</span>
+                        <span className="text-[10px] text-zinc-500 leading-tight">
+                          Access your saved experiences
+                        </span>
+                      </div>
+                    </Link>
 
+                    <Link
+                      href="/share"
+                      onClick={() => setUserMenuOpen(false)}
+                      className="flex items-center gap-3 px-3 py-2 rounded-xl text-zinc-300 hover:text-white hover:bg-zinc-800/70 transition-colors outline-none group"
+                    >
+                      <PlusCircle className="h-4 w-4 text-zinc-400 group-hover:text-blue-400 transition-colors" />
+                      <div className="flex flex-col">
+                        <span className="font-semibold text-xs">Share Experience</span>
+                        <span className="text-[10px] text-zinc-500 leading-tight">
+                          Post interview questions & tips
+                        </span>
+                      </div>
+                    </Link>
+
+                    {currentUser.role === "ADMIN" && (
+                      <Link
+                        href="/admin"
+                        onClick={() => setUserMenuOpen(false)}
+                        className="flex items-center gap-3 px-3 py-2 rounded-xl text-emerald-400 hover:bg-emerald-500/10 transition-colors outline-none group border border-emerald-500/20"
+                      >
+                        <Shield className="h-4 w-4 text-emerald-400" />
+                        <div className="flex flex-col">
+                          <span className="font-semibold text-xs">Admin Moderation</span>
+                          <span className="text-[10px] text-emerald-400/70 leading-tight">
+                            Manage submission queues
+                          </span>
+                        </div>
+                      </Link>
+                    )}
+                  </div>
+
+                  <div className="border-t border-zinc-800/80 my-1" />
+
+                  {/* Sign Out Button */}
                   <button
                     type="button"
                     onClick={handleLogout}
                     disabled={isPending}
-                    className="flex w-full items-center gap-2 px-4 py-2 text-xs text-rose-400 hover:bg-rose-950/40 text-left outline-none cursor-pointer"
+                    className="flex w-full items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-rose-400 hover:bg-rose-500/10 hover:text-rose-300 transition-colors text-left outline-none cursor-pointer"
                   >
-                    <LogOut className="h-3.5 w-3.5" />
-                    <span>Sign Out</span>
+                    <LogOut className="h-4 w-4" />
+                    <span>{isPending ? "Signing Out..." : "Sign Out"}</span>
                   </button>
                 </div>
               )}
@@ -236,7 +375,34 @@ export function Navbar({ currentUser }: NavbarProps) {
               <span>Share Experience</span>
             </Link>
 
-            {!currentUser && (
+            {currentUser ? (
+              <div className="pt-3 border-t border-zinc-800 mt-2 space-y-1">
+                <Link
+                  href="/profile"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="flex items-center gap-2 px-3 py-2 text-sm text-zinc-300 hover:text-white"
+                >
+                  <User className="h-4 w-4 text-blue-400" />
+                  <span>My Profile ({currentUser.name})</span>
+                </Link>
+                <Link
+                  href="/bookmarks"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="flex items-center gap-2 px-3 py-2 text-sm text-zinc-300 hover:text-white"
+                >
+                  <Bookmark className="h-4 w-4 text-zinc-400" />
+                  <span>Saved Bookmarks</span>
+                </Link>
+                <button
+                  type="button"
+                  onClick={handleLogout}
+                  className="flex w-full items-center gap-2 px-3 py-2 text-sm text-rose-400 hover:bg-rose-500/10 rounded-lg text-left"
+                >
+                  <LogOut className="h-4 w-4" />
+                  <span>Sign Out</span>
+                </button>
+              </div>
+            ) : (
               <div className="pt-3 border-t border-zinc-800 mt-2">
                 <Link
                   href="/login"

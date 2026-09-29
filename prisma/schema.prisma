@@ -85,6 +85,9 @@ model User {
   graduationYear  Int?          // Student profile metadata only
   bio             String?
   image           String?       // Profile picture / avatar
+  linkedinUrl     String?       // LinkedIn profile link
+  placementStatus String?       @default("PREPARING") // OFFER_ACCEPTED, ACTIVELY_INTERVIEWING, PREPARING, SEEKING_INTERNSHIP, HIGHER_STUDIES
+  placedCompany   String?       // Company & role name if placed
   oauthProvider   String?       // "google" or "linkedin"
   oauthId         String?       // OAuth provider unique subject ID
   totpSecret      String?       // Admin TOTP 2FA secret (base32)
