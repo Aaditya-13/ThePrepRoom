@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import { logoutAction } from "@/actions/auth";
 import { PLACEMENT_STATUS_CONFIG } from "@/lib/profile-constants";
+import { UserAvatar } from "@/components/user-avatar";
 
 interface NavbarProps {
   currentUser: {
@@ -147,27 +148,13 @@ export function Navbar({ currentUser }: NavbarProps) {
                     : "border-zinc-800/90 bg-[#111317]/90 hover:border-zinc-700 hover:bg-[#161820]"
                 }`}
               >
-                {/* Avatar with Gradient Ring */}
-                <div className="relative">
-                  <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-gradient-to-tr from-blue-600 via-indigo-500 to-cyan-400 p-[1.5px] shadow-sm">
-                    {currentUser.image ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img
-                        src={currentUser.image}
-                        alt={currentUser.name}
-                        className="h-full w-full rounded-full object-cover"
-                      />
-                    ) : (
-                      <div className="flex h-full w-full items-center justify-center rounded-full bg-[#0c0d10] text-[11px] font-bold text-white">
-                        {currentUser.name.charAt(0).toUpperCase()}
-                      </div>
-                    )}
-                  </div>
-                  {/* Status Indicator Dot */}
-                  <span
-                    className={`absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full border-2 border-[#111317] ${statusConfig.dotColor}`}
-                  />
-                </div>
+                {/* Avatar with Gradient Ring & 2-letter Initials Fallback */}
+                <UserAvatar
+                  name={currentUser.name}
+                  image={currentUser.image}
+                  size="sm"
+                  statusDotColor={statusConfig.dotColor}
+                />
 
                 {/* Name */}
                 <span className="hidden md:inline max-w-[120px] truncate text-xs font-semibold text-zinc-100 group-hover:text-white transition-colors">
@@ -189,28 +176,21 @@ export function Navbar({ currentUser }: NavbarProps) {
                 />
               </button>
 
-              {/* Modern Glass Dropdown Menu */}
+              {/* Modern Snappy Dropdown Menu */}
               {userMenuOpen && (
-                <div className="absolute right-0 mt-2.5 w-72 rounded-2xl border border-zinc-800/90 bg-[#111317]/95 backdrop-blur-xl shadow-2xl p-2 z-50 animate-in fade-in zoom-in-95 duration-150">
+                <div className="absolute right-0 mt-2 w-72 rounded-2xl border border-zinc-800 bg-[#121418] shadow-2xl shadow-black/80 p-2 z-50 animate-popover">
                   {/* User Profile Header Card inside Dropdown */}
                   <Link
                     href="/profile"
                     onClick={() => setUserMenuOpen(false)}
-                    className="block p-3 rounded-xl bg-gradient-to-b from-[#181a22] to-[#12141a] border border-zinc-800/80 hover:border-zinc-700/80 transition-all group"
+                    className="block p-3 rounded-xl bg-[#16181f] border border-zinc-800/80 hover:border-zinc-700/80 transition-all group"
                   >
                     <div className="flex items-center gap-3">
-                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-600 text-sm font-bold text-white shadow-md">
-                        {currentUser.image ? (
-                          // eslint-disable-next-line @next/next/no-img-element
-                          <img
-                            src={currentUser.image}
-                            alt={currentUser.name}
-                            className="h-full w-full rounded-xl object-cover"
-                          />
-                        ) : (
-                          currentUser.name.charAt(0).toUpperCase()
-                        )}
-                      </div>
+                      <UserAvatar
+                        name={currentUser.name}
+                        image={currentUser.image}
+                        size="md"
+                      />
 
                       <div className="space-y-0.5 overflow-hidden">
                         <div className="flex items-center gap-1.5">

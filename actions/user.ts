@@ -15,6 +15,10 @@ export async function updateUserProfileAction(prevState: any, formData: FormData
     const placementStatus = (formData.get("placementStatus") as string)?.trim() || "PREPARING";
     const placedCompany = (formData.get("placedCompany") as string)?.trim() || null;
     const bio = (formData.get("bio") as string)?.trim() || null;
+    
+    // Photo management
+    const imageAction = (formData.get("imageAction") as string)?.trim() || "KEEP";
+    const newImage = (formData.get("image") as string)?.trim() || null;
 
     if (!name || name.length < 2) {
       return { error: "Name must be at least 2 characters long." };
@@ -45,6 +49,21 @@ export async function updateUserProfileAction(prevState: any, formData: FormData
       }
     }
 
+    // Determine final image
+    let finalImage: string | null = currentUser.image;
+    if (imageAction === "REMOVE") {
+      finalImage = null;
+    } else if (imageAction === "UPDATE" && newImage) {
+      // Validate that it is either a data URI or a valid web URL
+      if (
+        newImage.startsWith("data:image/") ||
+        newImage.startsWith("http://") ||
+        newImage.startsWith("https://")
+      ) {
+        finalImage = newImage;
+      }
+    }
+
     const updated = await prisma.user.update({
       where: { id: currentUser.id },
       data: {
@@ -55,6 +74,7 @@ export async function updateUserProfileAction(prevState: any, formData: FormData
         placementStatus,
         placedCompany: placementStatus === "OFFER_ACCEPTED" ? placedCompany : null,
         bio,
+        image: finalImage,
       },
     });
 
@@ -69,7 +89,20 @@ export async function updateUserProfileAction(prevState: any, formData: FormData
     revalidatePath("/", "layout");
     revalidatePath("/profile");
 
-    return { success: true, message: "Profile updated successfully!" };
+    return { 
+      success: true, 
+      message: "Profile updated successfully!",
+      user: {
+        name: updated.name,
+        image: updated.image,
+        department: updated.department,
+        graduationYear: updated.graduationYear,
+        placementStatus: updated.placementStatus,
+        placedCompany: updated.placedCompany,
+        linkedinUrl: updated.linkedinUrl,
+        bio: updated.bio,
+      }
+    };
   } catch (err: any) {
     console.error("Update profile error:", err);
     return { error: err?.message || "Failed to update profile." };

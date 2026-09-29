@@ -3,6 +3,7 @@
 import { useRef } from "react";
 import Link from "next/link";
 import { ChevronLeft, ChevronRight, Eye, ArrowRight } from "lucide-react";
+import { getUserInitials } from "@/lib/user-utils";
 
 interface StoryItem {
   id: string;
@@ -19,6 +20,7 @@ interface StoryItem {
   };
   user: {
     name: string;
+    image?: string | null;
   } | null;
   isAnonymous: boolean;
 }
@@ -71,7 +73,7 @@ export function TopStoriesCarousel({ stories }: TopStoriesCarouselProps) {
         {stories.map((story, index) => {
           const rank = String(index + 1).padStart(2, "0");
           const authorName = story.isAnonymous ? "Anonymous Candidate" : story.user?.name || "Student";
-          const authorInitial = authorName.charAt(0).toUpperCase();
+          const authorInitials = getUserInitials(authorName);
 
           return (
             <Link
@@ -110,8 +112,13 @@ export function TopStoriesCarousel({ stories }: TopStoriesCarouselProps) {
               {/* Author footer */}
               <div className="mt-5 pt-3.5 border-t border-stone-100 dark:border-zinc-800/80 flex items-center justify-between">
                 <div className="flex items-center gap-2.5">
-                  <div className="flex h-7 w-7 items-center justify-center rounded-full bg-slate-900 dark:bg-zinc-800 text-white dark:text-zinc-200 font-bold text-xs">
-                    {authorInitial}
+                  <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-gradient-to-tr from-blue-600 to-indigo-600 text-white font-bold text-xs overflow-hidden">
+                    {story.user?.image && !story.isAnonymous ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img src={story.user.image} alt={authorName} className="h-full w-full object-cover" />
+                    ) : (
+                      <span>{authorInitials}</span>
+                    )}
                   </div>
                   <div className="text-left">
                     <p className="text-xs font-semibold text-slate-900 dark:text-zinc-200 line-clamp-1 leading-none">

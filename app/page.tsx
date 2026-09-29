@@ -20,6 +20,7 @@ import {
 } from "@/lib/public-queries";
 import { HeroIllustration } from "@/components/hero-illustration";
 import { TopStoriesCarousel } from "@/components/top-stories-carousel";
+import { getUserInitials } from "@/lib/user-utils";
 
 export const revalidate = 0; // Fresh on navigation
 
@@ -171,7 +172,7 @@ export default async function HomePage() {
             {featuredExperiences.map((exp, idx) => {
               const tagStyle = TAG_STYLES[idx % TAG_STYLES.length];
               const authorName = exp.isAnonymous ? "Anonymous Candidate" : exp.user?.name || "Student";
-              const authorInitial = authorName.charAt(0).toUpperCase();
+              const authorInitials = getUserInitials(authorName);
 
               return (
                 <Link
@@ -209,8 +210,13 @@ export default async function HomePage() {
                   {/* Card Bottom: Candidate & Views */}
                   <div className="mt-5 pt-3.5 border-t border-stone-100 dark:border-zinc-800/80 flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                      <div className="flex h-6 w-6 items-center justify-center rounded-full bg-blue-600 text-white font-bold text-[10px]">
-                        {authorInitial}
+                      <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-blue-600 text-white font-bold text-[10px] overflow-hidden">
+                        {exp.user?.image && !exp.isAnonymous ? (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img src={exp.user.image} alt={authorName} className="h-full w-full object-cover" />
+                        ) : (
+                          <span>{authorInitials}</span>
+                        )}
                       </div>
                       <span className="text-xs font-medium text-slate-800 dark:text-zinc-300 line-clamp-1">
                         {authorName}
