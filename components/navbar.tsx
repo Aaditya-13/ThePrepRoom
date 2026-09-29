@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState, useTransition, useRef } from "react";
 import {
@@ -107,12 +108,20 @@ export function Navbar({ currentUser: initialUser }: NavbarProps) {
         {/* Brand Identity */}
         <div className="flex items-center gap-8">
           <Link href="/" className="flex items-center gap-2.5 group outline-none focus:outline-none">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-600 text-white font-bold text-xs shadow-md shadow-blue-500/25 transition-transform duration-300 ease-out group-hover:scale-105">
-              <span className="tracking-tighter">PR</span>
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl overflow-hidden bg-white p-0.5 shadow-md shadow-blue-500/15 transition-transform duration-300 ease-out group-hover:scale-105">
+              <Image
+                src="/logo.png"
+                alt="ThePrepRoom Logo"
+                width={36}
+                height={36}
+                className="h-full w-full object-contain"
+                unoptimized
+                priority
+              />
             </div>
             <div className="flex items-baseline">
-              <span className="font-bold tracking-tight text-white text-lg">
-                the<span className="text-blue-500">PrepRoom</span>
+              <span className="font-heading font-black tracking-tight text-white text-lg sm:text-xl">
+                The<span className="text-blue-500">PrepRoom</span>
               </span>
             </div>
           </Link>

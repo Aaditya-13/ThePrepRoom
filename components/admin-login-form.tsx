@@ -3,6 +3,7 @@
 import { useState, useTransition, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import {
   ShieldCheck,
   Lock,
@@ -206,6 +207,23 @@ export function AdminLoginForm() {
       {/* Background glow */}
       <div className="absolute top-0 right-0 h-40 w-40 rounded-full bg-emerald-500/10 blur-3xl pointer-events-none" />
       <div className="absolute bottom-0 left-0 h-40 w-40 rounded-full bg-blue-500/10 blur-3xl pointer-events-none" />
+
+      {/* Brand Header */}
+      <Link href="/" className="inline-flex items-center gap-2.5 group relative z-10">
+        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl overflow-hidden bg-white p-0.5 shadow-md shadow-emerald-500/15 transition-transform duration-300 group-hover:scale-105">
+          <Image
+            src="/logo.png"
+            alt="ThePrepRoom Logo"
+            width={36}
+            height={36}
+            className="h-full w-full object-contain"
+            unoptimized
+          />
+        </div>
+        <span className="font-heading font-black tracking-tight text-white text-lg">
+          The<span className="text-blue-500">PrepRoom</span> <span className="font-semibold text-emerald-400 text-xs ml-1">Admin</span>
+        </span>
+      </Link>
 
       {/* Header Badge & Title */}
       <div className="space-y-2 relative z-10">

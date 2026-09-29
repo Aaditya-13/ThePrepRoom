@@ -3,6 +3,7 @@
 import { useState, useTransition, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import {
   AlertCircle,
   Sparkles,
@@ -109,6 +110,23 @@ export function LoginForm() {
   return (
     <div className="w-full max-w-md rounded-3xl border border-zinc-800 bg-[#111317] p-8 sm:p-10 shadow-2xl relative overflow-hidden space-y-6">
       <div className="absolute top-0 right-0 h-36 w-36 rounded-full bg-blue-500/10 blur-3xl pointer-events-none" />
+
+      {/* Brand Header */}
+      <Link href="/" className="inline-flex items-center gap-2.5 group relative z-10">
+        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl overflow-hidden bg-white p-0.5 shadow-md shadow-blue-500/15 transition-transform duration-300 group-hover:scale-105">
+          <Image
+            src="/logo.png"
+            alt="ThePrepRoom Logo"
+            width={36}
+            height={36}
+            className="h-full w-full object-contain"
+            unoptimized
+          />
+        </div>
+        <span className="font-heading font-black tracking-tight text-white text-lg">
+          The<span className="text-blue-500">PrepRoom</span>
+        </span>
+      </Link>
 
       {/* Header */}
       <div className="space-y-1.5 relative z-10">
@@ -260,6 +278,23 @@ export function RegisterForm() {
   return (
     <div className="w-full max-w-md rounded-3xl border border-zinc-800 bg-[#111317] p-8 sm:p-10 shadow-2xl relative overflow-hidden space-y-6">
       <div className="absolute top-0 right-0 h-36 w-36 rounded-full bg-blue-500/10 blur-3xl pointer-events-none" />
+
+      {/* Brand Header */}
+      <Link href="/" className="inline-flex items-center gap-2.5 group relative z-10">
+        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl overflow-hidden bg-white p-0.5 shadow-md shadow-blue-500/15 transition-transform duration-300 group-hover:scale-105">
+          <Image
+            src="/logo.png"
+            alt="ThePrepRoom Logo"
+            width={36}
+            height={36}
+            className="h-full w-full object-contain"
+            unoptimized
+          />
+        </div>
+        <span className="font-heading font-black tracking-tight text-white text-lg">
+          The<span className="text-blue-500">PrepRoom</span>
+        </span>
+      </Link>
 
       {/* Header */}
       <div className="space-y-1.5 relative z-10">

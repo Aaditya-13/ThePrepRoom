@@ -41,6 +41,11 @@ export const metadata: Metadata = {
     "online assessment",
     "campus recruitment",
   ],
+  icons: {
+    icon: "/icon.png",
+    shortcut: "/icon.png",
+    apple: "/icon.png",
+  },
 };
 
 export default async function RootLayout({
