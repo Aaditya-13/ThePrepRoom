@@ -52,6 +52,7 @@ export default async function RootLayout({
   return (
     <html
       lang="en"
+      data-scroll-behavior="smooth"
       suppressHydrationWarning
       className={`dark ${headingFont.variable} ${bodyFont.variable} ${monoFont.variable} h-full antialiased`}
       style={{ colorScheme: "dark" }}

@@ -25,6 +25,7 @@ import {
 } from "@/lib/utils";
 import { BookmarkButton } from "@/components/bookmark-button";
 import { ReportModal } from "@/components/report-modal";
+import { TableOfContents } from "@/components/table-of-contents";
 
 interface PageProps {
   params: Promise<{ slug: string }>;
@@ -64,6 +65,25 @@ export default async function ExperienceDetailPage(props: PageProps) {
   const oaRound = experience.rounds.find((r) => r.roundType === "ONLINE_ASSESSMENT");
   const techRounds = experience.rounds.filter((r) => r.roundType === "TECHNICAL");
   const hrRounds = experience.rounds.filter((r) => r.roundType === "HR");
+
+  const sections: { id: string; label: string }[] = [];
+  if (experience.rounds.length > 0) {
+    sections.push({ id: "selection-process", label: "Selection Process" });
+  }
+  if (oaRound) {
+    sections.push({ id: "online-assessment", label: "Online Assessment" });
+  }
+  if (techRounds.length > 0) {
+    sections.push({ id: "technical-interview", label: "Technical Interview" });
+  }
+  if (hrRounds.length > 0) {
+    sections.push({ id: "hr-interview", label: "HR Interview" });
+  }
+  sections.push({ id: "overall-experience", label: "Overall Experience" });
+  if (experience.advice) {
+    sections.push({ id: "advice-for-juniors", label: "Advice for Juniors" });
+  }
+  sections.push({ id: "result", label: "Final Result" });
 
   return (
     <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 py-10 sm:py-12">
@@ -455,83 +475,15 @@ export default async function ExperienceDetailPage(props: PageProps) {
 
         {/* Right Sticky Sidebar (4 cols on desktop) */}
         <aside className="lg:col-span-4 space-y-6">
-          {/* Table of Contents */}
-          <div className="sticky top-24 rounded-3xl border border-stone-200 dark:border-zinc-800/90 bg-white dark:bg-[#111317] p-6 space-y-5 shadow-xs">
-            <h3 className="text-xs font-bold uppercase tracking-wider text-slate-900 dark:text-zinc-100 border-b border-stone-100 dark:border-zinc-800 pb-2">
-              On This Page
-            </h3>
-            <nav className="space-y-2 text-xs font-medium text-slate-600 dark:text-zinc-400">
-              {experience.rounds.length > 0 && (
-                <a
-                  href="#selection-process"
-                  className="block hover:text-blue-500 transition-colors py-0.5"
-                >
-                  1. Selection Process
-                </a>
-              )}
-              {oaRound && (
-                <a
-                  href="#online-assessment"
-                  className="block hover:text-blue-500 transition-colors py-0.5"
-                >
-                  2. Online Assessment
-                </a>
-              )}
-              {techRounds.length > 0 && (
-                <a
-                  href="#technical-interview"
-                  className="block hover:text-blue-500 transition-colors py-0.5"
-                >
-                  3. Technical Interview
-                </a>
-              )}
-              {hrRounds.length > 0 && (
-                <a
-                  href="#hr-interview"
-                  className="block hover:text-blue-500 transition-colors py-0.5"
-                >
-                  4. HR Interview
-                </a>
-              )}
-              <a
-                href="#overall-experience"
-                className="block hover:text-blue-500 transition-colors py-0.5"
-              >
-                5. Overall Experience
-              </a>
-              {experience.advice && (
-                <a
-                  href="#advice-for-juniors"
-                  className="block hover:text-blue-500 transition-colors py-0.5"
-                >
-                  6. Advice for Juniors
-                </a>
-              )}
-              <a
-                href="#result"
-                className="block hover:text-blue-500 transition-colors py-0.5"
-              >
-                7. Final Result
-              </a>
-            </nav>
-
-            {/* Company snapshot */}
-            <div className="pt-4 border-t border-stone-100 dark:border-zinc-800 space-y-2.5">
-              <h4 className="text-xs font-bold text-slate-900 dark:text-zinc-100 uppercase tracking-wider">
-                About {experience.company.name}
-              </h4>
-              <p className="text-xs text-slate-500 dark:text-zinc-400 leading-relaxed">
-                {experience.company.description || "Leading global technology enterprise."}
-              </p>
-              <Link
-                href={`/companies/${experience.company.slug}`}
-                className="inline-flex items-center gap-1.5 text-xs font-semibold text-blue-600 dark:text-blue-400 hover:text-blue-500 pt-1"
-              >
-                <span>View all company experiences</span>
-                <ArrowRight className="h-3 w-3" />
-              </Link>
-            </div>
-          </div>
+          {/* Interactive Table of Contents with smooth section transitions */}
+          <TableOfContents
+            sections={sections}
+            company={{
+              name: experience.company.name,
+              slug: experience.company.slug,
+              description: experience.company.description,
+            }}
+          />
 
           {/* Related Experiences */}
           {related.length > 0 && (

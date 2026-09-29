@@ -1,3 +1,14 @@
+"use client";
+
+import { usePathname } from "next/navigation";
+
 export default function Template({ children }: { children: React.ReactNode }) {
-  return <div className="page-enter flex-1 flex flex-col">{children}</div>;
+  const pathname = usePathname();
+
+  return (
+    <div key={pathname} className="page-enter flex-1 flex flex-col">
+      {children}
+    </div>
+  );
 }
+
