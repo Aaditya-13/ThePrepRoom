@@ -335,15 +335,12 @@ export default async function ExperienceDetailPage(props: PageProps) {
                           {roundQuestions.map((link, idx) => (
                             <div
                               key={link.id}
-                              className="rounded-xl border border-stone-200 dark:border-zinc-800 bg-stone-50/50 dark:bg-[#16181e] p-4 space-y-2.5 hover:border-blue-500/50 transition-colors"
+                              className="rounded-xl border border-stone-200 dark:border-zinc-800 bg-stone-50/50 dark:bg-[#16181e] p-4 space-y-2.5"
                             >
                               <div className="flex items-start justify-between gap-3">
-                                <Link
-                                  href={`/questions/${link.question.slug}`}
-                                  className="text-sm sm:text-base font-semibold text-slate-900 dark:text-zinc-100 hover:text-blue-500 dark:hover:text-blue-400 transition-colors leading-snug"
-                                >
+                                <p className="text-sm sm:text-base font-semibold text-slate-900 dark:text-zinc-100 leading-snug">
                                   {idx + 1}. {link.question.text}
-                                </Link>
+                                </p>
                                 {link.question.topic && (
                                   <span className="shrink-0 rounded-full border border-stone-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 px-2.5 py-0.5 text-[11px] font-medium text-slate-600 dark:text-zinc-300">
                                     {link.question.topic.name}
@@ -400,12 +397,9 @@ export default async function ExperienceDetailPage(props: PageProps) {
                             key={link.id}
                             className="rounded-xl border border-stone-200 dark:border-zinc-800 bg-stone-50/50 dark:bg-[#16181e] p-4 space-y-1.5"
                           >
-                            <Link
-                              href={`/questions/${link.question.slug}`}
-                              className="text-sm font-semibold text-slate-900 dark:text-zinc-100 hover:text-blue-500 dark:hover:text-blue-400 transition-colors"
-                            >
+                            <p className="text-sm font-semibold text-slate-900 dark:text-zinc-100 leading-snug">
                               {idx + 1}. {link.question.text}
-                            </Link>
+                            </p>
                             {link.studentNotes && (
                               <p className="text-xs text-slate-600 dark:text-zinc-400 pl-3 border-l-2 border-amber-500">
                                 {link.studentNotes}
