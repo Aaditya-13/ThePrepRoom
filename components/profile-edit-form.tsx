@@ -327,17 +327,32 @@ export function ProfileEditModal({ user, isOpen, onClose, onProfileUpdated }: Pr
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
 
-  // Lock background scroll when modal is open
+  // Reset form and clear success/error state whenever modal opens or closes
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = "hidden";
+      setError(null);
+      setSuccess(null);
+      setName(user.name || "");
+      setDepartment(user.department || "");
+      setGraduationYear(user.graduationYear ? user.graduationYear.toString() : "");
+      setLinkedinUrl(user.linkedinUrl || "");
+      setPlacementStatus(user.placementStatus || "PREPARING");
+      setPlacedCompany(user.placedCompany || "");
+      setBio(user.bio || "");
+      setPreviewImage(user.image || null);
+      setImageAction("KEEP");
+      setShowUrlInput(false);
+      setCustomImageUrl("");
     } else {
       document.body.style.overflow = "unset";
+      setError(null);
+      setSuccess(null);
     }
     return () => {
       document.body.style.overflow = "unset";
     };
-  }, [isOpen]);
+  }, [isOpen, user]);
 
   if (!isOpen) return null;
 
@@ -386,6 +401,12 @@ export function ProfileEditModal({ user, isOpen, onClose, onProfileUpdated }: Pr
     }
   };
 
+  const handleClose = () => {
+    setError(null);
+    setSuccess(null);
+    onClose();
+  };
+
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError(null);
@@ -418,8 +439,9 @@ export function ProfileEditModal({ user, isOpen, onClose, onProfileUpdated }: Pr
         }
         router.refresh();
         setTimeout(() => {
+          setSuccess(null);
           onClose();
-        }, 300);
+        }, 500);
       }
     });
   };
@@ -431,12 +453,12 @@ export function ProfileEditModal({ user, isOpen, onClose, onProfileUpdated }: Pr
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/80 overflow-y-auto"
-      onClick={onClose}
+      onClick={handleClose}
     >
       <form
         onSubmit={handleSubmit}
         onClick={(e) => e.stopPropagation()}
-        className="relative w-full max-w-lg -translate-y-8 sm:-translate-y-12 my-auto rounded-2xl sm:rounded-3xl border border-zinc-800 bg-[#111317] shadow-2xl shadow-black overflow-hidden flex flex-col max-h-[min(540px,calc(100vh-5rem))] max-h-[min(540px,calc(100dvh-5rem))]"
+        className="relative w-full max-w-2xl -translate-y-6 sm:-translate-y-8 my-auto rounded-2xl sm:rounded-3xl border border-zinc-800 bg-[#111317] shadow-2xl shadow-black overflow-hidden flex flex-col max-h-[min(560px,calc(100vh-4rem))] max-h-[min(560px,calc(100dvh-4rem))]"
       >
         {/* 1. FIXED TOP HEADER */}
         <div className="shrink-0 flex items-center justify-between px-5 py-3.5 border-b border-zinc-800 bg-[#111317]">
@@ -451,7 +473,7 @@ export function ProfileEditModal({ user, isOpen, onClose, onProfileUpdated }: Pr
 
           <button
             type="button"
-            onClick={onClose}
+            onClick={handleClose}
             className="rounded-full p-1.5 text-zinc-400 hover:text-white hover:bg-zinc-800 transition-colors cursor-pointer"
           >
             <X className="h-4 w-4" />
@@ -633,7 +655,7 @@ export function ProfileEditModal({ user, isOpen, onClose, onProfileUpdated }: Pr
                     key={option.value}
                     type="button"
                     onClick={() => setPlacementStatus(option.value)}
-                    className={`flex items-start gap-2.5 p-2 rounded-xl border text-left transition-all cursor-pointer ${
+                    className={`flex items-start gap-2.5 p-2.5 rounded-xl border text-left transition-all cursor-pointer ${
                       isSelected
                         ? `${option.badgeBorder} ${option.badgeBg} ring-1 ring-blue-500/40`
                         : "border-zinc-800/80 bg-[#0c0d10] hover:border-zinc-700 hover:bg-[#14161c]"
@@ -641,10 +663,10 @@ export function ProfileEditModal({ user, isOpen, onClose, onProfileUpdated }: Pr
                   >
                     <div className={`h-2.5 w-2.5 rounded-full mt-1 shrink-0 ${option.dotColor}`} />
                     <div className="space-y-0.5 min-w-0">
-                      <p className={`font-semibold text-xs truncate ${isSelected ? option.textColor : "text-zinc-200"}`}>
+                      <p className={`font-semibold text-xs leading-snug ${isSelected ? option.textColor : "text-zinc-200"}`}>
                         {option.label}
                       </p>
-                      <p className="text-[10px] text-zinc-500 line-clamp-1 leading-tight">
+                      <p className="text-[10px] text-zinc-400/80 leading-normal line-clamp-2">
                         {option.description}
                       </p>
                     </div>
@@ -695,7 +717,7 @@ export function ProfileEditModal({ user, isOpen, onClose, onProfileUpdated }: Pr
         <div className="shrink-0 flex items-center justify-end gap-2.5 px-5 py-3 border-t border-zinc-800 bg-[#111317]">
           <button
             type="button"
-            onClick={onClose}
+            onClick={handleClose}
             className="rounded-xl border border-zinc-700 bg-zinc-800/80 hover:bg-zinc-700 hover:text-white text-zinc-200 px-3.5 py-1.5 text-xs font-semibold transition-colors cursor-pointer"
           >
             Cancel
