@@ -52,7 +52,7 @@ export default async function BookmarksPage() {
     <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 py-10 sm:py-12 space-y-10">
       {/* Top Header */}
       <div>
-        <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white">
+        <h1 className="font-heading text-3xl sm:text-4xl font-black tracking-[-0.03em] text-white">
           Saved Bookmarks
         </h1>
       </div>

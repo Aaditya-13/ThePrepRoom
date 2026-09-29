@@ -11,6 +11,7 @@ interface ExperienceSearchBarProps {
   initialSort?: string;
   initialFilters?: {
     company?: string;
+    role?: string;
     result?: string;
     placement?: string;
     year?: string;
@@ -72,6 +73,7 @@ export function ExperienceSearchBar({
 
   const currentSort = searchParams.get("sort") || initialSort || "newest";
   const currentCompany = searchParams.get("company") || initialFilters?.company;
+  const currentRole = searchParams.get("role") || initialFilters?.role;
   const currentResult = searchParams.get("result") || initialFilters?.result;
   const currentPlacement = searchParams.get("placement") || initialFilters?.placement;
   const currentYear = searchParams.get("year") || initialFilters?.year;
@@ -79,7 +81,7 @@ export function ExperienceSearchBar({
   const currentQ = searchParams.get("q") || initialFilters?.q;
 
   const hasAnyActiveFilter = Boolean(
-    currentCompany || currentResult || currentPlacement || currentYear || currentRound || currentQ
+    currentCompany || currentRole || currentResult || currentPlacement || currentYear || currentRound || currentQ
   );
 
   return (
@@ -184,6 +186,16 @@ export function ExperienceSearchBar({
               className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-blue-500/15 border border-blue-500/30 text-blue-300 hover:bg-blue-500/25 transition-colors capitalize"
             >
               <span>Company: {currentCompany}</span>
+              <X className="h-3 w-3" />
+            </button>
+          )}
+
+          {currentRole && (
+            <button
+              onClick={() => handleRemoveFilter("role")}
+              className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-blue-500/15 border border-blue-500/30 text-blue-300 hover:bg-blue-500/25 transition-colors capitalize"
+            >
+              <span>Role: {currentRole.replace(/-/g, " ")}</span>
               <X className="h-3 w-3" />
             </button>
           )}

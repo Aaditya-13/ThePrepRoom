@@ -35,6 +35,7 @@ export default async function ExperiencesPage(props: PageProps) {
   const [
     data,
     companies,
+    roles,
     availableYears,
     trendingExperiences,
     trendingCompanies,
@@ -65,6 +66,25 @@ export default async function ExperiencesPage(props: PageProps) {
         },
       },
       orderBy: { name: "asc" },
+    }),
+    prisma.companyRole.findMany({
+      where: {
+        experiences: {
+          some: { status: "APPROVED" },
+        },
+      },
+      select: {
+        title: true,
+        slug: true,
+        _count: {
+          select: {
+            experiences: {
+              where: { status: "APPROVED" },
+            },
+          },
+        },
+      },
+      orderBy: { title: "asc" },
     }),
     prisma.experience.findMany({
       where: { status: "APPROVED" },
@@ -130,7 +150,7 @@ export default async function ExperiencesPage(props: PageProps) {
     <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8 space-y-7">
       {/* Page Title */}
       <div>
-        <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white">
+        <h1 className="font-heading text-3xl sm:text-4xl font-black tracking-[-0.03em] text-white">
           Interview Experiences
         </h1>
       </div>
@@ -141,9 +161,11 @@ export default async function ExperiencesPage(props: PageProps) {
         <aside className="lg:col-span-3 xl:col-span-3 lg:sticky lg:top-20">
           <ExperienceSidebarFilters
             companies={companies}
+            roles={roles}
             years={years}
             initialFilters={{
               companySlug: searchParams.company,
+              roleSlug: searchParams.role,
               interviewYear: searchParams.year,
               placementType: searchParams.placement,
               roundType: searchParams.round,
@@ -161,6 +183,7 @@ export default async function ExperiencesPage(props: PageProps) {
             initialSort={searchParams.sort}
             initialFilters={{
               company: searchParams.company,
+              role: searchParams.role,
               result: searchParams.result,
               placement: searchParams.placement,
               year: searchParams.year,

@@ -37,7 +37,7 @@ export default async function QuestionsPage(props: PageProps) {
     <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 py-10 space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white">
+        <h1 className="font-heading text-3xl sm:text-4xl font-black tracking-[-0.03em] text-white">
           Interview Questions
         </h1>
       </div>

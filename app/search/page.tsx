@@ -33,7 +33,7 @@ export default async function SearchPage(props: PageProps) {
         <div className="absolute top-0 right-0 -mt-10 -mr-10 h-72 w-72 rounded-full bg-blue-500/10 blur-3xl pointer-events-none" />
 
         <div className="relative z-10 max-w-3xl">
-          <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white">
+          <h1 className="font-heading text-3xl sm:text-4xl font-black tracking-[-0.03em] text-white">
             Search
           </h1>
         </div>
