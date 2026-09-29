@@ -42,6 +42,29 @@ function LinkedInIcon({ className = "h-4 w-4" }: { className?: string }) {
   );
 }
 
+function AuthSkeleton({ isRegister = false }: { isRegister?: boolean }) {
+  return (
+    <div className="w-full max-w-md rounded-3xl border border-zinc-800 bg-[#111317] p-8 sm:p-10 shadow-2xl space-y-6 animate-pulse">
+      <div className="space-y-2">
+        <div className="h-4 w-28 rounded-full bg-zinc-800" />
+        <div className="h-8 w-40 rounded-lg bg-zinc-800" />
+        <div className="h-3 w-64 rounded bg-zinc-800" />
+      </div>
+      <div className="space-y-2.5">
+        <div className="h-10 w-full rounded-xl bg-zinc-800" />
+        <div className="h-10 w-full rounded-xl bg-zinc-800" />
+      </div>
+      <div className="h-px w-full bg-zinc-800" />
+      <div className="space-y-4">
+        <div className="h-10 w-full rounded-xl bg-zinc-800" />
+        <div className="h-10 w-full rounded-xl bg-zinc-800" />
+        {isRegister && <div className="h-10 w-full rounded-xl bg-zinc-800" />}
+        <div className="h-11 w-full rounded-xl bg-blue-600/30" />
+      </div>
+    </div>
+  );
+}
+
 export function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -49,14 +72,23 @@ export function LoginForm() {
   const urlError = searchParams.get("error");
   const oauthNotice = searchParams.get("oauth_notice");
 
+  const [mounted, setMounted] = useState(false);
   const [error, setError] = useState<string | null>(urlError || null);
   const [notice, setNotice] = useState<string | null>(oauthNotice || null);
   const [isPending, startTransition] = useTransition();
 
   useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
     if (urlError) setError(urlError);
     if (oauthNotice) setNotice(oauthNotice);
   }, [urlError, oauthNotice]);
+
+  if (!mounted) {
+    return <AuthSkeleton />;
+  }
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -197,8 +229,17 @@ export function RegisterForm() {
   const searchParams = useSearchParams();
   const next = searchParams.get("next") || "/experiences";
 
+  const [mounted, setMounted] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted) {
+    return <AuthSkeleton isRegister={true} />;
+  }
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();

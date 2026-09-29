@@ -24,6 +24,23 @@ import {
   AdminAuthStep,
 } from "@/actions/admin-auth";
 
+function AdminSkeleton() {
+  return (
+    <div className="w-full max-w-lg rounded-3xl border border-zinc-800 bg-[#111317] p-8 sm:p-10 shadow-2xl space-y-6 animate-pulse">
+      <div className="space-y-2">
+        <div className="h-4 w-32 rounded-full bg-zinc-800" />
+        <div className="h-8 w-48 rounded-lg bg-zinc-800" />
+        <div className="h-3 w-64 rounded bg-zinc-800" />
+      </div>
+      <div className="space-y-4">
+        <div className="h-12 w-full rounded-xl bg-zinc-800" />
+        <div className="h-12 w-full rounded-xl bg-zinc-800" />
+        <div className="h-12 w-full rounded-xl bg-emerald-600/30" />
+      </div>
+    </div>
+  );
+}
+
 export function AdminLoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -55,6 +72,10 @@ export function AdminLoginForm() {
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  if (!mounted) {
+    return <AdminSkeleton />;
+  }
 
   // Handle Step 1: Verify Credentials
   const handleCredentialsSubmit = (e: React.FormEvent<HTMLFormElement>) => {
