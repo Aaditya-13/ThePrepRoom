@@ -3,6 +3,7 @@ import { Outfit, Inter, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { Navbar } from "@/components/navbar";
 import { Footer } from "@/components/footer";
+import { SearchShortcut } from "@/components/search-shortcut";
 import { getCurrentUser } from "@/lib/auth";
 
 const headingFont = Outfit({
@@ -67,6 +68,7 @@ export default async function RootLayout({
         className="min-h-full flex flex-col bg-[#090a0d] text-[#f4f4f5] font-sans"
         suppressHydrationWarning
       >
+        <SearchShortcut />
         <Navbar currentUser={currentUser} />
         <main className="flex-1">{children}</main>
         <Footer />

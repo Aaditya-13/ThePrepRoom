@@ -106,7 +106,7 @@ export function ExperienceFeed({
 
       {/* Incremental Load More Action */}
       {hasMore ? (
-        <div className="pt-5 pb-3 flex flex-col items-center justify-center space-y-2.5">
+        <div className="pt-5 pb-3 flex justify-center">
           <button
             type="button"
             onClick={handleLoadMore}
@@ -125,18 +125,8 @@ export function ExperienceFeed({
               </>
             )}
           </button>
-          <span className="text-xs text-zinc-500 font-mono">
-            Showing <span className="text-zinc-300 font-semibold">{experiences.length}</span> of {totalCount} experiences ({remainingCount} more available)
-          </span>
         </div>
-      ) : (
-        <div className="pt-6 pb-2 text-center">
-          <span className="inline-flex items-center gap-1.5 text-xs text-zinc-500 font-medium bg-zinc-800/40 px-3.5 py-1.5 rounded-full border border-zinc-800/80">
-            <Check className="h-3.5 w-3.5 text-emerald-400" />
-            All {totalCount} experiences loaded
-          </span>
-        </div>
-      )}
+      ) : null}
     </div>
   );
 }

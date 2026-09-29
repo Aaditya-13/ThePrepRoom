@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
-import { useState, useTransition, useEffect } from "react";
+import { useState, useTransition, useEffect, useRef } from "react";
 import { Search, X, SlidersHorizontal, ArrowUpDown } from "lucide-react";
 
 interface ExperienceSearchBarProps {
@@ -41,6 +41,32 @@ export function ExperienceSearchBar({
   const [isPending, startTransition] = useTransition();
 
   const [query, setQuery] = useState(initialQuery || initialFilters?.q || "");
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  // Global "/" keyboard shortcut to focus search input
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Don't hijack if user is currently typing in an input, textarea, or contentEditable element
+      const target = e.target as HTMLElement | null;
+      if (
+        target &&
+        (target.tagName === "INPUT" ||
+          target.tagName === "TEXTAREA" ||
+          target.isContentEditable)
+      ) {
+        return;
+      }
+
+      if (e.key === "/") {
+        e.preventDefault();
+        inputRef.current?.focus();
+        inputRef.current?.select();
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
 
   // Keep query in sync if URL changes externally
   useEffect(() => {
@@ -126,14 +152,18 @@ export function ExperienceSearchBar({
         <div className="relative flex-1">
           <Search className="absolute left-3.5 top-3 h-4 w-4 text-zinc-500" />
           <input
+            ref={inputRef}
             suppressHydrationWarning
             type="text"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Escape") inputRef.current?.blur();
+            }}
             placeholder="Search experiences (company, role, questions, tech stack)..."
-            className="w-full rounded-xl border border-zinc-700/80 bg-zinc-800/70 py-2 pl-10 pr-9 text-xs sm:text-sm text-white placeholder:text-zinc-500 focus:border-blue-400 focus:outline-none transition-all"
+            className="w-full rounded-xl border border-zinc-700/80 bg-zinc-800/70 py-2 pl-10 pr-12 text-xs sm:text-sm text-white placeholder:text-zinc-500 focus:border-blue-400 focus:outline-none transition-all"
           />
-          {query && (
+          {query ? (
             <button
               type="button"
               onClick={handleClearQuery}
@@ -141,6 +171,12 @@ export function ExperienceSearchBar({
             >
               <X className="h-4 w-4" />
             </button>
+          ) : (
+            <div className="absolute right-3 top-2.5 hidden sm:flex items-center pointer-events-none">
+              <kbd className="inline-flex items-center justify-center h-4.5 min-w-[18px] px-1 rounded border border-zinc-700 bg-zinc-800/90 text-[10px] font-mono font-medium text-zinc-400 shadow-2xs">
+                /
+              </kbd>
+            </div>
           )}
         </div>
 
@@ -153,9 +189,9 @@ export function ExperienceSearchBar({
         </button>
       </form>
 
-      {/* Meta Bar: Results count, Active dismissible chips & Sort Order */}
+      {/* Meta Bar: Active dismissible chips & Sort Order */}
       <div className="flex flex-wrap items-center justify-between gap-3 text-xs">
-        {/* Results & Mobile Filter Trigger */}
+        {/* Mobile Filter Trigger */}
         <div className="flex items-center gap-3">
           {/* Mobile Filter Toggle Button */}
           {onOpenMobileFilters && (
@@ -173,10 +209,6 @@ export function ExperienceSearchBar({
               )}
             </button>
           )}
-
-          <span className="text-zinc-400 font-mono text-xs">
-            Showing <span className="font-semibold text-zinc-200">{filteredCount}</span> of {totalCount} experiences
-          </span>
         </div>
 
         {/* Sort Selector */}
