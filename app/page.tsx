@@ -63,7 +63,7 @@ export default async function HomePage() {
   ];
 
   return (
-    <div className="min-h-screen bg-[#fafaf9] dark:bg-[#090a0d] transition-colors">
+    <div className="min-h-screen bg-[#090a0d] text-white">
       {/* 1. HERO SECTION */}
       <section className="relative overflow-hidden border-b border-stone-200 dark:border-zinc-800/80 pt-12 pb-16 sm:pt-20 sm:pb-24">
         {/* Subtle background glow */}

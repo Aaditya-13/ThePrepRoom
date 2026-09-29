@@ -9,14 +9,15 @@
 }
 
 :root {
-  --background: #fafaf9;
-  --foreground: #0f172a;
-  --muted: #64748b;
-  --border: #e2e8f0;
+  --background: #090a0d;
+  --foreground: #f4f4f5;
+  --muted: #a1a1aa;
+  --border: #27272a;
+  color-scheme: dark;
 }
 
 .dark {
-  --background: #09090b;
+  --background: #090a0d;
   --foreground: #f4f4f5;
   --muted: #a1a1aa;
   --border: #27272a;

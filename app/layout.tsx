@@ -53,27 +53,18 @@ export default async function RootLayout({
     <html
       lang="en"
       suppressHydrationWarning
-      className={`${headingFont.variable} ${bodyFont.variable} ${monoFont.variable} h-full antialiased`}
+      className={`dark ${headingFont.variable} ${bodyFont.variable} ${monoFont.variable} h-full antialiased`}
+      style={{ colorScheme: "dark" }}
     >
       <head>
         <script
           dangerouslySetInnerHTML={{
-            __html: `
-              try {
-                const theme = localStorage.getItem('theme');
-                const systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-                if (theme === 'dark' || (!theme && systemDark)) {
-                  document.documentElement.classList.add('dark');
-                } else {
-                  document.documentElement.classList.remove('dark');
-                }
-              } catch (_) {}
-            `,
+            __html: `document.documentElement.classList.add('dark');`,
           }}
         />
       </head>
       <body
-        className="min-h-full flex flex-col bg-[#fafaf9] text-slate-900 dark:bg-[#09090b] dark:text-[#f4f4f5] font-sans transition-colors duration-150"
+        className="min-h-full flex flex-col bg-[#090a0d] text-[#f4f4f5] font-sans"
         suppressHydrationWarning
       >
         <Navbar currentUser={currentUser} />

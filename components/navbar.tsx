@@ -4,7 +4,6 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import {
-  Search,
   PlusCircle,
   Bookmark,
   Shield,
@@ -14,7 +13,6 @@ import {
   X,
 } from "lucide-react";
 import { logoutAction, demoLoginAction } from "@/actions/auth";
-import { ThemeToggle } from "./theme-toggle";
 
 interface NavbarProps {
   currentUser: {
@@ -95,23 +93,7 @@ export function Navbar({ currentUser }: NavbarProps) {
         </div>
 
         {/* Right Side Actions */}
-        <div className="flex items-center gap-2.5">
-          {/* Theme Toggle Button */}
-          <ThemeToggle />
-
-          {/* Search Trigger */}
-          <Link
-            href="/search"
-            className="flex items-center gap-2 rounded-lg border border-stone-200 bg-stone-50/70 dark:border-zinc-800 dark:bg-zinc-900/70 px-3 py-1.5 text-xs text-slate-500 dark:text-zinc-400 hover:border-stone-300 dark:hover:border-zinc-700 hover:text-slate-700 dark:hover:text-zinc-200 transition-colors duration-200"
-            title="Search companies, questions, experiences..."
-          >
-            <Search className="h-3.5 w-3.5" />
-            <span className="hidden sm:inline">Search...</span>
-            <kbd className="hidden lg:inline-block rounded bg-stone-200/80 dark:bg-zinc-800 px-1.5 py-0.5 text-[10px] font-mono text-slate-600 dark:text-zinc-400">
-              /
-            </kbd>
-          </Link>
-
+        <div className="flex items-center gap-3">
           {/* Share Experience Button */}
           <Link
             href="/share"
