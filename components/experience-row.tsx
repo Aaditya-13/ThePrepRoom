@@ -51,14 +51,20 @@ export function ExperienceRow({ experience }: ExperienceRowProps) {
       : [];
 
   return (
-    <article className="group py-5 px-4 sm:px-6 border-b border-stone-200 dark:border-zinc-800/80 hover:bg-zinc-900/60 transition-colors duration-200 ease-out">
-      <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
-        <div className="space-y-1.5 flex-1 min-w-0">
+    <article className="group relative rounded-2xl border border-zinc-800/80 bg-[#111317] p-5 sm:p-6 hover:border-blue-500/50 hover:bg-[#141720] hover:-translate-y-1 hover:shadow-xl hover:shadow-blue-950/20 active:translate-y-0 active:scale-[0.995] transition-all duration-250 ease-out cursor-pointer">
+      <Link
+        href={`/experiences/${experience.slug}`}
+        aria-label={`View experience for ${experience.role.title} at ${experience.company.name}`}
+        className="absolute inset-0 z-0 rounded-2xl focus:outline-hidden"
+        tabIndex={-1}
+      />
+      <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3 relative z-10 pointer-events-none">
+        <div className="space-y-2 flex-1 min-w-0 pointer-events-auto">
           {/* Header metadata row */}
           <div className="flex flex-wrap items-center gap-2">
             <Link
               href={`/companies/${experience.company.slug}`}
-              className="text-xs font-bold text-slate-800 dark:text-zinc-200 uppercase tracking-wider hover:text-blue-500 transition-colors focus:outline-none"
+              className="text-xs font-bold text-slate-800 dark:text-zinc-200 uppercase tracking-wider hover:text-blue-500 transition-colors focus:outline-hidden relative z-10"
             >
               {experience.company.name}
             </Link>
@@ -76,10 +82,10 @@ export function ExperienceRow({ experience }: ExperienceRowProps) {
           </div>
 
           {/* Role Title */}
-          <h3 className="text-base sm:text-lg font-semibold text-slate-900 dark:text-zinc-100 leading-snug">
+          <h3 className="text-base sm:text-lg font-bold text-slate-900 dark:text-zinc-100 group-hover:text-blue-500 transition-colors leading-snug">
             <Link
               href={`/experiences/${experience.slug}`}
-              className="hover:text-blue-500 transition-colors focus:outline-none"
+              className="focus:outline-hidden"
             >
               {experience.role.title}
             </Link>
@@ -104,27 +110,28 @@ export function ExperienceRow({ experience }: ExperienceRowProps) {
         </div>
 
         {/* Right side: Result Badge & Action */}
-        <div className="flex sm:flex-col items-center sm:items-end justify-between sm:justify-start gap-2 pt-1 sm:pt-0 shrink-0">
+        <div className="flex sm:flex-col items-center sm:items-end justify-between sm:justify-start gap-3 pt-1 sm:pt-0 shrink-0 pointer-events-auto">
           <div className="flex items-center gap-2">
             <span
               className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-[11px] font-semibold border ${resultInfo.badgeClass}`}
             >
               {resultInfo.label}
             </span>
-            <BookmarkButton
-              targetType="EXPERIENCE"
-              targetId={experience.id}
-              initialBookmarked={experience.isBookmarked}
-            />
+            <div className="relative z-10">
+              <BookmarkButton
+                targetType="EXPERIENCE"
+                targetId={experience.id}
+                initialBookmarked={experience.isBookmarked}
+              />
+            </div>
           </div>
 
-          <Link
-            href={`/experiences/${experience.slug}`}
-            className="text-xs font-semibold text-blue-500 hover:text-blue-400 inline-flex items-center gap-1 group-hover:translate-x-0.5 transition-transform focus:outline-none"
+          <span
+            className="text-xs font-semibold text-blue-500 group-hover:text-blue-400 inline-flex items-center gap-1.5 group-hover:translate-x-1.5 transition-all duration-300"
           >
             <span>View Experience</span>
             <span>→</span>
-          </Link>
+          </span>
         </div>
       </div>
     </article>

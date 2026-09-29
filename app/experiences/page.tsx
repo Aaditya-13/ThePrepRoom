@@ -116,7 +116,7 @@ export default async function ExperiencesPage(props: PageProps) {
           </div>
         </div>
       ) : (
-        <div className="divide-y divide-stone-100 dark:divide-zinc-800/80 border border-stone-200 dark:border-zinc-800/90 rounded-2xl bg-white dark:bg-[#121418] overflow-hidden shadow-xs">
+        <div className="space-y-3.5">
           {data.experiences.map((exp) => (
             <ExperienceRow key={exp.id} experience={exp} />
           ))}

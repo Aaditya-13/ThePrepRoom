@@ -132,23 +132,33 @@ textarea,
   outline: none !important;
 }
 
-/* Smooth anchor scrolling for section transitions */
+/* Smooth anchor scrolling for section transitions with navbar breathing room */
 html {
   scroll-behavior: smooth;
 }
 
-/* Silky smooth route navigation optical dissolve (no black flicker, no layout jump) */
+[id] {
+  scroll-margin-top: 5.5rem;
+}
+
+/* Signature Fluid Page Transition (soft cinematic focus & micro-scale bloom) */
 @keyframes pageEnter {
   0% {
-    opacity: 0.94;
+    opacity: 0.35;
+    transform: scale(0.994) translateY(4px);
+    filter: blur(2px);
   }
   100% {
     opacity: 1;
+    transform: scale(1) translateY(0);
+    filter: blur(0px);
   }
 }
 
 .page-enter {
-  animation: pageEnter 180ms ease-out both;
+  animation: pageEnter 280ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  will-change: opacity, transform, filter;
+  transform-origin: 50% 15%;
 }
 
 /* Reduced motion accessibility */
