@@ -77,8 +77,9 @@ export function AboutFounderCard({
             width={224}
             height={224}
             priority
+            unoptimized={true}
             onError={() => setImageError(true)}
-            className="w-full h-full object-cover object-[50%_15%] transition-transform duration-500 ease-out group-hover:scale-105"
+            className="w-full h-full object-cover object-[50%_20%] transition-transform duration-500 ease-out group-hover:scale-105"
           />
         ) : (
           <div className="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-blue-950 via-[#10131a] to-zinc-950 text-white select-none">

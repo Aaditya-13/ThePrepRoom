@@ -13,6 +13,8 @@ import {
   HelpCircle,
   Eye,
   Sparkles,
+  Building2,
+  Briefcase,
 } from "lucide-react";
 import {
   saveExperienceDraftAction,
@@ -21,6 +23,7 @@ import {
   RoundEntry,
   QuestionEntry,
 } from "@/actions/experience";
+import { findOrCreateCompanyAction, findOrCreateRoleAction } from "@/actions/admin";
 import { formatPlacementType, formatResultStatus } from "@/lib/utils";
 
 interface WizardProps {
@@ -148,14 +151,71 @@ export function ShareExperienceWizard({
     initialDraft?.isAnonymous ?? false
   );
 
+  // Dynamic company list & role creation state
+  const [companyList, setCompanyList] = useState(companies);
+  const [isAddingNewCompany, setIsAddingNewCompany] = useState(false);
+  const [customCompanyName, setCustomCompanyName] = useState("");
+  const [companyCreationLoading, setCompanyCreationLoading] = useState(false);
+
+  const [isAddingNewRole, setIsAddingNewRole] = useState(false);
+  const [customRoleTitle, setCustomRoleTitle] = useState("");
+  const [roleCreationLoading, setRoleCreationLoading] = useState(false);
+  const [roleCreationError, setRoleCreationError] = useState<string | null>(null);
+
   // Derive active company's roles
-  const activeCompany = companies.find((c) => c.id === selectedCompanyId);
+  const activeCompany = companyList.find((c) => c.id === selectedCompanyId) || companyList[0];
   const activeRoles = activeCompany?.roles || [];
 
   // Auto-set role if not selected or mismatched
-  if (activeRoles.length > 0 && (!selectedRoleId || !activeRoles.some((r) => r.id === selectedRoleId))) {
+  if (
+    !isAddingNewRole &&
+    activeRoles.length > 0 &&
+    (!selectedRoleId || !activeRoles.some((r) => r.id === selectedRoleId))
+  ) {
     setSelectedRoleId(activeRoles[0].id);
   }
+
+  const handleAddNewCompany = async () => {
+    if (!customCompanyName.trim()) return;
+    setCompanyCreationLoading(true);
+    const res = await findOrCreateCompanyAction(customCompanyName.trim());
+    setCompanyCreationLoading(false);
+    if (res?.company) {
+      const newComp = { ...res.company, roles: res.company.roles || [] };
+      setCompanyList((prev) => [...prev, newComp]);
+      setSelectedCompanyId(newComp.id);
+      setIsAddingNewCompany(false);
+      setCustomCompanyName("");
+      setIsAddingNewRole(true);
+    }
+  };
+
+  const handleAddNewRole = async (): Promise<string | null> => {
+    if (!customRoleTitle.trim() || !selectedCompanyId) return null;
+    setRoleCreationLoading(true);
+    setRoleCreationError(null);
+    const res = await findOrCreateRoleAction(selectedCompanyId, customRoleTitle.trim());
+    setRoleCreationLoading(false);
+    if (res?.error) {
+      setRoleCreationError(res.error);
+      return null;
+    } else if (res?.role) {
+      setCompanyList((prev) =>
+        prev.map((c) => {
+          if (c.id === selectedCompanyId) {
+            const exists = c.roles.some((r) => r.id === res.role.id);
+            return exists ? c : { ...c, roles: [...c.roles, res.role] };
+          }
+          return c;
+        })
+      );
+      setSelectedRoleId(res.role.id);
+      setIsAddingNewRole(false);
+      setCustomRoleTitle("");
+      return res.role.id;
+    }
+    return null;
+  };
 
   // Toggle rounds
   const toggleRoundSelection = (roundType: string) => {
@@ -353,34 +413,134 @@ export function ShareExperienceWizard({
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 text-xs sm:text-sm">
+            {/* Company Selection & On-the-fly Creation */}
             <div>
-              <label className="block font-semibold text-slate-700 dark:text-zinc-300 mb-1.5">Company *</label>
-              <select
-                value={selectedCompanyId}
-                onChange={(e) => setSelectedCompanyId(e.target.value)}
-                className="w-full rounded-xl border border-stone-300 dark:border-zinc-700 bg-stone-50 dark:bg-[#0c0d10] px-4 py-2.5 text-slate-900 dark:text-zinc-100 focus:border-blue-500 focus:outline-hidden"
-              >
-                {companies.map((c) => (
-                  <option key={c.id} value={c.id}>
-                    {c.name}
-                  </option>
-                ))}
-              </select>
+              <div className="flex items-center justify-between mb-1.5">
+                <label className="block font-semibold text-slate-700 dark:text-zinc-300">
+                  Company *
+                </label>
+                <button
+                  type="button"
+                  onClick={() => setIsAddingNewCompany(!isAddingNewCompany)}
+                  className="text-xs font-semibold text-blue-500 hover:text-blue-400 transition-colors"
+                >
+                  {isAddingNewCompany ? "Select existing company" : "+ Add new company"}
+                </button>
+              </div>
+
+              {isAddingNewCompany ? (
+                <div className="flex items-center gap-2">
+                  <input
+                    type="text"
+                    value={customCompanyName}
+                    onChange={(e) => setCustomCompanyName(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        e.preventDefault();
+                        handleAddNewCompany();
+                      }
+                    }}
+                    placeholder="Enter company name..."
+                    className="flex-1 rounded-xl border border-zinc-700 bg-[#0c0d10] px-4 py-2.5 text-white placeholder:text-zinc-500 focus:border-blue-500 focus:outline-hidden"
+                    autoFocus
+                  />
+                  <button
+                    type="button"
+                    onClick={handleAddNewCompany}
+                    disabled={companyCreationLoading}
+                    className="rounded-xl bg-blue-600 hover:bg-blue-500 px-4 py-2.5 text-xs font-semibold text-white shrink-0"
+                  >
+                    {companyCreationLoading ? "Adding..." : "Add"}
+                  </button>
+                </div>
+              ) : (
+                <select
+                  value={selectedCompanyId}
+                  onChange={(e) => {
+                    setSelectedCompanyId(e.target.value);
+                    setIsAddingNewRole(false);
+                  }}
+                  className="w-full rounded-xl border border-stone-300 dark:border-zinc-700 bg-stone-50 dark:bg-[#0c0d10] px-4 py-2.5 text-slate-900 dark:text-zinc-100 focus:border-blue-500 focus:outline-hidden"
+                >
+                  {companyList.map((c) => (
+                    <option key={c.id} value={c.id}>
+                      {c.name}
+                    </option>
+                  ))}
+                </select>
+              )}
             </div>
 
+            {/* Role Selection & On-the-fly Creation */}
             <div>
-              <label className="block font-semibold text-slate-700 dark:text-zinc-300 mb-1.5">Role *</label>
-              <select
-                value={selectedRoleId}
-                onChange={(e) => setSelectedRoleId(e.target.value)}
-                className="w-full rounded-xl border border-stone-300 dark:border-zinc-700 bg-stone-50 dark:bg-[#0c0d10] px-4 py-2.5 text-slate-900 dark:text-zinc-100 focus:border-blue-500 focus:outline-hidden"
-              >
-                {activeRoles.map((r) => (
-                  <option key={r.id} value={r.id}>
-                    {r.title}
-                  </option>
-                ))}
-              </select>
+              <div className="flex items-center justify-between mb-1.5">
+                <label className="block font-semibold text-slate-700 dark:text-zinc-300">
+                  Role *
+                </label>
+                <button
+                  type="button"
+                  onClick={() => setIsAddingNewRole(!isAddingNewRole)}
+                  className="text-xs font-semibold text-blue-500 hover:text-blue-400 transition-colors"
+                >
+                  {isAddingNewRole ? "Select from list" : "+ Create new role"}
+                </button>
+              </div>
+
+              {isAddingNewRole || activeRoles.length === 0 ? (
+                <div className="space-y-1.5">
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="text"
+                      value={customRoleTitle}
+                      onChange={(e) => setCustomRoleTitle(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          e.preventDefault();
+                          handleAddNewRole();
+                        }
+                      }}
+                      placeholder="e.g. SRE Intern, Full Stack Developer..."
+                      className="flex-1 rounded-xl border border-zinc-700 bg-[#0c0d10] px-4 py-2.5 text-white placeholder:text-zinc-500 focus:border-blue-500 focus:outline-hidden"
+                      autoFocus
+                    />
+                    <button
+                      type="button"
+                      onClick={handleAddNewRole}
+                      disabled={roleCreationLoading}
+                      className="rounded-xl bg-blue-600 hover:bg-blue-500 px-4 py-2.5 text-xs font-semibold text-white shrink-0"
+                    >
+                      {roleCreationLoading ? "Saving..." : "Save Role"}
+                    </button>
+                  </div>
+                  {roleCreationError && (
+                    <p className="text-xs text-rose-400 font-medium">{roleCreationError}</p>
+                  )}
+                  {activeRoles.length === 0 && (
+                    <p className="text-[11px] text-zinc-400">
+                      No roles exist for this company yet. Type your role title above.
+                    </p>
+                  )}
+                </div>
+              ) : (
+                <select
+                  value={selectedRoleId}
+                  onChange={(e) => {
+                    if (e.target.value === "__NEW__") {
+                      setIsAddingNewRole(true);
+                    } else {
+                      setSelectedRoleId(e.target.value);
+                    }
+                  }}
+                  className="w-full rounded-xl border border-stone-300 dark:border-zinc-700 bg-stone-50 dark:bg-[#0c0d10] px-4 py-2.5 text-slate-900 dark:text-zinc-100 focus:border-blue-500 focus:outline-hidden"
+                >
+                  {activeRoles.map((r) => (
+                    <option key={r.id} value={r.id}>
+                      {r.title}
+                    </option>
+                  ))}
+                  <option value="__NEW__">+ Add a custom / new role...</option>
+                </select>
+              )}
             </div>
 
             <div>
@@ -1044,7 +1204,12 @@ export function ShareExperienceWizard({
           {step < 6 ? (
             <button
               type="button"
-              onClick={() => setStep(step + 1)}
+              onClick={async () => {
+                if (step === 1 && isAddingNewRole && customRoleTitle.trim()) {
+                  await handleAddNewRole();
+                }
+                setStep(step + 1);
+              }}
               className="rounded-xl bg-blue-600 hover:bg-blue-500 px-5 py-2.5 text-xs sm:text-sm font-semibold text-white shadow-md shadow-blue-500/20 active:scale-95 inline-flex items-center gap-1.5 transition-all"
             >
               <span>Continue</span>
