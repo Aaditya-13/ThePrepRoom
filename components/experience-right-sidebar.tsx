@@ -48,7 +48,7 @@ export function ExperienceRightSidebar({
             <div className="flex h-6 w-6 items-center justify-center rounded-md bg-blue-500/10 text-blue-400">
               <TrendingUp className="h-3.5 w-3.5" />
             </div>
-            <h3 className="text-xs font-bold uppercase tracking-wider text-white">
+            <h3 className="text-xs font-semibold uppercase tracking-wider text-zinc-200">
               Trending Experiences
             </h3>
           </div>
@@ -67,19 +67,19 @@ export function ExperienceRightSidebar({
                 className="block rounded-xl border border-zinc-800/60 bg-[#16181e]/80 p-3 hover:border-blue-500/40 hover:bg-[#1a1d24] transition-all group outline-none"
               >
                 <div className="flex items-center justify-between text-[11px] text-zinc-400 pb-1">
-                  <span className="font-semibold text-zinc-300 group-hover:text-blue-400 transition-colors truncate">
+                  <span className="font-medium text-zinc-300 group-hover:text-blue-400 transition-colors truncate">
                     {exp.company.name}
                   </span>
                   <span className="font-mono text-zinc-500">{exp.interviewYear}</span>
                 </div>
 
-                <h4 className="text-xs font-semibold text-white group-hover:text-blue-300 transition-colors line-clamp-1">
+                <h4 className="text-xs font-medium text-zinc-100 group-hover:text-blue-300 transition-colors line-clamp-1">
                   {exp.role.title}
                 </h4>
 
                 <div className="mt-2 flex items-center justify-between pt-1 text-[10px]">
                   <span
-                    className={`px-1.5 py-0.5 rounded-md font-semibold text-[10px] ${resultInfo.badgeClass}`}
+                    className={`px-1.5 py-0.5 rounded-md font-medium text-[10px] ${resultInfo.badgeClass}`}
                   >
                     {resultInfo.label}
                   </span>
@@ -102,7 +102,7 @@ export function ExperienceRightSidebar({
               <div className="flex h-6 w-6 items-center justify-center rounded-md bg-emerald-500/10 text-emerald-400">
                 <Building2 className="h-3.5 w-3.5" />
               </div>
-              <h3 className="text-xs font-bold uppercase tracking-wider text-white">
+              <h3 className="text-xs font-semibold uppercase tracking-wider text-zinc-200">
                 Trending Companies
               </h3>
             </div>
@@ -140,7 +140,7 @@ export function ExperienceRightSidebar({
               <div className="flex h-6 w-6 items-center justify-center rounded-md bg-purple-500/10 text-purple-400">
                 <BookOpen className="h-3.5 w-3.5" />
               </div>
-              <h3 className="text-xs font-bold uppercase tracking-wider text-white">
+              <h3 className="text-xs font-semibold uppercase tracking-wider text-zinc-200">
                 Trending Prep Topics
               </h3>
             </div>
@@ -176,7 +176,7 @@ export function ExperienceRightSidebar({
       <div className="rounded-2xl border border-blue-500/25 bg-gradient-to-br from-blue-950/30 via-[#111317] to-[#111317] p-4 sm:p-5 space-y-3 shadow-xs">
         <div className="flex items-center gap-2 text-blue-400">
           <Sparkles className="h-4 w-4" />
-          <span className="text-xs font-bold uppercase tracking-wider">Recently Interviewed?</span>
+          <span className="text-xs font-semibold uppercase tracking-wider">Recently Interviewed?</span>
         </div>
         <p className="text-xs text-zinc-400 leading-relaxed">
           Pay it forward. Share your interview rounds, questions, and insights to guide junior students preparing for placements.

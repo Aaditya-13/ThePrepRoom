@@ -82,7 +82,7 @@ export function ExperienceSidebarFilters({
   const [isPending, startTransition] = useTransition();
   const [isMobileOpen, setIsMobileOpen] = useState(false);
 
-  // Active single-open dropdown window ('company' | 'role' | 'outcome' | 'placement' | 'year' | 'round' | null)
+  // Active single-open dropdown window
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -266,14 +266,14 @@ export function ExperienceSidebarFilters({
         <button
           type="button"
           onClick={() => setIsMobileOpen((prev) => !prev)}
-          className="flex items-center gap-2 outline-none lg:pointer-events-none w-full lg:w-auto justify-between lg:justify-start"
+          className="flex items-center gap-2 outline-none lg:pointer-events-none w-full lg:w-auto justify-between lg:justify-start group"
         >
           <div className="flex items-center gap-2">
-            <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-blue-500/10 text-blue-400">
+            <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-blue-500/10 text-blue-400 group-hover:bg-blue-500/20 transition-colors">
               <Filter className="h-4 w-4" />
             </div>
             <div className="text-left">
-              <h3 className="text-sm font-bold text-white tracking-tight">Filters</h3>
+              <h3 className="text-sm font-semibold text-white tracking-tight">Filters</h3>
               {activeFiltersCount > 0 && (
                 <span className="text-[11px] font-mono text-blue-400 font-medium">
                   {activeFiltersCount} active
@@ -284,7 +284,11 @@ export function ExperienceSidebarFilters({
 
           <div className="lg:hidden text-zinc-400 flex items-center gap-1.5 text-xs">
             <span>{isMobileOpen ? "Hide" : "Show"}</span>
-            {isMobileOpen ? <ChevronDown className="h-4 w-4 rotate-180" /> : <ChevronDown className="h-4 w-4" />}
+            <ChevronDown
+              className={`h-4 w-4 transition-transform duration-300 ${
+                isMobileOpen ? "rotate-180" : ""
+              }`}
+            />
           </div>
         </button>
 
@@ -301,31 +305,35 @@ export function ExperienceSidebarFilters({
       </div>
 
       {/* Filter Sections (Always visible on lg, toggled on mobile) */}
-      <div className={`space-y-3 pt-1 ${isMobileOpen ? "block" : "hidden lg:block"}`}>
+      <div className={`space-y-2.5 pt-1 ${isMobileOpen ? "block" : "hidden lg:block"}`}>
         {/* 1. COMPANY DROPDOWN WITH WINDOW & SEARCH & MULTI-SELECT */}
         <div className={`relative ${openDropdown === "company" ? "z-30" : "z-10"}`}>
           <button
             type="button"
             onClick={() => toggleDropdown("company")}
-            className={`w-full flex items-center justify-between p-3 rounded-xl border text-xs font-semibold tracking-wide transition-all outline-none ${
+            className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl border text-xs font-medium tracking-normal transition-all duration-200 outline-none select-none group ${
               selectedCompanySlugs.length > 0
-                ? "border-blue-500/60 bg-blue-500/10 text-white shadow-xs shadow-blue-500/10"
-                : "border-zinc-800/80 bg-[#16181e] text-zinc-300 hover:text-white hover:border-zinc-700/80 hover:bg-[#1a1d24]"
+                ? "border-blue-500/50 bg-blue-500/10 text-white shadow-xs shadow-blue-500/10"
+                : openDropdown === "company"
+                ? "border-zinc-700 bg-[#181a24] text-white shadow-sm"
+                : "border-zinc-800/80 bg-[#14161e] text-zinc-300 hover:text-white hover:border-zinc-700/80 hover:bg-[#181a24]"
             }`}
           >
-            <div className="flex items-center gap-2 min-w-0">
+            <div className="flex items-center gap-2.5 min-w-0">
               <div
-                className={`p-1.5 rounded-lg shrink-0 ${
+                className={`p-1.5 rounded-lg shrink-0 transition-colors duration-200 ${
                   selectedCompanySlugs.length > 0
                     ? "bg-blue-500/20 text-blue-400"
-                    : "bg-zinc-800/80 text-zinc-400"
+                    : "bg-zinc-800/80 text-zinc-400 group-hover:text-zinc-300"
                 }`}
               >
                 <Building2 className="h-3.5 w-3.5" />
               </div>
-              <span className="font-semibold">Company</span>
+              <span className="font-medium text-zinc-200 group-hover:text-white transition-colors">
+                Company
+              </span>
               {selectedCompanySlugs.length > 0 && (
-                <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-blue-500/25 text-blue-300 border border-blue-500/40 shrink-0">
+                <span className="inline-flex items-center px-1.5 py-0.2 rounded-full text-[10px] font-mono font-semibold bg-blue-500/25 text-blue-300 border border-blue-500/40 shrink-0">
                   {selectedCompanySlugs.length}
                 </span>
               )}
@@ -333,27 +341,27 @@ export function ExperienceSidebarFilters({
 
             <div className="flex items-center gap-1.5 min-w-0">
               {companyLabel && (
-                <span className="max-w-[90px] sm:max-w-[110px] truncate text-[11px] font-normal text-blue-300 bg-blue-500/20 px-1.5 py-0.5 rounded">
+                <span className="max-w-[95px] sm:max-w-[110px] truncate text-[11px] font-normal text-blue-300/90 bg-blue-500/15 px-1.5 py-0.5 rounded">
                   {companyLabel}
                 </span>
               )}
               <ChevronDown
-                className={`h-4 w-4 text-zinc-400 transition-transform duration-200 shrink-0 ${
-                  openDropdown === "company" ? "rotate-180 text-blue-400" : ""
+                className={`h-4 w-4 text-zinc-400 transition-transform duration-300 cubic-bezier(0.16, 1, 0.3, 1) shrink-0 ${
+                  openDropdown === "company" ? "rotate-180 text-blue-400" : "group-hover:text-zinc-300"
                 }`}
               />
             </div>
           </button>
 
-          {/* Floating Dropdown Window below heading */}
+          {/* Floating Dropdown Window with Smooth Animation */}
           {openDropdown === "company" && (
-            <div className="absolute left-0 right-0 top-[calc(100%+6px)] z-50 rounded-2xl border border-zinc-700/90 bg-[#13151b] p-3.5 shadow-2xl shadow-black ring-1 ring-white/10 space-y-2.5 animate-in fade-in zoom-in-95 duration-150">
+            <div className="animate-popover absolute left-0 right-0 top-[calc(100%+6px)] z-50 rounded-2xl border border-zinc-700/80 bg-[#12141c]/95 backdrop-blur-2xl p-3.5 shadow-2xl shadow-black/80 ring-1 ring-white/10 space-y-2.5">
               {/* Window Header */}
               <div className="flex items-center justify-between pb-2 border-b border-zinc-800/80">
-                <div className="flex items-center gap-1.5">
-                  <span className="text-xs font-bold text-white">Select Companies</span>
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-semibold text-zinc-200">Select Companies</span>
                   {selectedCompanySlugs.length > 0 && (
-                    <span className="text-[10px] font-mono text-blue-400 bg-blue-500/20 px-1.5 py-0.5 rounded-full font-bold">
+                    <span className="text-[10px] font-mono text-blue-400 bg-blue-500/15 border border-blue-500/30 px-1.5 py-0.2 rounded-full font-medium">
                       {selectedCompanySlugs.length} selected
                     </span>
                   )}
@@ -361,7 +369,8 @@ export function ExperienceSidebarFilters({
                 <button
                   type="button"
                   onClick={() => setOpenDropdown(null)}
-                  className="text-zinc-400 hover:text-white p-1 rounded-md hover:bg-zinc-800 transition-colors"
+                  className="text-zinc-400 hover:text-white p-1 rounded-lg hover:bg-zinc-800/80 transition-colors"
+                  title="Close"
                 >
                   <X className="h-3.5 w-3.5" />
                 </button>
@@ -376,15 +385,15 @@ export function ExperienceSidebarFilters({
                   value={companySearch}
                   onChange={(e) => setCompanySearch(e.target.value)}
                   placeholder="Search companies..."
-                  className="w-full rounded-lg border border-zinc-700/80 bg-zinc-800/90 py-1.5 pl-8 pr-7 text-xs text-white placeholder:text-zinc-500 focus:border-blue-400 focus:outline-none focus:ring-1 focus:ring-blue-400/50"
+                  className="w-full rounded-xl border border-zinc-700/70 bg-[#0c0d12] py-1.5 pl-8 pr-7 text-xs text-zinc-100 placeholder:text-zinc-500 focus:border-blue-500 focus:ring-1 focus:ring-blue-500/40 focus:outline-none transition-all duration-150"
                 />
                 {companySearch && (
                   <button
                     type="button"
                     onClick={() => setCompanySearch("")}
-                    className="absolute right-2 top-2 text-zinc-400 hover:text-white"
+                    className="absolute right-2 top-2 text-zinc-400 hover:text-white transition-colors"
                   >
-                    <X className="h-3 w-3" />
+                    <X className="h-3.5 w-3.5" />
                   </button>
                 )}
               </div>
@@ -396,7 +405,7 @@ export function ExperienceSidebarFilters({
                   <button
                     type="button"
                     onClick={clearCompanies}
-                    className="text-blue-400 hover:text-blue-300 font-medium"
+                    className="text-blue-400 hover:text-blue-300 font-medium transition-colors"
                   >
                     Clear selection
                   </button>
@@ -415,26 +424,26 @@ export function ExperienceSidebarFilters({
                         key={c.slug}
                         type="button"
                         onClick={() => toggleCompanySlug(c.slug)}
-                        className={`w-full flex items-center justify-between p-2 rounded-lg text-xs transition-all text-left group ${
+                        className={`w-full flex items-center justify-between p-2 rounded-xl text-xs transition-all duration-150 text-left group ${
                           isChecked
-                            ? "bg-blue-500/15 border border-blue-500/40 text-white font-medium shadow-xs"
-                            : "hover:bg-zinc-800/70 text-zinc-300 hover:text-white border border-transparent"
+                            ? "bg-blue-500/15 border border-blue-500/35 text-white font-medium"
+                            : "hover:bg-zinc-800/60 text-zinc-300 hover:text-white border border-transparent"
                         }`}
                       >
                         <div className="flex items-center gap-2.5 min-w-0">
                           <div
-                            className={`h-4 w-4 rounded flex items-center justify-center transition-colors shrink-0 ${
+                            className={`h-4 w-4 rounded flex items-center justify-center transition-all duration-150 shrink-0 ${
                               isChecked
-                                ? "bg-blue-600 text-white"
-                                : "border border-zinc-600 bg-zinc-800/90 group-hover:border-zinc-500"
+                                ? "bg-blue-600 border border-blue-500 text-white shadow-xs shadow-blue-500/30"
+                                : "border border-zinc-600/90 bg-zinc-800/80 group-hover:border-zinc-500"
                             }`}
                           >
-                            {isChecked && <Check className="h-3 w-3 stroke-[3]" />}
+                            {isChecked && <Check className="h-3 w-3 stroke-[2.5]" />}
                           </div>
                           <span className="truncate">{c.name}</span>
                         </div>
                         {c._count?.experiences !== undefined && (
-                          <span className="text-[10px] font-mono text-zinc-400 bg-zinc-800/80 px-1.5 py-0.5 rounded border border-zinc-700/50 shrink-0">
+                          <span className="text-[10px] font-mono text-zinc-400 bg-zinc-800/90 px-1.5 py-0.5 rounded border border-zinc-700/40 shrink-0">
                             {c._count.experiences}
                           </span>
                         )}
@@ -450,14 +459,14 @@ export function ExperienceSidebarFilters({
                   type="button"
                   onClick={clearCompanies}
                   disabled={selectedCompanySlugs.length === 0}
-                  className="text-xs text-zinc-400 hover:text-white disabled:opacity-40 disabled:hover:text-zinc-400 font-medium"
+                  className="text-xs text-zinc-400 hover:text-white disabled:opacity-30 disabled:hover:text-zinc-400 font-medium transition-colors"
                 >
                   Reset
                 </button>
                 <button
                   type="button"
                   onClick={() => setOpenDropdown(null)}
-                  className="rounded-lg bg-blue-600 hover:bg-blue-500 px-3 py-1 text-xs font-semibold text-white shadow-xs transition-colors active:scale-95"
+                  className="rounded-lg bg-blue-600 hover:bg-blue-500 px-3.5 py-1.5 text-xs font-semibold text-white shadow-md shadow-blue-600/20 active:scale-95 transition-all duration-150"
                 >
                   Done
                 </button>
@@ -471,25 +480,29 @@ export function ExperienceSidebarFilters({
           <button
             type="button"
             onClick={() => toggleDropdown("role")}
-            className={`w-full flex items-center justify-between p-3 rounded-xl border text-xs font-semibold tracking-wide transition-all outline-none ${
+            className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl border text-xs font-medium tracking-normal transition-all duration-200 outline-none select-none group ${
               selectedRoleSlugs.length > 0
-                ? "border-blue-500/60 bg-blue-500/10 text-white shadow-xs shadow-blue-500/10"
-                : "border-zinc-800/80 bg-[#16181e] text-zinc-300 hover:text-white hover:border-zinc-700/80 hover:bg-[#1a1d24]"
+                ? "border-blue-500/50 bg-blue-500/10 text-white shadow-xs shadow-blue-500/10"
+                : openDropdown === "role"
+                ? "border-zinc-700 bg-[#181a24] text-white shadow-sm"
+                : "border-zinc-800/80 bg-[#14161e] text-zinc-300 hover:text-white hover:border-zinc-700/80 hover:bg-[#181a24]"
             }`}
           >
-            <div className="flex items-center gap-2 min-w-0">
+            <div className="flex items-center gap-2.5 min-w-0">
               <div
-                className={`p-1.5 rounded-lg shrink-0 ${
+                className={`p-1.5 rounded-lg shrink-0 transition-colors duration-200 ${
                   selectedRoleSlugs.length > 0
                     ? "bg-blue-500/20 text-blue-400"
-                    : "bg-zinc-800/80 text-zinc-400"
+                    : "bg-zinc-800/80 text-zinc-400 group-hover:text-zinc-300"
                 }`}
               >
                 <Briefcase className="h-3.5 w-3.5" />
               </div>
-              <span className="font-semibold">Job Role</span>
+              <span className="font-medium text-zinc-200 group-hover:text-white transition-colors">
+                Job Role
+              </span>
               {selectedRoleSlugs.length > 0 && (
-                <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-blue-500/25 text-blue-300 border border-blue-500/40 shrink-0">
+                <span className="inline-flex items-center px-1.5 py-0.2 rounded-full text-[10px] font-mono font-semibold bg-blue-500/25 text-blue-300 border border-blue-500/40 shrink-0">
                   {selectedRoleSlugs.length}
                 </span>
               )}
@@ -497,27 +510,27 @@ export function ExperienceSidebarFilters({
 
             <div className="flex items-center gap-1.5 min-w-0">
               {roleLabel && (
-                <span className="max-w-[90px] sm:max-w-[110px] truncate text-[11px] font-normal text-blue-300 bg-blue-500/20 px-1.5 py-0.5 rounded">
+                <span className="max-w-[95px] sm:max-w-[110px] truncate text-[11px] font-normal text-blue-300/90 bg-blue-500/15 px-1.5 py-0.5 rounded">
                   {roleLabel}
                 </span>
               )}
               <ChevronDown
-                className={`h-4 w-4 text-zinc-400 transition-transform duration-200 shrink-0 ${
-                  openDropdown === "role" ? "rotate-180 text-blue-400" : ""
+                className={`h-4 w-4 text-zinc-400 transition-transform duration-300 cubic-bezier(0.16, 1, 0.3, 1) shrink-0 ${
+                  openDropdown === "role" ? "rotate-180 text-blue-400" : "group-hover:text-zinc-300"
                 }`}
               />
             </div>
           </button>
 
-          {/* Floating Dropdown Window below heading */}
+          {/* Floating Dropdown Window with Smooth Animation */}
           {openDropdown === "role" && (
-            <div className="absolute left-0 right-0 top-[calc(100%+6px)] z-50 rounded-2xl border border-zinc-700/90 bg-[#13151b] p-3.5 shadow-2xl shadow-black ring-1 ring-white/10 space-y-2.5 animate-in fade-in zoom-in-95 duration-150">
+            <div className="animate-popover absolute left-0 right-0 top-[calc(100%+6px)] z-50 rounded-2xl border border-zinc-700/80 bg-[#12141c]/95 backdrop-blur-2xl p-3.5 shadow-2xl shadow-black/80 ring-1 ring-white/10 space-y-2.5">
               {/* Window Header */}
               <div className="flex items-center justify-between pb-2 border-b border-zinc-800/80">
-                <div className="flex items-center gap-1.5">
-                  <span className="text-xs font-bold text-white">Select Roles</span>
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-semibold text-zinc-200">Select Roles</span>
                   {selectedRoleSlugs.length > 0 && (
-                    <span className="text-[10px] font-mono text-blue-400 bg-blue-500/20 px-1.5 py-0.5 rounded-full font-bold">
+                    <span className="text-[10px] font-mono text-blue-400 bg-blue-500/15 border border-blue-500/30 px-1.5 py-0.2 rounded-full font-medium">
                       {selectedRoleSlugs.length} selected
                     </span>
                   )}
@@ -525,7 +538,8 @@ export function ExperienceSidebarFilters({
                 <button
                   type="button"
                   onClick={() => setOpenDropdown(null)}
-                  className="text-zinc-400 hover:text-white p-1 rounded-md hover:bg-zinc-800 transition-colors"
+                  className="text-zinc-400 hover:text-white p-1 rounded-lg hover:bg-zinc-800/80 transition-colors"
+                  title="Close"
                 >
                   <X className="h-3.5 w-3.5" />
                 </button>
@@ -540,15 +554,15 @@ export function ExperienceSidebarFilters({
                   value={roleSearch}
                   onChange={(e) => setRoleSearch(e.target.value)}
                   placeholder="Search roles (e.g. SDE, Analyst)..."
-                  className="w-full rounded-lg border border-zinc-700/80 bg-zinc-800/90 py-1.5 pl-8 pr-7 text-xs text-white placeholder:text-zinc-500 focus:border-blue-400 focus:outline-none focus:ring-1 focus:ring-blue-400/50"
+                  className="w-full rounded-xl border border-zinc-700/70 bg-[#0c0d12] py-1.5 pl-8 pr-7 text-xs text-zinc-100 placeholder:text-zinc-500 focus:border-blue-500 focus:ring-1 focus:ring-blue-500/40 focus:outline-none transition-all duration-150"
                 />
                 {roleSearch && (
                   <button
                     type="button"
                     onClick={() => setRoleSearch("")}
-                    className="absolute right-2 top-2 text-zinc-400 hover:text-white"
+                    className="absolute right-2 top-2 text-zinc-400 hover:text-white transition-colors"
                   >
-                    <X className="h-3 w-3" />
+                    <X className="h-3.5 w-3.5" />
                   </button>
                 )}
               </div>
@@ -560,7 +574,7 @@ export function ExperienceSidebarFilters({
                   <button
                     type="button"
                     onClick={clearRoles}
-                    className="text-blue-400 hover:text-blue-300 font-medium"
+                    className="text-blue-400 hover:text-blue-300 font-medium transition-colors"
                   >
                     Clear selection
                   </button>
@@ -579,26 +593,26 @@ export function ExperienceSidebarFilters({
                         key={r.slug}
                         type="button"
                         onClick={() => toggleRoleSlug(r.slug)}
-                        className={`w-full flex items-center justify-between p-2 rounded-lg text-xs transition-all text-left group ${
+                        className={`w-full flex items-center justify-between p-2 rounded-xl text-xs transition-all duration-150 text-left group ${
                           isChecked
-                            ? "bg-blue-500/15 border border-blue-500/40 text-white font-medium shadow-xs"
-                            : "hover:bg-zinc-800/70 text-zinc-300 hover:text-white border border-transparent"
+                            ? "bg-blue-500/15 border border-blue-500/35 text-white font-medium"
+                            : "hover:bg-zinc-800/60 text-zinc-300 hover:text-white border border-transparent"
                         }`}
                       >
                         <div className="flex items-center gap-2.5 min-w-0">
                           <div
-                            className={`h-4 w-4 rounded flex items-center justify-center transition-colors shrink-0 ${
+                            className={`h-4 w-4 rounded flex items-center justify-center transition-all duration-150 shrink-0 ${
                               isChecked
-                                ? "bg-blue-600 text-white"
-                                : "border border-zinc-600 bg-zinc-800/90 group-hover:border-zinc-500"
+                                ? "bg-blue-600 border border-blue-500 text-white shadow-xs shadow-blue-500/30"
+                                : "border border-zinc-600/90 bg-zinc-800/80 group-hover:border-zinc-500"
                             }`}
                           >
-                            {isChecked && <Check className="h-3 w-3 stroke-[3]" />}
+                            {isChecked && <Check className="h-3 w-3 stroke-[2.5]" />}
                           </div>
                           <span className="truncate">{r.title}</span>
                         </div>
                         {r._count?.experiences !== undefined && (
-                          <span className="text-[10px] font-mono text-zinc-400 bg-zinc-800/80 px-1.5 py-0.5 rounded border border-zinc-700/50 shrink-0">
+                          <span className="text-[10px] font-mono text-zinc-400 bg-zinc-800/90 px-1.5 py-0.5 rounded border border-zinc-700/40 shrink-0">
                             {r._count.experiences}
                           </span>
                         )}
@@ -614,14 +628,14 @@ export function ExperienceSidebarFilters({
                   type="button"
                   onClick={clearRoles}
                   disabled={selectedRoleSlugs.length === 0}
-                  className="text-xs text-zinc-400 hover:text-white disabled:opacity-40 disabled:hover:text-zinc-400 font-medium"
+                  className="text-xs text-zinc-400 hover:text-white disabled:opacity-30 disabled:hover:text-zinc-400 font-medium transition-colors"
                 >
                   Reset
                 </button>
                 <button
                   type="button"
                   onClick={() => setOpenDropdown(null)}
-                  className="rounded-lg bg-blue-600 hover:bg-blue-500 px-3 py-1 text-xs font-semibold text-white shadow-xs transition-colors active:scale-95"
+                  className="rounded-lg bg-blue-600 hover:bg-blue-500 px-3.5 py-1.5 text-xs font-semibold text-white shadow-md shadow-blue-600/20 active:scale-95 transition-all duration-150"
                 >
                   Done
                 </button>
@@ -635,48 +649,53 @@ export function ExperienceSidebarFilters({
           <button
             type="button"
             onClick={() => toggleDropdown("outcome")}
-            className={`w-full flex items-center justify-between p-3 rounded-xl border text-xs font-semibold tracking-wide transition-all outline-none ${
+            className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl border text-xs font-medium tracking-normal transition-all duration-200 outline-none select-none group ${
               currentResult !== "ALL"
-                ? "border-blue-500/60 bg-blue-500/10 text-white shadow-xs shadow-blue-500/10"
-                : "border-zinc-800/80 bg-[#16181e] text-zinc-300 hover:text-white hover:border-zinc-700/80 hover:bg-[#1a1d24]"
+                ? "border-blue-500/50 bg-blue-500/10 text-white shadow-xs shadow-blue-500/10"
+                : openDropdown === "outcome"
+                ? "border-zinc-700 bg-[#181a24] text-white shadow-sm"
+                : "border-zinc-800/80 bg-[#14161e] text-zinc-300 hover:text-white hover:border-zinc-700/80 hover:bg-[#181a24]"
             }`}
           >
-            <div className="flex items-center gap-2 min-w-0">
+            <div className="flex items-center gap-2.5 min-w-0">
               <div
-                className={`p-1.5 rounded-lg shrink-0 ${
+                className={`p-1.5 rounded-lg shrink-0 transition-colors duration-200 ${
                   currentResult !== "ALL"
                     ? "bg-blue-500/20 text-blue-400"
-                    : "bg-zinc-800/80 text-zinc-400"
+                    : "bg-zinc-800/80 text-zinc-400 group-hover:text-zinc-300"
                 }`}
               >
                 <Award className="h-3.5 w-3.5" />
               </div>
-              <span className="font-semibold">Outcome</span>
+              <span className="font-medium text-zinc-200 group-hover:text-white transition-colors">
+                Outcome
+              </span>
             </div>
 
             <div className="flex items-center gap-1.5 min-w-0">
               {outcomeLabel && (
-                <span className="max-w-[90px] sm:max-w-[110px] truncate text-[11px] font-normal text-blue-300 bg-blue-500/20 px-1.5 py-0.5 rounded">
+                <span className="max-w-[95px] sm:max-w-[110px] truncate text-[11px] font-normal text-blue-300/90 bg-blue-500/15 px-1.5 py-0.5 rounded">
                   {outcomeLabel}
                 </span>
               )}
               <ChevronDown
-                className={`h-4 w-4 text-zinc-400 transition-transform duration-200 shrink-0 ${
-                  openDropdown === "outcome" ? "rotate-180 text-blue-400" : ""
+                className={`h-4 w-4 text-zinc-400 transition-transform duration-300 cubic-bezier(0.16, 1, 0.3, 1) shrink-0 ${
+                  openDropdown === "outcome" ? "rotate-180 text-blue-400" : "group-hover:text-zinc-300"
                 }`}
               />
             </div>
           </button>
 
-          {/* Floating Dropdown Window below heading */}
+          {/* Floating Dropdown Window with Smooth Animation */}
           {openDropdown === "outcome" && (
-            <div className="absolute left-0 right-0 top-[calc(100%+6px)] z-50 rounded-2xl border border-zinc-700/90 bg-[#13151b] p-3.5 shadow-2xl shadow-black ring-1 ring-white/10 space-y-2.5 animate-in fade-in zoom-in-95 duration-150">
+            <div className="animate-popover absolute left-0 right-0 top-[calc(100%+6px)] z-50 rounded-2xl border border-zinc-700/80 bg-[#12141c]/95 backdrop-blur-2xl p-3.5 shadow-2xl shadow-black/80 ring-1 ring-white/10 space-y-2.5">
               <div className="flex items-center justify-between pb-2 border-b border-zinc-800/80">
-                <span className="text-xs font-bold text-white">Select Outcome</span>
+                <span className="text-xs font-semibold text-zinc-200">Select Outcome</span>
                 <button
                   type="button"
                   onClick={() => setOpenDropdown(null)}
-                  className="text-zinc-400 hover:text-white p-1 rounded-md hover:bg-zinc-800 transition-colors"
+                  className="text-zinc-400 hover:text-white p-1 rounded-lg hover:bg-zinc-800/80 transition-colors"
+                  title="Close"
                 >
                   <X className="h-3.5 w-3.5" />
                 </button>
@@ -693,9 +712,9 @@ export function ExperienceSidebarFilters({
                         updateParam("result", opt.value);
                         setOpenDropdown(null);
                       }}
-                      className={`w-full flex items-center justify-between p-2 rounded-lg text-xs transition-colors text-left ${
+                      className={`w-full flex items-center justify-between p-2 rounded-xl text-xs transition-all duration-150 text-left ${
                         isSelected
-                          ? "bg-blue-500/15 border border-blue-500/40 text-blue-300 font-semibold"
+                          ? "bg-blue-500/15 border border-blue-500/35 text-blue-300 font-medium"
                           : "text-zinc-300 hover:text-white hover:bg-zinc-800/60 border border-transparent"
                       }`}
                     >
@@ -716,14 +735,14 @@ export function ExperienceSidebarFilters({
                     updateParam("result", "ALL");
                     setOpenDropdown(null);
                   }}
-                  className="text-xs text-zinc-400 hover:text-white font-medium"
+                  className="text-xs text-zinc-400 hover:text-white font-medium transition-colors"
                 >
                   Reset
                 </button>
                 <button
                   type="button"
                   onClick={() => setOpenDropdown(null)}
-                  className="rounded-lg bg-blue-600 hover:bg-blue-500 px-3 py-1 text-xs font-semibold text-white shadow-xs transition-colors active:scale-95"
+                  className="rounded-lg bg-blue-600 hover:bg-blue-500 px-3.5 py-1.5 text-xs font-semibold text-white shadow-md shadow-blue-600/20 active:scale-95 transition-all duration-150"
                 >
                   Done
                 </button>
@@ -737,48 +756,53 @@ export function ExperienceSidebarFilters({
           <button
             type="button"
             onClick={() => toggleDropdown("placement")}
-            className={`w-full flex items-center justify-between p-3 rounded-xl border text-xs font-semibold tracking-wide transition-all outline-none ${
+            className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl border text-xs font-medium tracking-normal transition-all duration-200 outline-none select-none group ${
               currentPlacement !== "ALL"
-                ? "border-blue-500/60 bg-blue-500/10 text-white shadow-xs shadow-blue-500/10"
-                : "border-zinc-800/80 bg-[#16181e] text-zinc-300 hover:text-white hover:border-zinc-700/80 hover:bg-[#1a1d24]"
+                ? "border-blue-500/50 bg-blue-500/10 text-white shadow-xs shadow-blue-500/10"
+                : openDropdown === "placement"
+                ? "border-zinc-700 bg-[#181a24] text-white shadow-sm"
+                : "border-zinc-800/80 bg-[#14161e] text-zinc-300 hover:text-white hover:border-zinc-700/80 hover:bg-[#181a24]"
             }`}
           >
-            <div className="flex items-center gap-2 min-w-0">
+            <div className="flex items-center gap-2.5 min-w-0">
               <div
-                className={`p-1.5 rounded-lg shrink-0 ${
+                className={`p-1.5 rounded-lg shrink-0 transition-colors duration-200 ${
                   currentPlacement !== "ALL"
                     ? "bg-blue-500/20 text-blue-400"
-                    : "bg-zinc-800/80 text-zinc-400"
+                    : "bg-zinc-800/80 text-zinc-400 group-hover:text-zinc-300"
                 }`}
               >
                 <Layers className="h-3.5 w-3.5" />
               </div>
-              <span className="font-semibold">Placement Type</span>
+              <span className="font-medium text-zinc-200 group-hover:text-white transition-colors">
+                Placement Type
+              </span>
             </div>
 
             <div className="flex items-center gap-1.5 min-w-0">
               {placementLabel && (
-                <span className="max-w-[90px] sm:max-w-[110px] truncate text-[11px] font-normal text-blue-300 bg-blue-500/20 px-1.5 py-0.5 rounded">
+                <span className="max-w-[95px] sm:max-w-[110px] truncate text-[11px] font-normal text-blue-300/90 bg-blue-500/15 px-1.5 py-0.5 rounded">
                   {placementLabel}
                 </span>
               )}
               <ChevronDown
-                className={`h-4 w-4 text-zinc-400 transition-transform duration-200 shrink-0 ${
-                  openDropdown === "placement" ? "rotate-180 text-blue-400" : ""
+                className={`h-4 w-4 text-zinc-400 transition-transform duration-300 cubic-bezier(0.16, 1, 0.3, 1) shrink-0 ${
+                  openDropdown === "placement" ? "rotate-180 text-blue-400" : "group-hover:text-zinc-300"
                 }`}
               />
             </div>
           </button>
 
-          {/* Floating Dropdown Window below heading */}
+          {/* Floating Dropdown Window with Smooth Animation */}
           {openDropdown === "placement" && (
-            <div className="absolute left-0 right-0 top-[calc(100%+6px)] z-50 rounded-2xl border border-zinc-700/90 bg-[#13151b] p-3.5 shadow-2xl shadow-black ring-1 ring-white/10 space-y-2.5 animate-in fade-in zoom-in-95 duration-150">
+            <div className="animate-popover absolute left-0 right-0 top-[calc(100%+6px)] z-50 rounded-2xl border border-zinc-700/80 bg-[#12141c]/95 backdrop-blur-2xl p-3.5 shadow-2xl shadow-black/80 ring-1 ring-white/10 space-y-2.5">
               <div className="flex items-center justify-between pb-2 border-b border-zinc-800/80">
-                <span className="text-xs font-bold text-white">Select Placement Type</span>
+                <span className="text-xs font-semibold text-zinc-200">Select Placement Type</span>
                 <button
                   type="button"
                   onClick={() => setOpenDropdown(null)}
-                  className="text-zinc-400 hover:text-white p-1 rounded-md hover:bg-zinc-800 transition-colors"
+                  className="text-zinc-400 hover:text-white p-1 rounded-lg hover:bg-zinc-800/80 transition-colors"
+                  title="Close"
                 >
                   <X className="h-3.5 w-3.5" />
                 </button>
@@ -795,9 +819,9 @@ export function ExperienceSidebarFilters({
                         updateParam("placement", opt.value);
                         setOpenDropdown(null);
                       }}
-                      className={`w-full flex items-center justify-between p-2 rounded-lg text-xs transition-colors text-left ${
+                      className={`w-full flex items-center justify-between p-2 rounded-xl text-xs transition-all duration-150 text-left ${
                         isSelected
-                          ? "bg-blue-500/15 border border-blue-500/40 text-blue-300 font-semibold"
+                          ? "bg-blue-500/15 border border-blue-500/35 text-blue-300 font-medium"
                           : "text-zinc-300 hover:text-white hover:bg-zinc-800/60 border border-transparent"
                       }`}
                     >
@@ -815,14 +839,14 @@ export function ExperienceSidebarFilters({
                     updateParam("placement", "ALL");
                     setOpenDropdown(null);
                   }}
-                  className="text-xs text-zinc-400 hover:text-white font-medium"
+                  className="text-xs text-zinc-400 hover:text-white font-medium transition-colors"
                 >
                   Reset
                 </button>
                 <button
                   type="button"
                   onClick={() => setOpenDropdown(null)}
-                  className="rounded-lg bg-blue-600 hover:bg-blue-500 px-3 py-1 text-xs font-semibold text-white shadow-xs transition-colors active:scale-95"
+                  className="rounded-lg bg-blue-600 hover:bg-blue-500 px-3.5 py-1.5 text-xs font-semibold text-white shadow-md shadow-blue-600/20 active:scale-95 transition-all duration-150"
                 >
                   Done
                 </button>
@@ -836,48 +860,53 @@ export function ExperienceSidebarFilters({
           <button
             type="button"
             onClick={() => toggleDropdown("year")}
-            className={`w-full flex items-center justify-between p-3 rounded-xl border text-xs font-semibold tracking-wide transition-all outline-none ${
+            className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl border text-xs font-medium tracking-normal transition-all duration-200 outline-none select-none group ${
               currentYear !== "ALL"
-                ? "border-blue-500/60 bg-blue-500/10 text-white shadow-xs shadow-blue-500/10"
-                : "border-zinc-800/80 bg-[#16181e] text-zinc-300 hover:text-white hover:border-zinc-700/80 hover:bg-[#1a1d24]"
+                ? "border-blue-500/50 bg-blue-500/10 text-white shadow-xs shadow-blue-500/10"
+                : openDropdown === "year"
+                ? "border-zinc-700 bg-[#181a24] text-white shadow-sm"
+                : "border-zinc-800/80 bg-[#14161e] text-zinc-300 hover:text-white hover:border-zinc-700/80 hover:bg-[#181a24]"
             }`}
           >
-            <div className="flex items-center gap-2 min-w-0">
+            <div className="flex items-center gap-2.5 min-w-0">
               <div
-                className={`p-1.5 rounded-lg shrink-0 ${
+                className={`p-1.5 rounded-lg shrink-0 transition-colors duration-200 ${
                   currentYear !== "ALL"
                     ? "bg-blue-500/20 text-blue-400"
-                    : "bg-zinc-800/80 text-zinc-400"
+                    : "bg-zinc-800/80 text-zinc-400 group-hover:text-zinc-300"
                 }`}
               >
                 <Calendar className="h-3.5 w-3.5" />
               </div>
-              <span className="font-semibold">Interview Year</span>
+              <span className="font-medium text-zinc-200 group-hover:text-white transition-colors">
+                Interview Year
+              </span>
             </div>
 
             <div className="flex items-center gap-1.5 min-w-0">
               {currentYear !== "ALL" && (
-                <span className="text-[11px] font-mono text-blue-300 bg-blue-500/20 px-1.5 py-0.5 rounded">
+                <span className="text-[11px] font-mono text-blue-300/90 bg-blue-500/15 px-1.5 py-0.5 rounded">
                   {currentYear}
                 </span>
               )}
               <ChevronDown
-                className={`h-4 w-4 text-zinc-400 transition-transform duration-200 shrink-0 ${
-                  openDropdown === "year" ? "rotate-180 text-blue-400" : ""
+                className={`h-4 w-4 text-zinc-400 transition-transform duration-300 cubic-bezier(0.16, 1, 0.3, 1) shrink-0 ${
+                  openDropdown === "year" ? "rotate-180 text-blue-400" : "group-hover:text-zinc-300"
                 }`}
               />
             </div>
           </button>
 
-          {/* Floating Dropdown Window below heading */}
+          {/* Floating Dropdown Window with Smooth Animation */}
           {openDropdown === "year" && (
-            <div className="absolute left-0 right-0 top-[calc(100%+6px)] z-50 rounded-2xl border border-zinc-700/90 bg-[#13151b] p-3.5 shadow-2xl shadow-black ring-1 ring-white/10 space-y-2.5 animate-in fade-in zoom-in-95 duration-150">
+            <div className="animate-popover absolute left-0 right-0 top-[calc(100%+6px)] z-50 rounded-2xl border border-zinc-700/80 bg-[#12141c]/95 backdrop-blur-2xl p-3.5 shadow-2xl shadow-black/80 ring-1 ring-white/10 space-y-2.5">
               <div className="flex items-center justify-between pb-2 border-b border-zinc-800/80">
-                <span className="text-xs font-bold text-white">Select Year</span>
+                <span className="text-xs font-semibold text-zinc-200">Select Year</span>
                 <button
                   type="button"
                   onClick={() => setOpenDropdown(null)}
-                  className="text-zinc-400 hover:text-white p-1 rounded-md hover:bg-zinc-800 transition-colors"
+                  className="text-zinc-400 hover:text-white p-1 rounded-lg hover:bg-zinc-800/80 transition-colors"
+                  title="Close"
                 >
                   <X className="h-3.5 w-3.5" />
                 </button>
@@ -890,10 +919,10 @@ export function ExperienceSidebarFilters({
                     updateParam("year", "ALL");
                     setOpenDropdown(null);
                   }}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-mono transition-colors ${
+                  className={`px-3 py-1.5 rounded-xl text-xs font-mono transition-all duration-150 ${
                     currentYear === "ALL"
                       ? "bg-blue-600 text-white font-semibold shadow-xs"
-                      : "bg-zinc-800/90 text-zinc-400 hover:text-white hover:bg-zinc-700"
+                      : "bg-zinc-800/80 text-zinc-400 hover:text-white hover:bg-zinc-700"
                   }`}
                 >
                   All Years
@@ -908,10 +937,10 @@ export function ExperienceSidebarFilters({
                         updateParam("year", y.toString());
                         setOpenDropdown(null);
                       }}
-                      className={`px-3 py-1.5 rounded-lg text-xs font-mono transition-colors ${
+                      className={`px-3 py-1.5 rounded-xl text-xs font-mono transition-all duration-150 ${
                         isSelected
                           ? "bg-blue-600 text-white font-semibold shadow-xs"
-                          : "bg-zinc-800/90 text-zinc-400 hover:text-white hover:bg-zinc-700"
+                          : "bg-zinc-800/80 text-zinc-400 hover:text-white hover:bg-zinc-700"
                       }`}
                     >
                       {y}
@@ -927,14 +956,14 @@ export function ExperienceSidebarFilters({
                     updateParam("year", "ALL");
                     setOpenDropdown(null);
                   }}
-                  className="text-xs text-zinc-400 hover:text-white font-medium"
+                  className="text-xs text-zinc-400 hover:text-white font-medium transition-colors"
                 >
                   Reset
                 </button>
                 <button
                   type="button"
                   onClick={() => setOpenDropdown(null)}
-                  className="rounded-lg bg-blue-600 hover:bg-blue-500 px-3 py-1 text-xs font-semibold text-white shadow-xs transition-colors active:scale-95"
+                  className="rounded-lg bg-blue-600 hover:bg-blue-500 px-3.5 py-1.5 text-xs font-semibold text-white shadow-md shadow-blue-600/20 active:scale-95 transition-all duration-150"
                 >
                   Done
                 </button>
@@ -948,48 +977,53 @@ export function ExperienceSidebarFilters({
           <button
             type="button"
             onClick={() => toggleDropdown("round")}
-            className={`w-full flex items-center justify-between p-3 rounded-xl border text-xs font-semibold tracking-wide transition-all outline-none ${
+            className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl border text-xs font-medium tracking-normal transition-all duration-200 outline-none select-none group ${
               currentRound !== "ALL"
-                ? "border-blue-500/60 bg-blue-500/10 text-white shadow-xs shadow-blue-500/10"
-                : "border-zinc-800/80 bg-[#16181e] text-zinc-300 hover:text-white hover:border-zinc-700/80 hover:bg-[#1a1d24]"
+                ? "border-blue-500/50 bg-blue-500/10 text-white shadow-xs shadow-blue-500/10"
+                : openDropdown === "round"
+                ? "border-zinc-700 bg-[#181a24] text-white shadow-sm"
+                : "border-zinc-800/80 bg-[#14161e] text-zinc-300 hover:text-white hover:border-zinc-700/80 hover:bg-[#181a24]"
             }`}
           >
-            <div className="flex items-center gap-2 min-w-0">
+            <div className="flex items-center gap-2.5 min-w-0">
               <div
-                className={`p-1.5 rounded-lg shrink-0 ${
+                className={`p-1.5 rounded-lg shrink-0 transition-colors duration-200 ${
                   currentRound !== "ALL"
                     ? "bg-blue-500/20 text-blue-400"
-                    : "bg-zinc-800/80 text-zinc-400"
+                    : "bg-zinc-800/80 text-zinc-400 group-hover:text-zinc-300"
                 }`}
               >
                 <Layers className="h-3.5 w-3.5" />
               </div>
-              <span className="font-semibold">Round Included</span>
+              <span className="font-medium text-zinc-200 group-hover:text-white transition-colors">
+                Round Included
+              </span>
             </div>
 
             <div className="flex items-center gap-1.5 min-w-0">
               {roundLabel && (
-                <span className="max-w-[90px] sm:max-w-[110px] truncate text-[11px] font-normal text-blue-300 bg-blue-500/20 px-1.5 py-0.5 rounded">
+                <span className="max-w-[95px] sm:max-w-[110px] truncate text-[11px] font-normal text-blue-300/90 bg-blue-500/15 px-1.5 py-0.5 rounded">
                   {roundLabel}
                 </span>
               )}
               <ChevronDown
-                className={`h-4 w-4 text-zinc-400 transition-transform duration-200 shrink-0 ${
-                  openDropdown === "round" ? "rotate-180 text-blue-400" : ""
+                className={`h-4 w-4 text-zinc-400 transition-transform duration-300 cubic-bezier(0.16, 1, 0.3, 1) shrink-0 ${
+                  openDropdown === "round" ? "rotate-180 text-blue-400" : "group-hover:text-zinc-300"
                 }`}
               />
             </div>
           </button>
 
-          {/* Floating Dropdown Window below heading */}
+          {/* Floating Dropdown Window with Smooth Animation */}
           {openDropdown === "round" && (
-            <div className="absolute left-0 right-0 top-[calc(100%+6px)] z-50 rounded-2xl border border-zinc-700/90 bg-[#13151b] p-3.5 shadow-2xl shadow-black ring-1 ring-white/10 space-y-2.5 animate-in fade-in zoom-in-95 duration-150">
+            <div className="animate-popover absolute left-0 right-0 top-[calc(100%+6px)] z-50 rounded-2xl border border-zinc-700/80 bg-[#12141c]/95 backdrop-blur-2xl p-3.5 shadow-2xl shadow-black/80 ring-1 ring-white/10 space-y-2.5">
               <div className="flex items-center justify-between pb-2 border-b border-zinc-800/80">
-                <span className="text-xs font-bold text-white">Select Round Type</span>
+                <span className="text-xs font-semibold text-zinc-200">Select Round Type</span>
                 <button
                   type="button"
                   onClick={() => setOpenDropdown(null)}
-                  className="text-zinc-400 hover:text-white p-1 rounded-md hover:bg-zinc-800 transition-colors"
+                  className="text-zinc-400 hover:text-white p-1 rounded-lg hover:bg-zinc-800/80 transition-colors"
+                  title="Close"
                 >
                   <X className="h-3.5 w-3.5" />
                 </button>
@@ -1006,9 +1040,9 @@ export function ExperienceSidebarFilters({
                         updateParam("round", opt.value);
                         setOpenDropdown(null);
                       }}
-                      className={`w-full flex items-center justify-between p-2 rounded-lg text-xs transition-colors text-left ${
+                      className={`w-full flex items-center justify-between p-2 rounded-xl text-xs transition-all duration-150 text-left ${
                         isSelected
-                          ? "bg-blue-500/15 border border-blue-500/40 text-blue-300 font-semibold"
+                          ? "bg-blue-500/15 border border-blue-500/35 text-blue-300 font-medium"
                           : "text-zinc-300 hover:text-white hover:bg-zinc-800/60 border border-transparent"
                       }`}
                     >
@@ -1026,14 +1060,14 @@ export function ExperienceSidebarFilters({
                     updateParam("round", "ALL");
                     setOpenDropdown(null);
                   }}
-                  className="text-xs text-zinc-400 hover:text-white font-medium"
+                  className="text-xs text-zinc-400 hover:text-white font-medium transition-colors"
                 >
                   Reset
                 </button>
                 <button
                   type="button"
                   onClick={() => setOpenDropdown(null)}
-                  className="rounded-lg bg-blue-600 hover:bg-blue-500 px-3 py-1 text-xs font-semibold text-white shadow-xs transition-colors active:scale-95"
+                  className="rounded-lg bg-blue-600 hover:bg-blue-500 px-3.5 py-1.5 text-xs font-semibold text-white shadow-md shadow-blue-600/20 active:scale-95 transition-all duration-150"
                 >
                   Done
                 </button>

@@ -92,7 +92,7 @@ export function ExperienceRow({ experience }: ExperienceRowProps) {
           </div>
 
           {/* Role Title */}
-          <h3 className="text-base sm:text-lg font-bold text-slate-900 dark:text-zinc-100 group-hover:text-blue-400 transition-colors leading-snug">
+          <h3 className="text-base sm:text-lg font-semibold text-slate-900 dark:text-zinc-100 group-hover:text-blue-400 transition-colors leading-snug">
             <Link
               href={`/experiences/${experience.slug}`}
               className="hover:text-blue-400 transition-colors"

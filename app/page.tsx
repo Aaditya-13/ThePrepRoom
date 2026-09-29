@@ -150,7 +150,7 @@ export default async function HomePage() {
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 space-y-8">
           <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
             <div>
-              <h2 className="font-heading text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white">
+              <h2 className="text-2xl sm:text-3xl font-semibold tracking-tight text-slate-900 dark:text-white">
                 Featured Interviews
               </h2>
               <p className="font-body text-sm text-slate-600 dark:text-zinc-400 mt-1">
@@ -256,7 +256,7 @@ export default async function HomePage() {
       <section className="py-14 sm:py-18 border-b border-stone-200 dark:border-zinc-800/80 bg-white dark:bg-[#090a0d]">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 space-y-6">
           <div>
-            <h2 className="font-heading text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white">
+            <h2 className="text-2xl sm:text-3xl font-semibold tracking-tight text-slate-900 dark:text-white">
               Find experiences that match your goal
             </h2>
             <p className="font-body text-sm text-slate-600 dark:text-zinc-400 mt-1">
@@ -344,7 +344,7 @@ export default async function HomePage() {
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 space-y-6">
           <div className="flex items-end justify-between">
             <div>
-              <h2 className="font-heading text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white">
+              <h2 className="text-2xl sm:text-3xl font-semibold tracking-tight text-slate-900 dark:text-white">
                 Top Stories
               </h2>
               <p className="font-body text-sm text-slate-600 dark:text-zinc-400 mt-1">
@@ -369,7 +369,7 @@ export default async function HomePage() {
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 space-y-8">
           <div className="flex items-end justify-between">
             <div>
-              <h2 className="font-heading text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white">
+              <h2 className="text-2xl sm:text-3xl font-semibold tracking-tight text-slate-900 dark:text-white">
                 Frequently Asked Technical Questions
               </h2>
               <p className="font-body text-sm text-slate-600 dark:text-zinc-400 mt-1">
@@ -417,7 +417,7 @@ export default async function HomePage() {
       {/* 6. CALL TO ACTION STRIP */}
       <section className="py-14 sm:py-20 bg-stone-50 dark:bg-[#0c0e12]">
         <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 text-center space-y-4">
-          <h3 className="font-heading text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white">
+          <h3 className="text-2xl sm:text-3xl font-semibold tracking-tight text-slate-900 dark:text-white">
             Attended an interview recently?
           </h3>
           <p className="font-body text-sm sm:text-base text-slate-600 dark:text-zinc-400 max-w-xl mx-auto">
