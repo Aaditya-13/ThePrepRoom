@@ -6,6 +6,7 @@ import { getCurrentUser, requireAdmin } from "@/lib/auth";
 import { verifyCompanyRoleConsistency } from "@/lib/company-role";
 import { findOrCreateCanonicalQuestion } from "@/lib/deduplicate";
 import { slugify } from "@/lib/utils";
+import { getPublicExperiences } from "@/lib/public-queries";
 
 export interface QuestionEntry {
   text: string;
@@ -364,4 +365,60 @@ export async function adminModerateExperienceAction(
   revalidatePath("/companies");
   revalidatePath("/questions");
   return { success: true };
+}
+
+/**
+ * Public action: Load more experiences for incremental pagination
+ */
+export async function loadMoreExperiencesAction(params: {
+  query?: string;
+  companySlug?: string;
+  roleSlug?: string;
+  interviewYear?: number;
+  placementType?: string;
+  roundType?: string;
+  result?: string;
+  sortBy?: "newest" | "views";
+  page: number;
+  limit?: number;
+}) {
+  const result = await getPublicExperiences({
+    query: params.query,
+    companySlug: params.companySlug,
+    roleSlug: params.roleSlug,
+    interviewYear: params.interviewYear,
+    placementType: params.placementType,
+    roundType: params.roundType,
+    result: params.result,
+    sortBy: params.sortBy || "newest",
+    page: params.page,
+    limit: params.limit || 6,
+  });
+
+  return {
+    experiences: result.experiences.map((exp) => ({
+      id: exp.id,
+      slug: exp.slug,
+      company: {
+        name: exp.company.name,
+        slug: exp.company.slug,
+      },
+      role: {
+        title: exp.role.title,
+        slug: exp.role.slug,
+      },
+      interviewYear: exp.interviewYear,
+      placementType: exp.placementType,
+      result: exp.result,
+      overallExperience: exp.overallExperience,
+      isDemo: exp.isDemo,
+      rounds: exp.rounds.map((r) => ({
+        roundType: r.roundType,
+        roundName: r.roundName || undefined,
+      })),
+    })),
+    totalCount: result.totalCount,
+    totalPages: result.totalPages,
+    currentPage: result.currentPage,
+  };
 }

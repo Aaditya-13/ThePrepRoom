@@ -355,7 +355,7 @@ export function ExperienceSidebarFilters({
 
           {/* Floating Dropdown Window with Smooth Animation */}
           {openDropdown === "company" && (
-            <div className="animate-popover absolute left-0 right-0 top-[calc(100%+6px)] z-50 rounded-2xl border border-zinc-700/80 bg-[#12141c]/95 backdrop-blur-2xl p-3.5 shadow-2xl shadow-black/80 ring-1 ring-white/10 space-y-2.5">
+            <div className="animate-popover mt-2 rounded-2xl border border-zinc-700/80 bg-[#12141c]/95 backdrop-blur-2xl p-3.5 shadow-2xl shadow-black/80 ring-1 ring-white/10 space-y-2.5">
               {/* Window Header */}
               <div className="flex items-center justify-between pb-2 border-b border-zinc-800/80">
                 <div className="flex items-center gap-2">
@@ -524,7 +524,7 @@ export function ExperienceSidebarFilters({
 
           {/* Floating Dropdown Window with Smooth Animation */}
           {openDropdown === "role" && (
-            <div className="animate-popover absolute left-0 right-0 top-[calc(100%+6px)] z-50 rounded-2xl border border-zinc-700/80 bg-[#12141c]/95 backdrop-blur-2xl p-3.5 shadow-2xl shadow-black/80 ring-1 ring-white/10 space-y-2.5">
+            <div className="animate-popover mt-2 rounded-2xl border border-zinc-700/80 bg-[#12141c]/95 backdrop-blur-2xl p-3.5 shadow-2xl shadow-black/80 ring-1 ring-white/10 space-y-2.5">
               {/* Window Header */}
               <div className="flex items-center justify-between pb-2 border-b border-zinc-800/80">
                 <div className="flex items-center gap-2">
@@ -688,7 +688,7 @@ export function ExperienceSidebarFilters({
 
           {/* Floating Dropdown Window with Smooth Animation */}
           {openDropdown === "outcome" && (
-            <div className="animate-popover absolute left-0 right-0 top-[calc(100%+6px)] z-50 rounded-2xl border border-zinc-700/80 bg-[#12141c]/95 backdrop-blur-2xl p-3.5 shadow-2xl shadow-black/80 ring-1 ring-white/10 space-y-2.5">
+            <div className="animate-popover mt-2 rounded-2xl border border-zinc-700/80 bg-[#12141c]/95 backdrop-blur-2xl p-3.5 shadow-2xl shadow-black/80 ring-1 ring-white/10 space-y-2.5">
               <div className="flex items-center justify-between pb-2 border-b border-zinc-800/80">
                 <span className="text-xs font-semibold text-zinc-200">Select Outcome</span>
                 <button
@@ -795,7 +795,7 @@ export function ExperienceSidebarFilters({
 
           {/* Floating Dropdown Window with Smooth Animation */}
           {openDropdown === "placement" && (
-            <div className="animate-popover absolute left-0 right-0 top-[calc(100%+6px)] z-50 rounded-2xl border border-zinc-700/80 bg-[#12141c]/95 backdrop-blur-2xl p-3.5 shadow-2xl shadow-black/80 ring-1 ring-white/10 space-y-2.5">
+            <div className="animate-popover mt-2 rounded-2xl border border-zinc-700/80 bg-[#12141c]/95 backdrop-blur-2xl p-3.5 shadow-2xl shadow-black/80 ring-1 ring-white/10 space-y-2.5">
               <div className="flex items-center justify-between pb-2 border-b border-zinc-800/80">
                 <span className="text-xs font-semibold text-zinc-200">Select Placement Type</span>
                 <button
@@ -899,7 +899,7 @@ export function ExperienceSidebarFilters({
 
           {/* Floating Dropdown Window with Smooth Animation */}
           {openDropdown === "year" && (
-            <div className="animate-popover absolute left-0 right-0 top-[calc(100%+6px)] z-50 rounded-2xl border border-zinc-700/80 bg-[#12141c]/95 backdrop-blur-2xl p-3.5 shadow-2xl shadow-black/80 ring-1 ring-white/10 space-y-2.5">
+            <div className="animate-popover mt-2 rounded-2xl border border-zinc-700/80 bg-[#12141c]/95 backdrop-blur-2xl p-3.5 shadow-2xl shadow-black/80 ring-1 ring-white/10 space-y-2.5">
               <div className="flex items-center justify-between pb-2 border-b border-zinc-800/80">
                 <span className="text-xs font-semibold text-zinc-200">Select Year</span>
                 <button
@@ -1016,7 +1016,7 @@ export function ExperienceSidebarFilters({
 
           {/* Floating Dropdown Window with Smooth Animation */}
           {openDropdown === "round" && (
-            <div className="animate-popover absolute left-0 right-0 top-[calc(100%+6px)] z-50 rounded-2xl border border-zinc-700/80 bg-[#12141c]/95 backdrop-blur-2xl p-3.5 shadow-2xl shadow-black/80 ring-1 ring-white/10 space-y-2.5">
+            <div className="animate-popover mt-2 rounded-2xl border border-zinc-700/80 bg-[#12141c]/95 backdrop-blur-2xl p-3.5 shadow-2xl shadow-black/80 ring-1 ring-white/10 space-y-2.5">
               <div className="flex items-center justify-between pb-2 border-b border-zinc-800/80">
                 <span className="text-xs font-semibold text-zinc-200">Select Round Type</span>
                 <button
