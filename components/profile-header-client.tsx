@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import {
   Bookmark,
@@ -43,6 +43,20 @@ interface ProfileHeaderClientProps {
 export function ProfileHeaderClient({ user: initialUser, bookmarksCount }: ProfileHeaderClientProps) {
   const [user, setUser] = useState(initialUser);
   const [isEditOpen, setIsEditOpen] = useState(false);
+
+  useEffect(() => {
+    setUser(initialUser);
+  }, [initialUser]);
+
+  useEffect(() => {
+    const handleProfileUpdated = (event: any) => {
+      if (event.detail) {
+        setUser((prev) => ({ ...prev, ...event.detail }));
+      }
+    };
+    window.addEventListener("profile-updated", handleProfileUpdated);
+    return () => window.removeEventListener("profile-updated", handleProfileUpdated);
+  }, []);
 
   const statusKey = user.placementStatus || "PREPARING";
   const statusConfig = PLACEMENT_STATUS_CONFIG[statusKey] || PLACEMENT_STATUS_CONFIG.PREPARING;

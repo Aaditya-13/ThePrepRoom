@@ -30,18 +30,23 @@ export function UserAvatar({
   showRing = false,
 }: UserAvatarProps) {
   const [hasError, setHasError] = useState(false);
-  const [isLoaded, setIsLoaded] = useState(false);
 
-  // Reset state if image prop changes
+  // Reset error state whenever image prop changes
   useEffect(() => {
     setHasError(false);
-    setIsLoaded(false);
   }, [image]);
 
   const initials = getUserInitials(name);
   const sizeClass = SIZE_MAP[size] || SIZE_MAP.md;
 
-  const showImage = Boolean(image && !hasError && image.trim().length > 0 && image !== "null" && image !== "undefined");
+  const validImage = Boolean(
+    image &&
+    typeof image === "string" &&
+    image.trim().length > 0 &&
+    image !== "null" &&
+    image !== "undefined" &&
+    !hasError
+  );
 
   return (
     <div className={`relative inline-block shrink-0 ${className}`}>
@@ -50,23 +55,17 @@ export function UserAvatar({
           showRing ? "ring-2 ring-blue-500/40 shadow-sm" : ""
         }`}
       >
-        {/* Always render 2-letter initials underneath so there is NEVER a blank or broken state */}
-        <span className="select-none leading-none uppercase">{initials}</span>
-
-        {/* If image is provided, overlay the image once loaded. If it fails, hide it completely */}
-        {showImage && (
+        {validImage ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img
             src={image!}
             alt=""
             referrerPolicy="no-referrer"
-            crossOrigin="anonymous"
-            onLoad={() => setIsLoaded(true)}
             onError={() => setHasError(true)}
-            className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-150 ${
-              isLoaded ? "opacity-100" : "opacity-0 pointer-events-none"
-            }`}
+            className="h-full w-full object-cover"
           />
+        ) : (
+          <span className="select-none leading-none uppercase">{initials}</span>
         )}
       </div>
 

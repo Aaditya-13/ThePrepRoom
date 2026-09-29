@@ -34,13 +34,28 @@ interface NavbarProps {
   } | null;
 }
 
-export function Navbar({ currentUser }: NavbarProps) {
+export function Navbar({ currentUser: initialUser }: NavbarProps) {
+  const [currentUser, setCurrentUser] = useState(initialUser);
   const pathname = usePathname();
   const router = useRouter();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
   const userMenuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    setCurrentUser(initialUser);
+  }, [initialUser]);
+
+  useEffect(() => {
+    const handleProfileUpdated = (event: any) => {
+      if (event.detail) {
+        setCurrentUser((prev: any) => (prev ? { ...prev, ...event.detail } : prev));
+      }
+    };
+    window.addEventListener("profile-updated", handleProfileUpdated);
+    return () => window.removeEventListener("profile-updated", handleProfileUpdated);
+  }, []);
 
   // Close dropdown on outside click
   useEffect(() => {

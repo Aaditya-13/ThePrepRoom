@@ -410,6 +410,9 @@ export function ProfileEditModal({ user, isOpen, onClose, onProfileUpdated }: Pr
         setError(res.error);
       } else {
         setSuccess("Profile saved!");
+        if (typeof window !== "undefined" && res?.user) {
+          window.dispatchEvent(new CustomEvent("profile-updated", { detail: res.user }));
+        }
         if (onProfileUpdated && res?.user) {
           onProfileUpdated(res.user);
         }
@@ -433,7 +436,7 @@ export function ProfileEditModal({ user, isOpen, onClose, onProfileUpdated }: Pr
       <form
         onSubmit={handleSubmit}
         onClick={(e) => e.stopPropagation()}
-        className="relative w-full max-w-lg my-auto rounded-2xl sm:rounded-3xl border border-zinc-800 bg-[#111317] shadow-2xl shadow-black overflow-hidden flex flex-col max-h-[min(540px,calc(100vh-2.5rem))] max-h-[min(540px,calc(100dvh-2.5rem))]"
+        className="relative w-full max-w-lg -translate-y-8 sm:-translate-y-12 my-auto rounded-2xl sm:rounded-3xl border border-zinc-800 bg-[#111317] shadow-2xl shadow-black overflow-hidden flex flex-col max-h-[min(540px,calc(100vh-5rem))] max-h-[min(540px,calc(100dvh-5rem))]"
       >
         {/* 1. FIXED TOP HEADER */}
         <div className="shrink-0 flex items-center justify-between px-5 py-3.5 border-b border-zinc-800 bg-[#111317]">
