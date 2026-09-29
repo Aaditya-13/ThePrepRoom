@@ -8,7 +8,6 @@ import {
   Check,
   Building2,
   Briefcase,
-  Award,
   Calendar,
   Layers,
   ChevronDown,
@@ -44,14 +43,6 @@ interface ExperienceSidebarFiltersProps {
     result?: string;
   };
 }
-
-const OUTCOME_OPTIONS = [
-  { value: "ALL", label: "All Outcomes", dot: null },
-  { value: "SELECTED", label: "Selected", dot: "bg-emerald-400" },
-  { value: "REJECTED", label: "Rejected", dot: "bg-rose-400" },
-  { value: "WAITLISTED", label: "Waitlisted", dot: "bg-amber-400" },
-  { value: "PENDING", label: "Result Pending", dot: "bg-blue-400" },
-];
 
 const PLACEMENT_OPTIONS = [
   { value: "ALL", label: "All Types" },
@@ -148,7 +139,6 @@ export function ExperienceSidebarFilters({
       .filter(Boolean);
   }, [rawRoleParam]);
 
-  const currentResult = searchParams.get("result") || initialFilters.result || "ALL";
   const currentPlacement = searchParams.get("placement") || initialFilters.placementType || "ALL";
   const currentYear = searchParams.get("year") || initialFilters.interviewYear || "ALL";
   const currentRound = searchParams.get("round") || initialFilters.roundType || "ALL";
@@ -226,7 +216,6 @@ export function ExperienceSidebarFilters({
   const activeFiltersCount = [
     selectedCompanySlugs.length > 0,
     selectedRoleSlugs.length > 0,
-    currentResult !== "ALL",
     currentPlacement !== "ALL",
     currentYear !== "ALL",
     currentRound !== "ALL",
@@ -254,11 +243,6 @@ export function ExperienceSidebarFilters({
     }
     return `${selectedRoleSlugs.length} selected`;
   }, [selectedRoleSlugs, roles]);
-
-  const outcomeLabel =
-    currentResult === "ALL"
-      ? null
-      : OUTCOME_OPTIONS.find((o) => o.value === currentResult)?.label;
 
   const placementLabel =
     currentPlacement === "ALL"
@@ -665,117 +649,7 @@ export function ExperienceSidebarFilters({
           )}
         </div>
 
-        {/* 3. OUTCOME / RESULT DROPDOWN WITH WINDOW */}
-        <div
-          ref={openDropdown === "outcome" ? activeDropdownRef : undefined}
-          className={`relative ${openDropdown === "outcome" ? "z-30" : "z-10"}`}
-        >
-          <button
-            type="button"
-            onClick={() => toggleDropdown("outcome")}
-            className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl border text-xs font-medium tracking-normal transition-all duration-200 outline-none select-none group ${
-              currentResult !== "ALL"
-                ? "border-blue-500/50 bg-blue-500/10 text-white shadow-xs shadow-blue-500/10"
-                : openDropdown === "outcome"
-                ? "border-zinc-700 bg-[#181a24] text-white shadow-sm"
-                : "border-zinc-800/80 bg-[#14161e] text-zinc-300 hover:text-white hover:border-zinc-700/80 hover:bg-[#181a24]"
-            }`}
-          >
-            <div className="flex items-center gap-2.5 min-w-0">
-              <div
-                className={`p-1.5 rounded-lg shrink-0 transition-colors duration-200 ${
-                  currentResult !== "ALL"
-                    ? "bg-blue-500/20 text-blue-400"
-                    : "bg-zinc-800/80 text-zinc-400 group-hover:text-zinc-300"
-                }`}
-              >
-                <Award className="h-3.5 w-3.5" />
-              </div>
-              <span className="font-medium text-zinc-200 group-hover:text-white transition-colors">
-                Outcome
-              </span>
-            </div>
-
-            <div className="flex items-center gap-1.5 min-w-0">
-              {outcomeLabel && (
-                <span className="max-w-[95px] sm:max-w-[110px] truncate text-[11px] font-normal text-blue-300/90 bg-blue-500/15 px-1.5 py-0.5 rounded">
-                  {outcomeLabel}
-                </span>
-              )}
-              <ChevronDown
-                className={`h-4 w-4 text-zinc-400 transition-transform duration-300 cubic-bezier(0.16, 1, 0.3, 1) shrink-0 ${
-                  openDropdown === "outcome" ? "rotate-180 text-blue-400" : "group-hover:text-zinc-300"
-                }`}
-              />
-            </div>
-          </button>
-
-          {/* Floating Dropdown Window with Smooth Animation */}
-          {openDropdown === "outcome" && (
-            <div className="animate-popover mt-2 rounded-2xl border border-zinc-700/80 bg-[#12141c]/95 backdrop-blur-2xl p-3.5 shadow-2xl shadow-black/80 ring-1 ring-white/10 space-y-2.5">
-              <div className="flex items-center justify-between pb-2 border-b border-zinc-800/80">
-                <span className="text-xs font-semibold text-zinc-200">Select Outcome</span>
-                <button
-                  type="button"
-                  onClick={() => setOpenDropdown(null)}
-                  className="text-zinc-400 hover:text-white p-1 rounded-lg hover:bg-zinc-800/80 transition-colors"
-                  title="Close"
-                >
-                  <X className="h-3.5 w-3.5" />
-                </button>
-              </div>
-
-              <div className="space-y-1">
-                {OUTCOME_OPTIONS.map((opt) => {
-                  const isSelected = currentResult === opt.value;
-                  return (
-                    <button
-                      key={opt.value}
-                      type="button"
-                      onClick={() => {
-                        updateParam("result", opt.value);
-                        setOpenDropdown(null);
-                      }}
-                      className={`w-full flex items-center justify-between p-2 rounded-xl text-xs transition-all duration-150 text-left ${
-                        isSelected
-                          ? "bg-blue-500/15 border border-blue-500/35 text-blue-300 font-medium"
-                          : "text-zinc-300 hover:text-white hover:bg-zinc-800/60 border border-transparent"
-                      }`}
-                    >
-                      <div className="flex items-center gap-2">
-                        {opt.dot && <span className={`h-2.5 w-2.5 rounded-full ${opt.dot} shrink-0`} />}
-                        <span>{opt.label}</span>
-                      </div>
-                      {isSelected && <Check className="h-3.5 w-3.5 text-blue-400" />}
-                    </button>
-                  );
-                })}
-              </div>
-
-              <div className="pt-2 border-t border-zinc-800/80 flex items-center justify-between">
-                <button
-                  type="button"
-                  onClick={() => {
-                    updateParam("result", "ALL");
-                    setOpenDropdown(null);
-                  }}
-                  className="text-xs text-zinc-400 hover:text-white font-medium transition-colors"
-                >
-                  Reset
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setOpenDropdown(null)}
-                  className="rounded-lg bg-blue-600 hover:bg-blue-500 px-3.5 py-1.5 text-xs font-semibold text-white shadow-md shadow-blue-600/20 active:scale-95 transition-all duration-150"
-                >
-                  Done
-                </button>
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* 4. PLACEMENT TYPE DROPDOWN WITH WINDOW */}
+        {/* 3. PLACEMENT TYPE DROPDOWN WITH WINDOW */}
         <div
           ref={openDropdown === "placement" ? activeDropdownRef : undefined}
           className={`relative ${openDropdown === "placement" ? "z-30" : "z-10"}`}
@@ -882,7 +756,7 @@ export function ExperienceSidebarFilters({
           )}
         </div>
 
-        {/* 5. INTERVIEW YEAR DROPDOWN WITH WINDOW */}
+        {/* 4. INTERVIEW YEAR DROPDOWN WITH WINDOW */}
         <div
           ref={openDropdown === "year" ? activeDropdownRef : undefined}
           className={`relative ${openDropdown === "year" ? "z-30" : "z-10"}`}
@@ -1002,7 +876,7 @@ export function ExperienceSidebarFilters({
           )}
         </div>
 
-        {/* 6. ROUNDS INCLUDED DROPDOWN WITH WINDOW */}
+        {/* 5. ROUNDS INCLUDED DROPDOWN WITH WINDOW */}
         <div
           ref={openDropdown === "round" ? activeDropdownRef : undefined}
           className={`relative ${openDropdown === "round" ? "z-30" : "z-10"}`}

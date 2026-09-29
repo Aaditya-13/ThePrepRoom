@@ -210,7 +210,7 @@ export function AdminLoginForm() {
 
       {/* Brand Header */}
       <Link href="/" className="inline-flex items-center gap-2.5 group relative z-10">
-        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl overflow-hidden bg-white p-0.5 shadow-md shadow-emerald-500/15 transition-transform duration-300 group-hover:scale-105">
+        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl overflow-hidden bg-white p-0.5">
           <Image
             src="/logo.png"
             alt="ThePrepRoom Logo"

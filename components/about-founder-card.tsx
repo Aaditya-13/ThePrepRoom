@@ -8,8 +8,6 @@ import {
   Mail,
   Copy,
   Check,
-  ExternalLink,
-  Sparkles,
 } from "lucide-react";
 
 function LinkedInIcon({ className = "h-4 w-4" }: { className?: string }) {
@@ -60,7 +58,6 @@ export function AboutFounderCard({
       setCopiedEmail(true);
       setTimeout(() => setCopiedEmail(false), 2000);
     } catch {
-      // Fallback
       setCopiedEmail(true);
       setTimeout(() => setCopiedEmail(false), 2000);
     }
@@ -68,35 +65,35 @@ export function AboutFounderCard({
 
   return (
     <div className="flex flex-col items-center sm:items-start text-center sm:text-left space-y-4">
-      {/* 1. PHOTO WITH SUBTLE HOVER OVERLAY */}
-      <div className="relative group w-48 h-48 sm:w-56 sm:h-56 rounded-3xl overflow-hidden border border-zinc-800 bg-[#0c0d10] shadow-2xl shadow-black/60 transition-all duration-300 group-hover:border-blue-500/40 group-hover:shadow-blue-500/10">
+      {/* Photo Container with subtle, restrained hover interaction */}
+      <div className="relative group w-48 h-48 sm:w-56 sm:h-56 rounded-2xl overflow-hidden border border-zinc-800 bg-[#0c0d10] transition-colors duration-200 group-hover:border-zinc-700">
         {!imageError ? (
           <Image
             src={imageUrl}
-            alt={`${name} - Founder & Developer`}
+            alt={name}
             width={224}
             height={224}
             priority
             unoptimized={true}
             onError={() => setImageError(true)}
-            className="w-full h-full object-cover object-[50%_20%] transition-transform duration-500 ease-out group-hover:scale-105"
+            className="w-full h-full object-cover object-[50%_20%]"
           />
         ) : (
-          <div className="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-blue-950 via-[#10131a] to-zinc-950 text-white select-none">
-            <span className="text-4xl font-extrabold tracking-tight text-blue-400 font-heading">
+          <div className="w-full h-full flex flex-col items-center justify-center bg-[#10131a] text-white select-none">
+            <span className="text-3xl font-bold tracking-tight text-zinc-300 font-heading">
               VK
             </span>
-            <span className="text-[11px] text-zinc-400 mt-1 font-mono">{name}</span>
+            <span className="text-[11px] text-zinc-500 mt-1 font-mono">{name}</span>
           </div>
         )}
 
         {/* Subtle, Smooth Hover Social Overlay */}
-        <div className="absolute inset-0 bg-black/65 backdrop-blur-[2px] opacity-0 group-hover:opacity-100 transition-opacity duration-300 ease-out flex flex-col items-center justify-center p-3 pointer-events-none group-hover:pointer-events-auto">
+        <div className="absolute inset-0 bg-black/60 backdrop-blur-[2px] opacity-0 group-hover:opacity-100 transition-opacity duration-200 ease-out flex flex-col items-center justify-center p-3 pointer-events-none group-hover:pointer-events-auto">
           <p className="text-[11px] font-medium text-zinc-300 mb-2.5 tracking-wide">
-            Connect with Ved
+            Connect
           </p>
 
-          <div className="flex items-center gap-2.5">
+          <div className="flex items-center gap-2">
             {/* LinkedIn */}
             <a
               href={linkedinUrl}
@@ -104,7 +101,7 @@ export function AboutFounderCard({
               rel="noopener noreferrer"
               aria-label="LinkedIn profile"
               title="LinkedIn Profile"
-              className="p-2.5 rounded-xl bg-zinc-900/90 border border-zinc-700/80 text-[#0a66c2] hover:bg-[#0a66c2] hover:text-white hover:border-[#0a66c2] transition-all duration-200 hover:scale-110 active:scale-95 shadow-md shadow-black/50 cursor-pointer"
+              className="p-2.5 rounded-xl bg-zinc-900/90 border border-zinc-700 text-[#0a66c2] hover:bg-[#0a66c2] hover:text-white hover:border-[#0a66c2] transition-colors duration-150"
             >
               <LinkedInIcon className="h-4 w-4" />
             </a>
@@ -116,7 +113,7 @@ export function AboutFounderCard({
               rel="noopener noreferrer"
               aria-label="GitHub profile"
               title="GitHub Profile"
-              className="p-2.5 rounded-xl bg-zinc-900/90 border border-zinc-700/80 text-zinc-100 hover:bg-zinc-100 hover:text-zinc-950 hover:border-white transition-all duration-200 hover:scale-110 active:scale-95 shadow-md shadow-black/50 cursor-pointer"
+              className="p-2.5 rounded-xl bg-zinc-900/90 border border-zinc-700 text-zinc-200 hover:bg-zinc-100 hover:text-zinc-950 hover:border-white transition-colors duration-150"
             >
               <GitHubIcon className="h-4 w-4" />
             </a>
@@ -126,23 +123,15 @@ export function AboutFounderCard({
               href={`mailto:${email}`}
               aria-label="Send email"
               title={`Email: ${email}`}
-              className="p-2.5 rounded-xl bg-zinc-900/90 border border-zinc-700/80 text-emerald-400 hover:bg-emerald-500 hover:text-zinc-950 hover:border-emerald-400 transition-all duration-200 hover:scale-110 active:scale-95 shadow-md shadow-black/50 cursor-pointer"
+              className="p-2.5 rounded-xl bg-zinc-900/90 border border-zinc-700 text-zinc-200 hover:bg-zinc-100 hover:text-zinc-950 hover:border-white transition-colors duration-150"
             >
               <Mail className="h-4 w-4" />
             </a>
           </div>
         </div>
-
-        {/* Status Badge in corner */}
-        <div className="absolute top-2.5 left-2.5 z-10">
-          <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-black/60 backdrop-blur-md border border-zinc-700/50 text-[10px] font-medium text-emerald-400 shadow-xs">
-            <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
-            Founder
-          </span>
-        </div>
       </div>
 
-      {/* 2. CLEAR DETAILS DISPLAYED BELOW THE PHOTO */}
+      {/* Clean Details Displayed Directly Below Photo */}
       <div className="space-y-2 w-full max-w-[240px]">
         <div>
           <h2 className="text-lg font-bold text-white tracking-tight font-heading">
@@ -153,28 +142,26 @@ export function AboutFounderCard({
           </p>
         </div>
 
-        {/* Department & Graduation Year Badges */}
+        {/* Department & Graduation Year */}
         <div className="flex flex-col gap-1.5 pt-1">
-          {/* Department */}
-          <div className="inline-flex items-center justify-center sm:justify-start gap-2 px-3 py-1.5 rounded-xl bg-[#141720] border border-zinc-800 text-zinc-200 text-xs">
+          <div className="inline-flex items-center justify-center sm:justify-start gap-2 px-3 py-1.5 rounded-xl bg-[#141720] border border-zinc-800/80 text-zinc-200 text-xs">
             <GraduationCap className="h-3.5 w-3.5 text-blue-400 shrink-0" />
             <span className="font-semibold text-zinc-200 truncate">{department}</span>
           </div>
 
-          {/* Graduation Year */}
-          <div className="inline-flex items-center justify-center sm:justify-start gap-2 px-3 py-1.5 rounded-xl bg-[#141720] border border-zinc-800 text-zinc-200 text-xs">
-            <Calendar className="h-3.5 w-3.5 text-purple-400 shrink-0" />
+          <div className="inline-flex items-center justify-center sm:justify-start gap-2 px-3 py-1.5 rounded-xl bg-[#141720] border border-zinc-800/80 text-zinc-200 text-xs">
+            <Calendar className="h-3.5 w-3.5 text-zinc-400 shrink-0" />
             <span className="font-semibold text-zinc-200">{graduationYear}</span>
           </div>
         </div>
 
-        {/* Quick Clickable Social Pills (Ideal for Mobile & Direct Access) */}
+        {/* Direct Social Links */}
         <div className="pt-2 flex items-center justify-center sm:justify-start gap-2">
           <a
             href={linkedinUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="p-2 rounded-xl bg-zinc-900 border border-zinc-800 text-[#0a66c2] hover:bg-[#0a66c2]/10 hover:border-[#0a66c2]/40 transition-all cursor-pointer"
+            className="p-2 rounded-xl bg-zinc-900 border border-zinc-800 text-[#0a66c2] hover:bg-[#0a66c2]/10 hover:border-[#0a66c2]/40 transition-colors"
             title="LinkedIn Profile"
           >
             <LinkedInIcon className="h-4 w-4" />
@@ -184,7 +171,7 @@ export function AboutFounderCard({
             href={githubUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="p-2 rounded-xl bg-zinc-900 border border-zinc-800 text-zinc-300 hover:text-white hover:bg-zinc-800 hover:border-zinc-700 transition-all cursor-pointer"
+            className="p-2 rounded-xl bg-zinc-900 border border-zinc-800 text-zinc-300 hover:text-white hover:bg-zinc-800 hover:border-zinc-700 transition-colors"
             title="GitHub Profile"
           >
             <GitHubIcon className="h-4 w-4" />
@@ -193,7 +180,7 @@ export function AboutFounderCard({
           <button
             type="button"
             onClick={handleCopyEmail}
-            className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-zinc-900 border border-zinc-800 text-[11px] font-medium text-zinc-300 hover:text-white hover:border-zinc-700 transition-all cursor-pointer"
+            className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-zinc-900 border border-zinc-800 text-[11px] font-medium text-zinc-300 hover:text-white hover:border-zinc-700 transition-colors cursor-pointer"
             title="Click to copy email address"
           >
             {copiedEmail ? (

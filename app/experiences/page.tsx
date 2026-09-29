@@ -13,7 +13,7 @@ export const revalidate = 0;
 export const metadata = {
   title: "Interview Experiences",
   description:
-    "Real placement experiences shared by students. Filter by company, year, rounds, or outcome to inspect what came before you.",
+    "Real placement experiences shared by students. Filter by company, role, year, or rounds to inspect what came before you.",
 };
 
 interface PageProps {
@@ -52,7 +52,6 @@ export default async function ExperiencesPage(props: PageProps) {
       interviewYear,
       placementType: searchParams.placement,
       roundType: searchParams.round,
-      result: searchParams.result,
       sortBy: searchParams.sort || "newest",
       page,
       limit: 6,
@@ -173,7 +172,6 @@ export default async function ExperiencesPage(props: PageProps) {
               interviewYear: searchParams.year,
               placementType: searchParams.placement,
               roundType: searchParams.round,
-              result: searchParams.result,
             }}
           />
         </StickySidebar>

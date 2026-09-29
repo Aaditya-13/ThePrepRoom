@@ -32,9 +32,6 @@ export default async function AboutPage() {
 
   return (
     <div className="min-h-screen bg-[#090a0d] text-zinc-100 pb-20 selection:bg-blue-600 selection:text-white">
-      {/* Decorative ambient background glows */}
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-7xl h-96 bg-gradient-to-b from-blue-600/10 via-purple-600/5 to-transparent blur-3xl pointer-events-none -z-10" />
-
       <main className="mx-auto max-w-6xl px-4 pt-10 sm:px-6 lg:px-8 space-y-14">
         {/* Breadcrumb Navigation */}
         <nav aria-label="Breadcrumb" className="flex items-center gap-2 text-xs text-zinc-400">
@@ -59,9 +56,7 @@ export default async function AboutPage() {
         </div>
 
         {/* Founder Spotlight & Authentic Personal Note */}
-        <section className="rounded-3xl border border-zinc-800/90 bg-[#101217] p-6 sm:p-10 shadow-2xl relative overflow-hidden">
-          <div className="absolute -right-24 -top-24 w-80 h-80 bg-blue-500/10 rounded-full blur-3xl pointer-events-none" />
-
+        <section className="rounded-3xl border border-zinc-800/90 bg-[#101217] p-6 sm:p-10 relative">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start">
             {/* Left: Founder Profile Card */}
             <div className="lg:col-span-4 flex justify-center lg:justify-start">
@@ -279,7 +274,7 @@ export default async function AboutPage() {
         </section>
 
         {/* Call to Action Banner */}
-        <section className="rounded-3xl border border-blue-500/30 bg-gradient-to-br from-blue-950/40 via-[#10141f] to-zinc-950 p-6 sm:p-10 shadow-2xl flex flex-col md:flex-row items-center justify-between gap-6 text-center md:text-left">
+        <section className="rounded-3xl border border-zinc-800 bg-[#111317] p-6 sm:p-10 flex flex-col md:flex-row items-center justify-between gap-6 text-center md:text-left">
           <div className="space-y-2 max-w-xl">
             <h3 className="text-xl sm:text-2xl font-bold text-white font-heading">
               Have an Interview Story to Share?

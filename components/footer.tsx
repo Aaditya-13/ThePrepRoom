@@ -25,7 +25,7 @@ export function Footer() {
           {/* Brand & Description (4 cols) */}
           <div className="lg:col-span-4 space-y-4">
             <Link href="/" className="flex items-center gap-2.5 group">
-              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl overflow-hidden bg-white p-0.5 shadow-md shadow-blue-500/15 transition-transform duration-300 ease-out group-hover:scale-105">
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl overflow-hidden bg-white p-0.5">
                 <Image
                   src="/logo.png"
                   alt="ThePrepRoom Logo"

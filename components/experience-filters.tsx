@@ -58,7 +58,6 @@ export function ExperienceFilters({ companies, years, initialFilters }: FilterPr
     searchParams.has("year") ||
     searchParams.has("placement") ||
     searchParams.has("round") ||
-    searchParams.has("result") ||
     searchParams.has("sort");
 
   return (
@@ -85,7 +84,7 @@ export function ExperienceFilters({ companies, years, initialFilters }: FilterPr
       </form>
 
       {/* Multi-parameter Filter Row */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3 pt-3 border-t border-zinc-800/80 text-xs">
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3 pt-3 border-t border-zinc-800/80 text-xs">
         {/* Company Filter */}
         <div>
           <label className="block text-[11px] font-semibold uppercase tracking-wider text-zinc-400 mb-1.5">Company</label>
@@ -150,22 +149,6 @@ export function ExperienceFilters({ companies, years, initialFilters }: FilterPr
             <option value="HR">HR Interview</option>
             <option value="GROUP_DISCUSSION">Group Discussion</option>
             <option value="APTITUDE">Aptitude Test</option>
-          </select>
-        </div>
-
-        {/* Result Filter */}
-        <div>
-          <label className="block text-[11px] font-semibold uppercase tracking-wider text-zinc-400 mb-1.5">Outcome</label>
-          <select
-            value={searchParams.get("result") || "ALL"}
-            onChange={(e) => updateParam("result", e.target.value)}
-            className="w-full rounded-lg border border-zinc-700/80 bg-zinc-800/80 py-1.5 px-2.5 text-xs text-zinc-200 focus:border-blue-500 focus:outline-none"
-          >
-            <option value="ALL">All Results</option>
-            <option value="SELECTED">Selected</option>
-            <option value="REJECTED">Rejected</option>
-            <option value="WAITLISTED">Waitlisted</option>
-            <option value="PENDING">Result Pending</option>
           </select>
         </div>
 

@@ -75,11 +75,6 @@ export default async function HomePage() {
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
             {/* Left Hero Content */}
             <div className="lg:col-span-7 space-y-6 text-center lg:text-left">
-              <div className="inline-flex items-center gap-2 rounded-full border border-blue-500/20 bg-blue-50/50 dark:bg-blue-950/30 px-3.5 py-1 text-xs font-semibold text-blue-600 dark:text-blue-400">
-                <Sparkles className="h-3.5 w-3.5" />
-                <span>The Student Placement Archive</span>
-              </div>
-
               <h1 className="font-heading text-4xl sm:text-5xl lg:text-6xl font-black tracking-[-0.03em] text-slate-900 dark:text-white leading-[1.1]">
                 Know the drill.
                 <span className="block text-blue-600 dark:text-blue-500 mt-1 sm:mt-2">

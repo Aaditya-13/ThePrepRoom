@@ -118,7 +118,6 @@ export function ExperienceSearchBar({
   const currentSort = searchParams.get("sort") || initialSort || "newest";
   const currentCompany = searchParams.get("company") || initialFilters?.company;
   const currentRole = searchParams.get("role") || initialFilters?.role;
-  const currentResult = searchParams.get("result") || initialFilters?.result;
   const currentPlacement = searchParams.get("placement") || initialFilters?.placement;
   const currentYear = searchParams.get("year") || initialFilters?.year;
   const currentRound = searchParams.get("round") || initialFilters?.round;
@@ -135,7 +134,6 @@ export function ExperienceSearchBar({
   const hasAnyActiveFilter = Boolean(
     companySlugs.length > 0 ||
       roleSlugs.length > 0 ||
-      currentResult ||
       currentPlacement ||
       currentYear ||
       currentRound ||
@@ -273,16 +271,6 @@ export function ExperienceSearchBar({
               </button>
             );
           })}
-
-          {currentResult && (
-            <button
-              onClick={() => handleRemoveFilter("result")}
-              className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-blue-500/15 border border-blue-500/30 text-blue-300 hover:bg-blue-500/25 transition-colors capitalize"
-            >
-              <span>Outcome: {currentResult.toLowerCase()}</span>
-              <X className="h-3 w-3" />
-            </button>
-          )}
 
           {currentPlacement && (
             <button

@@ -108,7 +108,7 @@ export function Navbar({ currentUser: initialUser }: NavbarProps) {
         {/* Brand Identity */}
         <div className="flex items-center gap-8">
           <Link href="/" className="flex items-center gap-2.5 group outline-none focus:outline-none">
-            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl overflow-hidden bg-white p-0.5 shadow-md shadow-blue-500/15 transition-transform duration-300 ease-out group-hover:scale-105">
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl overflow-hidden bg-white p-0.5">
               <Image
                 src="/logo.png"
                 alt="ThePrepRoom Logo"
