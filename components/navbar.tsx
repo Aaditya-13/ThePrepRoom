@@ -87,6 +87,7 @@ export function Navbar({ currentUser: initialUser }: NavbarProps) {
     { label: "Questions", href: "/questions" },
     { label: "Companies", href: "/companies" },
     { label: "Prepare", href: "/prepare" },
+    { label: "About", href: "/about" },
   ];
 
   const handleLogout = () => {
