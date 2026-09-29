@@ -8,6 +8,7 @@ export async function GET(request: NextRequest) {
   const code = searchParams.get("code");
   const state = searchParams.get("state");
   const error = searchParams.get("error");
+  const errorDescription = searchParams.get("error_description");
   const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
 
   const cookieStore = await cookies();
@@ -18,8 +19,12 @@ export async function GET(request: NextRequest) {
   cookieStore.delete("oauth_next");
 
   if (error || !code || !state || state !== savedState) {
+    console.error("LinkedIn OAuth error or state mismatch:", { error, errorDescription, state, savedState });
     const errorUrl = new URL("/login", appUrl);
-    errorUrl.searchParams.set("error", "LinkedIn authentication was cancelled or failed verification.");
+    errorUrl.searchParams.set(
+      "error",
+      errorDescription || "LinkedIn authentication was cancelled or failed verification."
+    );
     return NextResponse.redirect(errorUrl);
   }
 
@@ -28,7 +33,7 @@ export async function GET(request: NextRequest) {
   const redirectUri = `${appUrl}/api/auth/linkedin/callback`;
 
   try {
-    // Exchange authorization code for LinkedIn access token
+    // 1. Exchange authorization code for LinkedIn access token
     const tokenRes = await fetch("https://www.linkedin.com/oauth/v2/accessToken", {
       method: "POST",
       headers: { "Content-Type": "application/x-www-form-urlencoded" },
@@ -42,32 +47,59 @@ export async function GET(request: NextRequest) {
     });
 
     if (!tokenRes.ok) {
-      throw new Error("Failed to exchange LinkedIn OAuth code");
+      const errBody = await tokenRes.text();
+      console.error("LinkedIn token exchange failed:", errBody);
+      throw new Error(`Failed to exchange LinkedIn OAuth code: ${errBody}`);
     }
 
     const tokenData = await tokenRes.json();
     const accessToken = tokenData.access_token;
+    const idToken = tokenData.id_token;
 
-    // Fetch user profile from LinkedIn OpenID UserInfo endpoint
-    const userRes = await fetch("https://api.linkedin.com/v2/userinfo", {
-      headers: { Authorization: `Bearer ${accessToken}` },
-    });
+    let email: string | undefined;
+    let name: string | undefined;
+    let linkedInId: string | undefined;
+    let picture: string | undefined;
 
-    if (!userRes.ok) {
-      throw new Error("Failed to fetch LinkedIn user profile");
+    // 2. Try fetching from LinkedIn OpenID UserInfo endpoint
+    try {
+      const userRes = await fetch("https://api.linkedin.com/v2/userinfo", {
+        headers: { Authorization: `Bearer ${accessToken}` },
+      });
+
+      if (userRes.ok) {
+        const profile = await userRes.json();
+        email = profile.email?.toLowerCase().trim();
+        name = profile.name || `${profile.given_name || ""} ${profile.family_name || ""}`.trim() || "Student";
+        linkedInId = profile.sub;
+        picture = profile.picture;
+      }
+    } catch (userInfoErr) {
+      console.warn("LinkedIn userinfo fetch error, falling back to id_token:", userInfoErr);
     }
 
-    const profile = await userRes.json();
-    const email = profile.email?.toLowerCase().trim();
-    const name = profile.name || `${profile.given_name || ""} ${profile.family_name || ""}`.trim() || "Student";
-    const linkedInId = profile.sub;
-    const picture = profile.picture;
+    // 3. Fallback to decoding id_token JWT if userinfo was unavailable
+    if ((!email || !linkedInId) && idToken) {
+      try {
+        const parts = idToken.split(".");
+        if (parts.length === 3) {
+          const payloadJson = Buffer.from(parts[1], "base64").toString("utf-8");
+          const idData = JSON.parse(payloadJson);
+          email = email || idData.email?.toLowerCase().trim();
+          name = name || idData.name || `${idData.given_name || ""} ${idData.family_name || ""}`.trim() || "Student";
+          linkedInId = linkedInId || idData.sub;
+          picture = picture || idData.picture;
+        }
+      } catch (jwtErr) {
+        console.error("Failed to parse LinkedIn id_token:", jwtErr);
+      }
+    }
 
     if (!email) {
-      throw new Error("No verified email provided by LinkedIn");
+      throw new Error("No verified email received from LinkedIn account.");
     }
 
-    // Check if user already exists
+    // 4. Check if user already exists
     let user = await prisma.user.findUnique({
       where: { email },
     });
@@ -88,7 +120,7 @@ export async function GET(request: NextRequest) {
         where: { id: user.id },
         data: {
           oauthProvider: "linkedin",
-          oauthId: linkedInId,
+          oauthId: linkedInId || user.oauthId,
           image: user.image || picture || null,
         },
       });
@@ -98,17 +130,17 @@ export async function GET(request: NextRequest) {
       user = await prisma.user.create({
         data: {
           email,
-          name,
+          name: name || "Student",
           role: "STUDENT",
           oauthProvider: "linkedin",
-          oauthId: linkedInId,
+          oauthId: linkedInId || null,
           image: picture || null,
           collegeId: college?.id || null,
         },
       });
     }
 
-    // Create session cookie for student
+    // 5. Create secure session cookie for student
     await createSessionCookie({
       userId: user.id,
       email: user.email,
@@ -119,10 +151,13 @@ export async function GET(request: NextRequest) {
 
     const destination = new URL(next, appUrl);
     return NextResponse.redirect(destination);
-  } catch (err) {
+  } catch (err: any) {
     console.error("LinkedIn OAuth callback error:", err);
     const errorUrl = new URL("/login", appUrl);
-    errorUrl.searchParams.set("error", "Failed to sign in with LinkedIn. Please try again or use college email.");
+    errorUrl.searchParams.set(
+      "error",
+      err?.message || "Failed to sign in with LinkedIn. Please try again or use college email."
+    );
     return NextResponse.redirect(errorUrl);
   }
 }
