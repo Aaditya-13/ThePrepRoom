@@ -51,14 +51,14 @@ export function ExperienceRow({ experience }: ExperienceRowProps) {
       : [];
 
   return (
-    <article className="group relative py-5 px-4 sm:px-6 border-b border-stone-200 dark:border-zinc-800/80 hover:bg-zinc-900/60 active:bg-zinc-800/60 active:scale-[0.998] transition-all duration-200 ease-out cursor-pointer">
+    <article className="group py-5 px-4 sm:px-6 border-b border-stone-200 dark:border-zinc-800/80 hover:bg-zinc-900/60 transition-colors duration-200 ease-out">
       <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
         <div className="space-y-1.5 flex-1 min-w-0">
           {/* Header metadata row */}
-          <div className="flex flex-wrap items-center gap-2 relative z-10">
+          <div className="flex flex-wrap items-center gap-2">
             <Link
               href={`/companies/${experience.company.slug}`}
-              className="text-xs font-bold text-slate-800 dark:text-zinc-200 uppercase tracking-wider hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+              className="text-xs font-bold text-slate-800 dark:text-zinc-200 uppercase tracking-wider hover:text-blue-500 transition-colors focus:outline-none"
             >
               {experience.company.name}
             </Link>
@@ -79,9 +79,8 @@ export function ExperienceRow({ experience }: ExperienceRowProps) {
           <h3 className="text-base sm:text-lg font-semibold text-slate-900 dark:text-zinc-100 leading-snug">
             <Link
               href={`/experiences/${experience.slug}`}
-              className="hover:text-blue-600 dark:hover:text-blue-400 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors"
+              className="hover:text-blue-500 transition-colors focus:outline-none"
             >
-              <span className="absolute inset-0 z-0" aria-hidden="true" />
               {experience.role.title}
             </Link>
           </h3>
@@ -105,7 +104,7 @@ export function ExperienceRow({ experience }: ExperienceRowProps) {
         </div>
 
         {/* Right side: Result Badge & Action */}
-        <div className="flex sm:flex-col items-center sm:items-end justify-between sm:justify-start gap-2 pt-1 sm:pt-0 shrink-0 relative z-10">
+        <div className="flex sm:flex-col items-center sm:items-end justify-between sm:justify-start gap-2 pt-1 sm:pt-0 shrink-0">
           <div className="flex items-center gap-2">
             <span
               className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-[11px] font-semibold border ${resultInfo.badgeClass}`}
@@ -119,12 +118,13 @@ export function ExperienceRow({ experience }: ExperienceRowProps) {
             />
           </div>
 
-          <span
-            className="text-xs font-semibold text-blue-600 dark:text-blue-400 group-hover:text-blue-500 inline-flex items-center gap-1 group-hover:translate-x-0.5 transition-transform"
+          <Link
+            href={`/experiences/${experience.slug}`}
+            className="text-xs font-semibold text-blue-500 hover:text-blue-400 inline-flex items-center gap-1 group-hover:translate-x-0.5 transition-transform focus:outline-none"
           >
             <span>View Experience</span>
             <span>→</span>
-          </span>
+          </Link>
         </div>
       </div>
     </article>

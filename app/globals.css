@@ -118,10 +118,29 @@ textarea,
   transition-duration: 240ms;
 }
 
+/* Prevent unwanted focus bounding box flashes on click & section navigation */
+:focus:not(:focus-visible) {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+*:focus {
+  outline: none;
+}
+
+:target {
+  outline: none !important;
+}
+
+/* Smooth anchor scrolling for section transitions */
+html {
+  scroll-behavior: smooth;
+}
+
 /* Silky smooth route navigation optical dissolve (no black flicker, no layout jump) */
 @keyframes pageEnter {
   0% {
-    opacity: 0.88;
+    opacity: 0.94;
   }
   100% {
     opacity: 1;
@@ -129,7 +148,7 @@ textarea,
 }
 
 .page-enter {
-  animation: pageEnter 220ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation: pageEnter 180ms ease-out both;
 }
 
 /* Reduced motion accessibility */
