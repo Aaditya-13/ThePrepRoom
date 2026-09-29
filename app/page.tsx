@@ -67,23 +67,20 @@ export default async function HomePage() {
   return (
     <div className="min-h-screen bg-[#090a0d] text-white">
       {/* 1. HERO SECTION */}
-      <section className="relative overflow-hidden border-b border-stone-200 dark:border-zinc-800/80 pt-12 pb-16 sm:pt-20 sm:pb-24">
-        {/* Subtle background glow */}
-        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[600px] h-[350px] bg-blue-600/10 dark:bg-blue-500/10 blur-[120px] pointer-events-none rounded-full" />
-
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+      <section className="relative overflow-hidden border-b border-zinc-800/80 min-h-[calc(100vh-4rem)] flex items-center py-10 lg:py-0">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 w-full">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
             {/* Left Hero Content */}
             <div className="lg:col-span-7 space-y-6 text-center lg:text-left">
-              <h1 className="font-heading text-4xl sm:text-5xl lg:text-6xl font-black tracking-[-0.03em] text-slate-900 dark:text-white leading-[1.1]">
+              <h1 className="font-heading text-4xl sm:text-5xl lg:text-6xl font-black tracking-[-0.03em] text-white leading-[1.1]">
                 Know the drill.
-                <span className="block text-blue-600 dark:text-blue-500 mt-1 sm:mt-2">
+                <span className="block text-blue-500 mt-1 sm:mt-2">
                   Before you face&nbsp;it.
                 </span>
               </h1>
 
-              <p className="font-body text-sm sm:text-base text-slate-600 dark:text-zinc-400 max-w-xl leading-relaxed font-normal">
-                Real placement experiences, questions, and insights from students who've been there.
+              <p className="font-body text-sm sm:text-base text-zinc-400 max-w-xl leading-relaxed font-normal mx-auto lg:mx-0">
+                Real placement experiences, questions, and insights from students who&apos;ve been there.
               </p>
 
               {/* Action Buttons */}
@@ -98,39 +95,19 @@ export default async function HomePage() {
 
                 <Link
                   href="/share"
-                  className="h-11 sm:h-12 px-6 rounded-full border border-stone-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-slate-900 dark:text-white font-medium text-sm inline-flex items-center justify-center gap-2 hover:bg-stone-50 dark:hover:bg-zinc-800 transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] shadow-xs"
+                  className="h-11 sm:h-12 px-6 rounded-full border border-zinc-700 bg-zinc-900 text-white font-medium text-sm inline-flex items-center justify-center gap-2 hover:bg-zinc-800 transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] shadow-xs"
                 >
-                  <PenLine className="h-4 w-4 text-blue-500" />
+                  <PenLine className="h-4 w-4 text-blue-400" />
                   <span>Share Your Journey</span>
                 </Link>
 
                 <Link
                   href="/companies"
-                  className="h-11 sm:h-12 px-5 rounded-full border border-stone-300 dark:border-zinc-800 bg-stone-100/90 dark:bg-zinc-800/80 hover:bg-stone-200 dark:hover:bg-zinc-800 text-slate-800 dark:text-zinc-200 font-medium text-sm inline-flex items-center justify-center gap-2 transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] shadow-xs"
+                  className="h-11 sm:h-12 px-5 rounded-full border border-zinc-800 bg-zinc-800/80 hover:bg-zinc-800 text-zinc-200 font-medium text-sm inline-flex items-center justify-center gap-2 transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] shadow-xs"
                 >
-                  <Building2 className="h-4 w-4 text-emerald-500" />
+                  <Building2 className="h-4 w-4 text-emerald-400" />
                   <span>Company Stats</span>
                 </Link>
-              </div>
-
-              {/* Trust & Feature Badges */}
-              <div className="pt-4 flex flex-wrap items-center justify-center lg:justify-start gap-2.5">
-                <div className="inline-flex items-center gap-1.5 rounded-full border border-stone-200 dark:border-zinc-800 bg-stone-100/80 dark:bg-zinc-900/80 px-3.5 py-1.5 text-xs font-medium text-slate-700 dark:text-zinc-300">
-                  <ShieldCheck className="h-3.5 w-3.5 text-blue-500" />
-                  <span>Real Experiences</span>
-                </div>
-                <div className="inline-flex items-center gap-1.5 rounded-full border border-stone-200 dark:border-zinc-800 bg-stone-100/80 dark:bg-zinc-900/80 px-3.5 py-1.5 text-xs font-medium text-slate-700 dark:text-zinc-300">
-                  <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500" />
-                  <span>Verified Students</span>
-                </div>
-                <div className="inline-flex items-center gap-1.5 rounded-full border border-stone-200 dark:border-zinc-800 bg-stone-100/80 dark:bg-zinc-900/80 px-3.5 py-1.5 text-xs font-medium text-slate-700 dark:text-zinc-300">
-                  <Building2 className="h-3.5 w-3.5 text-amber-500" />
-                  <span>Top Companies</span>
-                </div>
-                <div className="inline-flex items-center gap-1.5 rounded-full border border-stone-200 dark:border-zinc-800 bg-stone-100/80 dark:bg-zinc-900/80 px-3.5 py-1.5 text-xs font-medium text-slate-700 dark:text-zinc-300">
-                  <Sparkles className="h-3.5 w-3.5 text-purple-400" />
-                  <span>Interview Tips</span>
-                </div>
               </div>
             </div>
 
@@ -142,21 +119,21 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* 2. FEATURED INTERVIEWS SECTION (Image 2 reference) */}
-      <section className="py-14 sm:py-18 border-b border-stone-200 dark:border-zinc-800/80 bg-stone-50/40 dark:bg-[#0c0e12]">
+      {/* 2. FEATURED INTERVIEWS SECTION */}
+      <section className="py-16 sm:py-20 border-b border-zinc-800/80 bg-[#0c0e12]">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 space-y-8">
           <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
             <div>
-              <h2 className="text-2xl sm:text-3xl font-semibold tracking-tight text-slate-900 dark:text-white">
+              <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-white font-heading">
                 Featured Interviews
               </h2>
-              <p className="font-body text-sm text-slate-600 dark:text-zinc-400 mt-1">
+              <p className="font-body text-xs sm:text-sm text-zinc-400 mt-1">
                 Handpicked interview journeys from students who recently cracked top opportunities.
               </p>
             </div>
             <Link
               href="/experiences"
-              className="text-sm font-semibold text-blue-600 dark:text-blue-400 hover:text-blue-500 inline-flex items-center gap-1.5 group"
+              className="text-xs sm:text-sm font-semibold text-blue-400 hover:text-blue-300 inline-flex items-center gap-1.5 group transition-colors"
             >
               <span>View all stories</span>
               <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
@@ -174,12 +151,12 @@ export default async function HomePage() {
                 <Link
                   key={exp.id}
                   href={`/experiences/${exp.slug}`}
-                  className="rounded-2xl border border-stone-200 dark:border-zinc-800/90 bg-white dark:bg-[#121418] p-5 hover:border-blue-500/40 hover:-translate-y-0.5 active:scale-[0.995] transition-[transform,border-color,background-color,box-shadow] duration-200 ease-out shadow-xs hover:shadow-xl hover:shadow-black/40 group flex flex-col justify-between cursor-pointer outline-none select-none"
+                  className="rounded-2xl border border-zinc-800/90 bg-[#121418] p-5 hover:border-blue-500/40 hover:-translate-y-0.5 active:scale-[0.995] transition-[transform,border-color,background-color,box-shadow] duration-200 ease-out shadow-xs hover:shadow-xl hover:shadow-black/40 group flex flex-col justify-between cursor-pointer outline-none select-none"
                 >
                   <div className="space-y-3">
                     {/* Top Row: Year · Department and Tag */}
                     <div className="flex items-center justify-between text-xs font-mono">
-                      <span className="text-slate-500 dark:text-zinc-400 font-medium">
+                      <span className="text-zinc-400 font-medium">
                         {exp.interviewYear} · {exp.user?.department || "CSE"}
                       </span>
                       <span className={`px-2 py-0.5 rounded-full border text-[10px] font-semibold ${tagStyle.bg}`}>
@@ -189,22 +166,22 @@ export default async function HomePage() {
 
                     {/* Company and Role */}
                     <div>
-                      <h3 className="text-base font-bold text-slate-900 dark:text-white group-hover:text-blue-500 transition-colors line-clamp-1">
+                      <h3 className="text-base font-bold text-white group-hover:text-blue-400 transition-colors line-clamp-1">
                         {exp.company.name}
                       </h3>
-                      <p className="text-xs text-slate-500 dark:text-zinc-400 mt-0.5 line-clamp-1 font-medium">
+                      <p className="text-xs text-zinc-400 mt-0.5 line-clamp-1 font-medium">
                         {exp.role.title}
                       </p>
                     </div>
 
                     {/* Excerpt */}
-                    <p className="text-xs text-slate-600 dark:text-zinc-400 line-clamp-3 leading-relaxed">
+                    <p className="text-xs text-zinc-400 line-clamp-3 leading-relaxed">
                       {exp.overallExperience}
                     </p>
                   </div>
 
                   {/* Card Bottom: Candidate & Views */}
-                  <div className="mt-5 pt-3.5 border-t border-stone-100 dark:border-zinc-800/80 flex items-center justify-between">
+                  <div className="mt-5 pt-3.5 border-t border-zinc-800/80 flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-blue-600 text-white font-bold text-[10px] overflow-hidden">
                         {exp.user?.image && !exp.isAnonymous ? (
@@ -214,12 +191,12 @@ export default async function HomePage() {
                           <span>{authorInitials}</span>
                         )}
                       </div>
-                      <span className="text-xs font-medium text-slate-800 dark:text-zinc-300 line-clamp-1">
+                      <span className="text-xs font-medium text-zinc-300 line-clamp-1">
                         {authorName}
                       </span>
                     </div>
-                    <span className="text-xs font-mono text-slate-400 dark:text-zinc-500">
-                      {exp.viewsCount}
+                    <span className="text-xs font-mono text-zinc-500">
+                      {exp.viewsCount} views
                     </span>
                   </div>
                 </Link>
@@ -227,17 +204,17 @@ export default async function HomePage() {
             })}
           </div>
 
-          {/* RESOURCE CALLOUT BANNER (Image 2 bottom reference) */}
-          <div className="rounded-2xl bg-[#c8c5ff] text-[#121324] p-6 sm:p-7 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-md">
+          {/* RESOURCE CALLOUT BANNER */}
+          <div className="rounded-2xl border border-zinc-800 bg-[#12141c] p-6 sm:p-7 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div className="flex items-center gap-4">
-              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-[#1e1b4b] text-white shadow-md">
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-blue-600/10 border border-blue-500/20 text-blue-400">
                 <GraduationCap className="h-6 w-6" />
               </div>
               <div>
-                <h4 className="text-base sm:text-lg font-bold text-[#1e1b4b]">
+                <h4 className="text-base sm:text-lg font-bold text-white font-heading">
                   New to placement drives?
                 </h4>
-                <p className="text-xs sm:text-sm text-[#2d2a6a] mt-0.5 max-w-xl">
+                <p className="text-xs sm:text-sm text-zinc-400 mt-0.5 max-w-xl">
                   Inspect high-yield Core CS roadmaps, Linux administration essentials, and company-specific preparation patterns.
                 </p>
               </div>
@@ -245,7 +222,7 @@ export default async function HomePage() {
 
             <Link
               href="/prepare"
-              className="rounded-full bg-[#1e1b4b] hover:bg-[#2b276b] text-white font-semibold px-6 py-2.5 text-xs sm:text-sm inline-flex items-center gap-1.5 shrink-0 transition-all hover:scale-105 active:scale-95 shadow-md"
+              className="rounded-full bg-blue-600 hover:bg-blue-500 text-white font-semibold px-6 py-2.5 text-xs sm:text-sm inline-flex items-center gap-1.5 shrink-0 transition-colors shadow-md shadow-blue-600/20"
             >
               <span>Explore Resources</span>
               <ArrowRight className="h-4 w-4" />
