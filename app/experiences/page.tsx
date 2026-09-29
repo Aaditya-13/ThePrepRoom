@@ -158,7 +158,7 @@ export default async function ExperiencesPage(props: PageProps) {
       {/* 3-Column Catalog Layout */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         {/* Left Column: Amazon/Flipkart-style Filters */}
-        <aside className="lg:col-span-3 xl:col-span-3 lg:sticky lg:top-20">
+        <aside className="lg:col-span-3 xl:col-span-3 lg:sticky lg:top-20 z-20">
           <ExperienceSidebarFilters
             companies={companies}
             roles={roles}
@@ -181,6 +181,8 @@ export default async function ExperiencesPage(props: PageProps) {
             filteredCount={data.experiences.length}
             initialQuery={searchParams.q}
             initialSort={searchParams.sort}
+            companies={companies}
+            roles={roles}
             initialFilters={{
               company: searchParams.company,
               role: searchParams.role,

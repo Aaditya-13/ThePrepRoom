@@ -18,6 +18,8 @@ interface ExperienceSearchBarProps {
     round?: string;
     q?: string;
   };
+  companies?: { name: string; slug: string }[];
+  roles?: { title: string; slug: string }[];
   onOpenMobileFilters?: () => void;
   activeFiltersCount?: number;
 }
@@ -28,6 +30,8 @@ export function ExperienceSearchBar({
   initialQuery = "",
   initialSort = "newest",
   initialFilters,
+  companies = [],
+  roles = [],
   onOpenMobileFilters,
   activeFiltersCount = 0,
 }: ExperienceSearchBarProps) {
@@ -71,6 +75,20 @@ export function ExperienceSearchBar({
     updateParam(key, null);
   };
 
+  const handleRemoveCompanySlug = (slugToRemove: string) => {
+    const raw = searchParams.get("company") || initialFilters?.company || "";
+    const list = raw.split(",").map((s) => s.trim()).filter(Boolean);
+    const updated = list.filter((s) => s !== slugToRemove);
+    updateParam("company", updated.length > 0 ? updated.join(",") : null);
+  };
+
+  const handleRemoveRoleSlug = (slugToRemove: string) => {
+    const raw = searchParams.get("role") || initialFilters?.role || "";
+    const list = raw.split(",").map((s) => s.trim()).filter(Boolean);
+    const updated = list.filter((s) => s !== slugToRemove);
+    updateParam("role", updated.length > 0 ? updated.join(",") : null);
+  };
+
   const currentSort = searchParams.get("sort") || initialSort || "newest";
   const currentCompany = searchParams.get("company") || initialFilters?.company;
   const currentRole = searchParams.get("role") || initialFilters?.role;
@@ -80,8 +98,22 @@ export function ExperienceSearchBar({
   const currentRound = searchParams.get("round") || initialFilters?.round;
   const currentQ = searchParams.get("q") || initialFilters?.q;
 
+  const companySlugs = currentCompany
+    ? currentCompany.split(",").map((s) => s.trim()).filter(Boolean)
+    : [];
+
+  const roleSlugs = currentRole
+    ? currentRole.split(",").map((s) => s.trim()).filter(Boolean)
+    : [];
+
   const hasAnyActiveFilter = Boolean(
-    currentCompany || currentRole || currentResult || currentPlacement || currentYear || currentRound || currentQ
+    companySlugs.length > 0 ||
+      roleSlugs.length > 0 ||
+      currentResult ||
+      currentPlacement ||
+      currentYear ||
+      currentRound ||
+      currentQ
   );
 
   return (
@@ -94,6 +126,7 @@ export function ExperienceSearchBar({
         <div className="relative flex-1">
           <Search className="absolute left-3.5 top-3 h-4 w-4 text-zinc-500" />
           <input
+            suppressHydrationWarning
             type="text"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
@@ -153,6 +186,7 @@ export function ExperienceSearchBar({
             Sort:
           </span>
           <select
+            suppressHydrationWarning
             value={currentSort}
             onChange={(e) => updateParam("sort", e.target.value)}
             className="rounded-lg border border-zinc-700/80 bg-zinc-800/80 py-1 px-2.5 text-xs text-zinc-200 focus:border-blue-400 focus:outline-none transition-colors"
@@ -180,25 +214,33 @@ export function ExperienceSearchBar({
             </button>
           )}
 
-          {currentCompany && (
-            <button
-              onClick={() => handleRemoveFilter("company")}
-              className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-blue-500/15 border border-blue-500/30 text-blue-300 hover:bg-blue-500/25 transition-colors capitalize"
-            >
-              <span>Company: {currentCompany}</span>
-              <X className="h-3 w-3" />
-            </button>
-          )}
+          {companySlugs.map((slug) => {
+            const companyName = companies.find((c) => c.slug === slug)?.name || slug;
+            return (
+              <button
+                key={`company-${slug}`}
+                onClick={() => handleRemoveCompanySlug(slug)}
+                className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-blue-500/15 border border-blue-500/30 text-blue-300 hover:bg-blue-500/25 transition-colors"
+              >
+                <span>Company: {companyName}</span>
+                <X className="h-3 w-3" />
+              </button>
+            );
+          })}
 
-          {currentRole && (
-            <button
-              onClick={() => handleRemoveFilter("role")}
-              className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-blue-500/15 border border-blue-500/30 text-blue-300 hover:bg-blue-500/25 transition-colors capitalize"
-            >
-              <span>Role: {currentRole.replace(/-/g, " ")}</span>
-              <X className="h-3 w-3" />
-            </button>
-          )}
+          {roleSlugs.map((slug) => {
+            const roleTitle = roles.find((r) => r.slug === slug)?.title || slug.replace(/-/g, " ");
+            return (
+              <button
+                key={`role-${slug}`}
+                onClick={() => handleRemoveRoleSlug(slug)}
+                className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-blue-500/15 border border-blue-500/30 text-blue-300 hover:bg-blue-500/25 transition-colors capitalize"
+              >
+                <span>Role: {roleTitle}</span>
+                <X className="h-3 w-3" />
+              </button>
+            );
+          })}
 
           {currentResult && (
             <button

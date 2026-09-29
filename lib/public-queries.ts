@@ -46,11 +46,21 @@ export async function getPublicExperiences(filter: GetExperiencesFilter = {}) {
   };
 
   if (companySlug) {
-    where.company = { slug: companySlug };
+    const companySlugs = companySlug.split(",").map((s) => s.trim()).filter(Boolean);
+    if (companySlugs.length === 1) {
+      where.company = { slug: companySlugs[0] };
+    } else if (companySlugs.length > 1) {
+      where.company = { slug: { in: companySlugs } };
+    }
   }
 
   if (roleSlug) {
-    where.role = { slug: roleSlug };
+    const roleSlugs = roleSlug.split(",").map((s) => s.trim()).filter(Boolean);
+    if (roleSlugs.length === 1) {
+      where.role = { slug: roleSlugs[0] };
+    } else if (roleSlugs.length > 1) {
+      where.role = { slug: { in: roleSlugs } };
+    }
   }
 
   if (interviewYear) {
