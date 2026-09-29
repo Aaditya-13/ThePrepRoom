@@ -85,6 +85,20 @@ export function ExperienceSidebarFilters({
   // Active single-open dropdown window
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const activeDropdownRef = useRef<HTMLDivElement>(null);
+
+  // Auto-scroll newly opened dropdown into full view if needed
+  useEffect(() => {
+    if (openDropdown && activeDropdownRef.current) {
+      const timer = setTimeout(() => {
+        activeDropdownRef.current?.scrollIntoView({
+          behavior: "smooth",
+          block: "nearest",
+        });
+      }, 70);
+      return () => clearTimeout(timer);
+    }
+  }, [openDropdown]);
 
   // Close dropdown on outside click or Escape key
   useEffect(() => {
@@ -257,10 +271,11 @@ export function ExperienceSidebarFilters({
       : ROUND_OPTIONS.find((r) => r.value === currentRound)?.label;
 
   return (
-    <div
-      ref={containerRef}
-      className="relative bg-[#111317] border border-zinc-800/80 rounded-2xl p-4 sm:p-5 shadow-xs transition-colors space-y-4"
-    >
+    <div className="space-y-4 pb-16">
+      <div
+        ref={containerRef}
+        className="relative bg-[#111317] border border-zinc-800/80 rounded-2xl p-4 sm:p-5 shadow-xs transition-colors space-y-4"
+      >
       {/* Sidebar Header / Mobile Toggle Bar */}
       <div className="flex items-center justify-between pb-3 border-b border-zinc-800/80">
         <button
@@ -307,7 +322,10 @@ export function ExperienceSidebarFilters({
       {/* Filter Sections (Always visible on lg, toggled on mobile) */}
       <div className={`space-y-2.5 pt-1 ${isMobileOpen ? "block" : "hidden lg:block"}`}>
         {/* 1. COMPANY DROPDOWN WITH WINDOW & SEARCH & MULTI-SELECT */}
-        <div className={`relative ${openDropdown === "company" ? "z-30" : "z-10"}`}>
+        <div
+          ref={openDropdown === "company" ? activeDropdownRef : undefined}
+          className={`relative ${openDropdown === "company" ? "z-30" : "z-10"}`}
+        >
           <button
             type="button"
             onClick={() => toggleDropdown("company")}
@@ -476,7 +494,10 @@ export function ExperienceSidebarFilters({
         </div>
 
         {/* 2. JOB ROLE DROPDOWN WITH WINDOW & SEARCH & MULTI-SELECT */}
-        <div className={`relative ${openDropdown === "role" ? "z-30" : "z-10"}`}>
+        <div
+          ref={openDropdown === "role" ? activeDropdownRef : undefined}
+          className={`relative ${openDropdown === "role" ? "z-30" : "z-10"}`}
+        >
           <button
             type="button"
             onClick={() => toggleDropdown("role")}
@@ -645,7 +666,10 @@ export function ExperienceSidebarFilters({
         </div>
 
         {/* 3. OUTCOME / RESULT DROPDOWN WITH WINDOW */}
-        <div className={`relative ${openDropdown === "outcome" ? "z-30" : "z-10"}`}>
+        <div
+          ref={openDropdown === "outcome" ? activeDropdownRef : undefined}
+          className={`relative ${openDropdown === "outcome" ? "z-30" : "z-10"}`}
+        >
           <button
             type="button"
             onClick={() => toggleDropdown("outcome")}
@@ -752,7 +776,10 @@ export function ExperienceSidebarFilters({
         </div>
 
         {/* 4. PLACEMENT TYPE DROPDOWN WITH WINDOW */}
-        <div className={`relative ${openDropdown === "placement" ? "z-30" : "z-10"}`}>
+        <div
+          ref={openDropdown === "placement" ? activeDropdownRef : undefined}
+          className={`relative ${openDropdown === "placement" ? "z-30" : "z-10"}`}
+        >
           <button
             type="button"
             onClick={() => toggleDropdown("placement")}
@@ -856,7 +883,10 @@ export function ExperienceSidebarFilters({
         </div>
 
         {/* 5. INTERVIEW YEAR DROPDOWN WITH WINDOW */}
-        <div className={`relative ${openDropdown === "year" ? "z-30" : "z-10"}`}>
+        <div
+          ref={openDropdown === "year" ? activeDropdownRef : undefined}
+          className={`relative ${openDropdown === "year" ? "z-30" : "z-10"}`}
+        >
           <button
             type="button"
             onClick={() => toggleDropdown("year")}
@@ -973,7 +1003,10 @@ export function ExperienceSidebarFilters({
         </div>
 
         {/* 6. ROUNDS INCLUDED DROPDOWN WITH WINDOW */}
-        <div className={`relative ${openDropdown === "round" ? "z-30" : "z-10"}`}>
+        <div
+          ref={openDropdown === "round" ? activeDropdownRef : undefined}
+          className={`relative ${openDropdown === "round" ? "z-30" : "z-10"}`}
+        >
           <button
             type="button"
             onClick={() => toggleDropdown("round")}
@@ -1077,5 +1110,6 @@ export function ExperienceSidebarFilters({
         </div>
       </div>
     </div>
+  </div>
   );
 }

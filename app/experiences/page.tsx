@@ -5,6 +5,7 @@ import { ExperienceFeed } from "@/components/experience-feed";
 import { ExperienceSidebarFilters } from "@/components/experience-sidebar-filters";
 import { ExperienceSearchBar } from "@/components/experience-search-bar";
 import { ExperienceRightSidebar } from "@/components/experience-right-sidebar";
+import { StickySidebar } from "@/components/sticky-sidebar";
 
 export const metadata = {
   title: "Interview Experiences",
@@ -158,7 +159,7 @@ export default async function ExperiencesPage(props: PageProps) {
       {/* 3-Column Catalog Layout */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         {/* Left Column: Amazon/Flipkart-style Filters */}
-        <aside className="lg:col-span-3 xl:col-span-3 lg:sticky lg:top-20 lg:max-h-[calc(100vh-5.5rem)] lg:overflow-y-auto overscroll-contain pr-1 z-20">
+        <StickySidebar className="lg:col-span-3 xl:col-span-3">
           <ExperienceSidebarFilters
             companies={companies}
             roles={roles}
@@ -172,7 +173,7 @@ export default async function ExperiencesPage(props: PageProps) {
               result: searchParams.result,
             }}
           />
-        </aside>
+        </StickySidebar>
 
         {/* Middle Column: Prominent Search Bar & Experience Stream */}
         <section className="lg:col-span-6 xl:col-span-6 space-y-4 min-w-0">
@@ -212,13 +213,13 @@ export default async function ExperiencesPage(props: PageProps) {
         </section>
 
         {/* Right Column: Trending Interview Experiences & Widgets */}
-        <aside className="lg:col-span-3 xl:col-span-3 lg:sticky lg:top-20 lg:max-h-[calc(100vh-5.5rem)] lg:overflow-y-auto overscroll-contain pr-1">
+        <StickySidebar className="lg:col-span-3 xl:col-span-3">
           <ExperienceRightSidebar
             trendingExperiences={trendingExperiences}
             trendingCompanies={trendingCompanies}
             trendingTopics={trendingTopics}
           />
-        </aside>
+        </StickySidebar>
       </div>
     </div>
   );

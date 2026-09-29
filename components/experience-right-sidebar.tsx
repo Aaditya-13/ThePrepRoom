@@ -40,7 +40,7 @@ export function ExperienceRightSidebar({
   trendingTopics,
 }: ExperienceRightSidebarProps) {
   return (
-    <div className="space-y-5">
+    <div className="space-y-5 pb-16">
       {/* 1. TRENDING INTERVIEW EXPERIENCES */}
       <div className="bg-[#111317] border border-zinc-800/80 rounded-2xl p-4 sm:p-5 shadow-xs space-y-3.5">
         <div className="flex items-center justify-between pb-2 border-b border-zinc-800/80">
