@@ -198,7 +198,7 @@ export function Navbar({ currentUser }: NavbarProps) {
                 Sign In
               </Link>
               {process.env.NODE_ENV !== "production" && (
-                <div className="hidden lg:flex items-center gap-1 border-l border-zinc-800 pl-2">
+                <div className="hidden lg:flex items-center gap-1.5 border-l border-zinc-800 pl-2.5">
                   <button
                     onClick={() => handleDemoLogin("student")}
                     disabled={isPending}
@@ -207,14 +207,14 @@ export function Navbar({ currentUser }: NavbarProps) {
                   >
                     Demo Student
                   </button>
-                  <button
-                    onClick={() => handleDemoLogin("admin")}
-                    disabled={isPending}
-                    className="rounded-md border border-zinc-800 bg-[#16181e] px-2 py-0.5 text-[11px] font-semibold text-zinc-200 hover:bg-zinc-800 outline-none cursor-pointer transition-colors"
-                    title="Dev: Login as Admin"
+                  <Link
+                    href="/admin/login"
+                    className="rounded-md border border-emerald-500/30 bg-emerald-500/10 px-2 py-0.5 text-[11px] font-semibold text-emerald-400 hover:bg-emerald-500/20 outline-none cursor-pointer transition-colors flex items-center gap-1"
+                    title="Admin Portal (TOTP 2FA)"
                   >
-                    Demo Admin
-                  </button>
+                    <Shield className="h-3 w-3" />
+                    <span>Admin 2FA</span>
+                  </Link>
                 </div>
               )}
             </div>

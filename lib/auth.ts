@@ -15,6 +15,8 @@ export interface SessionPayload {
   email: string;
   role: string;
   name: string;
+  authMethod?: "credentials" | "google" | "linkedin" | "totp";
+  adminVerified?: boolean;
 }
 
 /**
@@ -48,9 +50,9 @@ export async function clearSessionCookie() {
 }
 
 /**
- * Retrieves the currently authenticated user from the session cookie
+ * Decrypts and verifies the current session payload from cookies
  */
-export async function getCurrentUser() {
+export async function getSessionPayload(): Promise<SessionPayload | null> {
   try {
     const cookieStore = await cookies();
     const token = cookieStore.get(SESSION_COOKIE_NAME)?.value;
@@ -59,8 +61,29 @@ export async function getCurrentUser() {
     const { payload } = await jwtVerify(token, SECRET_KEY);
     if (!payload?.userId) return null;
 
+    return {
+      userId: payload.userId as string,
+      email: payload.email as string,
+      role: payload.role as string,
+      name: payload.name as string,
+      authMethod: payload.authMethod as SessionPayload["authMethod"],
+      adminVerified: Boolean(payload.adminVerified),
+    };
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Retrieves the currently authenticated user from the database
+ */
+export async function getCurrentUser() {
+  try {
+    const session = await getSessionPayload();
+    if (!session?.userId) return null;
+
     const user = await prisma.user.findUnique({
-      where: { id: payload.userId as string },
+      where: { id: session.userId },
       select: {
         id: true,
         email: true,
@@ -69,6 +92,9 @@ export async function getCurrentUser() {
         department: true,
         graduationYear: true,
         bio: true,
+        image: true,
+        oauthProvider: true,
+        totpEnabled: true,
         collegeId: true,
         createdAt: true,
       },
@@ -81,7 +107,7 @@ export async function getCurrentUser() {
 }
 
 /**
- * Ensures user is authenticated; throws or returns null if not
+ * Ensures user is authenticated; throws if not
  */
 export async function requireAuth() {
   const user = await getCurrentUser();
@@ -92,13 +118,19 @@ export async function requireAuth() {
 }
 
 /**
- * Ensures user has ADMIN role; throws if not
+ * Ensures user has verified ADMIN role with TOTP 2FA verification; throws if not
  */
 export async function requireAdmin() {
-  const user = await requireAuth();
-  if (user.role !== "ADMIN") {
+  const session = await getSessionPayload();
+  if (!session || session.role !== "ADMIN" || !session.adminVerified) {
+    throw new Error("Access denied. Admin 2FA authorization required.");
+  }
+
+  const user = await getCurrentUser();
+  if (!user || user.role !== "ADMIN") {
     throw new Error("Access denied. Admin privileges required.");
   }
+
   return user;
 }
 
