@@ -301,11 +301,12 @@ export async function getRecentApprovedExperiences(limit = 6) {
 }
 
 /**
- * Fetch popular companies based on actual approved experience count — cached for 60s
+ * Fetch popular companies based on actual approved experience count — cached for 30s
+ * Guarantees at least 4 top companies are displayed even before experiences are added.
  */
 export const getPopularCompanies = unstable_cache(
   async (limit = 6) => {
-    const companies = await prisma.company.findMany({
+    const companiesWithExp = await prisma.company.findMany({
       where: {
         experiences: {
           some: { status: { in: ["APPROVED", "PENDING"] } },
@@ -329,18 +330,50 @@ export const getPopularCompanies = unstable_cache(
       },
     });
 
-    return companies
-      .map((c) => ({
-        ...c,
-        approvedExperiencesCount: c._count.experiences,
-        rolesCount: c._count.roles,
-        latestYear: c.experiences[0]?.interviewYear ?? null,
-      }))
+    const result = companiesWithExp.map((c) => ({
+      id: c.id,
+      name: c.name,
+      slug: c.slug,
+      approvedExperiencesCount: c._count.experiences,
+      rolesCount: c._count.roles,
+      latestYear: c.experiences[0]?.interviewYear ?? null,
+    }));
+
+    // If fewer than 4 companies have experiences yet, supplement with registered companies from DB
+    if (result.length < 4) {
+      const existingIds = new Set(result.map((c) => c.id));
+      const fallbackCompanies = await prisma.company.findMany({
+        where: { id: { notIn: Array.from(existingIds) } },
+        take: 4 - result.length,
+        include: {
+          _count: {
+            select: {
+              experiences: true,
+              roles: true,
+            },
+          },
+        },
+        orderBy: { name: "asc" },
+      });
+
+      for (const fc of fallbackCompanies) {
+        result.push({
+          id: fc.id,
+          name: fc.name,
+          slug: fc.slug,
+          approvedExperiencesCount: fc._count.experiences,
+          rolesCount: fc._count.roles,
+          latestYear: null,
+        });
+      }
+    }
+
+    return result
       .sort((a, b) => b.approvedExperiencesCount - a.approvedExperiencesCount)
       .slice(0, limit);
   },
   ["popular-companies"],
-  { revalidate: 60, tags: ["companies", "experiences"] }
+  { revalidate: 30, tags: ["companies", "experiences"] }
 );
 
 /**
