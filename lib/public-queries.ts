@@ -215,24 +215,28 @@ export async function getPublicExperienceBySlug(slug: string) {
 }
 
 /**
- * Fetch related approved experiences (same company or similar role)
+ * Fetch related approved experiences (same company or similar role) — cached for 60s
  */
-export async function getRelatedExperiences(experienceId: string, companyId: string, roleId: string) {
-  return await prisma.experience.findMany({
-    where: {
-      status: { in: ["APPROVED", "PENDING"] },
-      id: { not: experienceId },
-      OR: [{ companyId }, { roleId }],
-    },
-    take: 3,
-    orderBy: { createdAt: "desc" },
-    include: {
-      company: true,
-      role: true,
-      rounds: { orderBy: { orderIndex: "asc" } },
-    },
-  });
-}
+export const getRelatedExperiences = unstable_cache(
+  async (experienceId: string, companyId: string, roleId: string) => {
+    return await prisma.experience.findMany({
+      where: {
+        status: { in: ["APPROVED", "PENDING"] },
+        id: { not: experienceId },
+        OR: [{ companyId }, { roleId }],
+      },
+      take: 3,
+      orderBy: { createdAt: "desc" },
+      include: {
+        company: true,
+        role: true,
+        rounds: { orderBy: { orderIndex: "asc" } },
+      },
+    });
+  },
+  ["related-experiences"],
+  { revalidate: 60, tags: ["experiences"] }
+);
 
 /**
  * Get real database-driven statistics (strictly 0 fake metrics) — cached for 30s
