@@ -1,4 +1,5 @@
 import { prisma } from "./prisma";
+import { unstable_cache } from "next/cache";
 
 /**
  * STRICT PUBLIC DATA QUERY LIBRARY
@@ -234,48 +235,52 @@ export async function getRelatedExperiences(experienceId: string, companyId: str
 }
 
 /**
- * Get real database-driven statistics (strictly 0 fake metrics)
+ * Get real database-driven statistics (strictly 0 fake metrics) — cached for 30s
  */
-export async function getPublicStats() {
-  const [experiencesCount, companiesCount, questionsCount, oaRoundsCount] = await Promise.all([
-    // Public experiences (approved & pending)
-    prisma.experience.count({
-      where: { status: { in: ["APPROVED", "PENDING"] } },
-    }),
-    // Companies with at least one public experience
-    prisma.company.count({
-      where: {
-        experiences: {
-          some: { status: { in: ["APPROVED", "PENDING"] } },
-        },
-      },
-    }),
-    // Questions appearing in public experiences
-    prisma.question.count({
-      where: {
-        experienceLinks: {
-          some: {
-            experience: { status: { in: ["APPROVED", "PENDING"] } },
+export const getPublicStats = unstable_cache(
+  async () => {
+    const [experiencesCount, companiesCount, questionsCount, oaRoundsCount] = await Promise.all([
+      // Public experiences (approved & pending)
+      prisma.experience.count({
+        where: { status: { in: ["APPROVED", "PENDING"] } },
+      }),
+      // Companies with at least one public experience
+      prisma.company.count({
+        where: {
+          experiences: {
+            some: { status: { in: ["APPROVED", "PENDING"] } },
           },
         },
-      },
-    }),
-    // Online assessment rounds in public experiences
-    prisma.interviewRound.count({
-      where: {
-        roundType: "ONLINE_ASSESSMENT",
-        experience: { status: { in: ["APPROVED", "PENDING"] } },
-      },
-    }),
-  ]);
+      }),
+      // Questions appearing in public experiences
+      prisma.question.count({
+        where: {
+          experienceLinks: {
+            some: {
+              experience: { status: { in: ["APPROVED", "PENDING"] } },
+            },
+          },
+        },
+      }),
+      // Online assessment rounds in public experiences
+      prisma.interviewRound.count({
+        where: {
+          roundType: "ONLINE_ASSESSMENT",
+          experience: { status: { in: ["APPROVED", "PENDING"] } },
+        },
+      }),
+    ]);
 
-  return {
-    experiencesCount,
-    companiesCount,
-    questionsCount,
-    oaRoundsCount,
-  };
-}
+    return {
+      experiencesCount,
+      companiesCount,
+      questionsCount,
+      oaRoundsCount,
+    };
+  },
+  ["public-stats"],
+  { revalidate: 30, tags: ["stats", "experiences"] }
+);
 
 /**
  * Fetch recently approved experiences for the homepage
@@ -296,55 +301,103 @@ export async function getRecentApprovedExperiences(limit = 6) {
 }
 
 /**
- * Fetch popular companies based on actual approved experience count
+ * Fetch popular companies based on actual approved experience count — cached for 60s
  */
-export async function getPopularCompanies(limit = 6) {
-  const companies = await prisma.company.findMany({
-    where: {
-      experiences: {
-        some: { status: { in: ["APPROVED", "PENDING"] } },
-      },
-    },
-    include: {
-      _count: {
-        select: {
-          experiences: {
-            where: { status: { in: ["APPROVED", "PENDING"] } },
-          },
-          roles: true,
+export const getPopularCompanies = unstable_cache(
+  async (limit = 6) => {
+    const companies = await prisma.company.findMany({
+      where: {
+        experiences: {
+          some: { status: { in: ["APPROVED", "PENDING"] } },
         },
       },
-      experiences: {
-        where: { status: { in: ["APPROVED", "PENDING"] } },
-        select: { interviewYear: true },
-        orderBy: { interviewYear: "desc" },
-        take: 1,
+      include: {
+        _count: {
+          select: {
+            experiences: {
+              where: { status: { in: ["APPROVED", "PENDING"] } },
+            },
+            roles: true,
+          },
+        },
+        experiences: {
+          where: { status: { in: ["APPROVED", "PENDING"] } },
+          select: { interviewYear: true },
+          orderBy: { interviewYear: "desc" },
+          take: 1,
+        },
       },
-    },
-  });
+    });
 
-  return companies
-    .map((c) => ({
-      ...c,
+    return companies
+      .map((c) => ({
+        ...c,
+        approvedExperiencesCount: c._count.experiences,
+        rolesCount: c._count.roles,
+        latestYear: c.experiences[0]?.interviewYear ?? null,
+      }))
+      .sort((a, b) => b.approvedExperiencesCount - a.approvedExperiencesCount)
+      .slice(0, limit);
+  },
+  ["popular-companies"],
+  { revalidate: 60, tags: ["companies", "experiences"] }
+);
+
+/**
+ * Internal cached all companies
+ */
+const getCachedCompaniesList = unstable_cache(
+  async () => {
+    const companies = await prisma.company.findMany({
+      include: {
+        _count: {
+          select: {
+            experiences: {
+              where: { status: { in: ["APPROVED", "PENDING"] } },
+            },
+            roles: true,
+          },
+        },
+        experiences: {
+          where: { status: { in: ["APPROVED", "PENDING"] } },
+          select: { interviewYear: true },
+          orderBy: { interviewYear: "desc" },
+          take: 1,
+        },
+        roles: {
+          take: 5,
+        },
+      },
+      orderBy: { name: "asc" },
+    });
+
+    return companies.map((c) => ({
+      id: c.id,
+      name: c.name,
+      slug: c.slug,
+      description: c.description,
+      industry: c.industry,
+      website: c.website,
       approvedExperiencesCount: c._count.experiences,
       rolesCount: c._count.roles,
       latestYear: c.experiences[0]?.interviewYear ?? null,
-    }))
-    .sort((a, b) => b.approvedExperiencesCount - a.approvedExperiencesCount)
-    .slice(0, limit);
-}
+      sampleRoles: c.roles.map((r) => r.title),
+    }));
+  },
+  ["all-public-companies-cached"],
+  { revalidate: 60, tags: ["companies", "experiences"] }
+);
 
 /**
  * Fetch all companies for the directory with approved stats
  */
 export async function getAllPublicCompanies(search?: string) {
-  const where: any = {};
-  if (search) {
-    where.name = { contains: search.trim() };
+  if (!search) {
+    return await getCachedCompaniesList();
   }
 
   const companies = await prisma.company.findMany({
-    where,
+    where: { name: { contains: search.trim() } },
     include: {
       _count: {
         select: {
@@ -380,6 +433,127 @@ export async function getAllPublicCompanies(search?: string) {
     sampleRoles: c.roles.map((r) => r.title),
   }));
 }
+
+/**
+ * Highly optimized static catalog metadata — cached in memory for sub-millisecond response
+ */
+export const getAllTopics = unstable_cache(
+  async () => {
+    return await prisma.topic.findMany({
+      orderBy: { name: "asc" },
+    });
+  },
+  ["all-topics-cached"],
+  { revalidate: 300, tags: ["topics"] }
+);
+
+export const getExperienceCatalogStaticData = unstable_cache(
+  async () => {
+    const [companies, roles, availableYears, trendingExperiences, trendingCompanies, trendingTopics] =
+      await Promise.all([
+        prisma.company.findMany({
+          select: {
+            name: true,
+            slug: true,
+            _count: {
+              select: {
+                experiences: {
+                  where: { status: { in: ["APPROVED", "PENDING"] } },
+                },
+              },
+            },
+          },
+          orderBy: { name: "asc" },
+        }),
+        prisma.companyRole.findMany({
+          where: {
+            experiences: {
+              some: { status: { in: ["APPROVED", "PENDING"] } },
+            },
+          },
+          select: {
+            title: true,
+            slug: true,
+            _count: {
+              select: {
+                experiences: {
+                  where: { status: { in: ["APPROVED", "PENDING"] } },
+                },
+              },
+            },
+          },
+          orderBy: { title: "asc" },
+        }),
+        prisma.experience.findMany({
+          where: { status: { in: ["APPROVED", "PENDING"] } },
+          select: { interviewYear: true },
+          distinct: ["interviewYear"],
+          orderBy: { interviewYear: "desc" },
+        }),
+        prisma.experience.findMany({
+          where: { status: { in: ["APPROVED", "PENDING"] } },
+          take: 3,
+          orderBy: { viewsCount: "desc" },
+          include: {
+            company: { select: { name: true, slug: true } },
+            role: { select: { title: true, slug: true } },
+          },
+        }),
+        prisma.company.findMany({
+          where: {
+            experiences: {
+              some: { status: { in: ["APPROVED", "PENDING"] } },
+            },
+          },
+          take: 6,
+          select: {
+            name: true,
+            slug: true,
+            _count: {
+              select: {
+                experiences: {
+                  where: { status: { in: ["APPROVED", "PENDING"] } },
+                },
+              },
+            },
+          },
+          orderBy: {
+            experiences: {
+              _count: "desc",
+            },
+          },
+        }),
+        prisma.topic.findMany({
+          take: 4,
+          select: {
+            name: true,
+            slug: true,
+            _count: {
+              select: {
+                questions: true,
+              },
+            },
+          },
+          orderBy: {
+            questions: {
+              _count: "desc",
+            },
+          },
+        }),
+      ]);
+
+    return {
+      companies,
+      roles,
+      availableYears: availableYears.map((y) => y.interviewYear),
+      trendingExperiences,
+      trendingCompanies,
+      trendingTopics,
+    };
+  },
+  ["catalog-static-metadata"],
+  { revalidate: 60, tags: ["catalog", "experiences", "companies"] }
+);
 
 /**
  * Fetch company detail by slug

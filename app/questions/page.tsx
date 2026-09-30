@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { Search, HelpCircle, ArrowRight } from "lucide-react";
-import { prisma } from "@/lib/prisma";
-import { getPublicQuestions } from "@/lib/public-queries";
+import { getPublicQuestions, getAllTopics } from "@/lib/public-queries";
 import { BookmarkButton } from "@/components/bookmark-button";
 
 export const revalidate = 30;
@@ -30,9 +29,7 @@ export default async function QuestionsPage(props: PageProps) {
       round: searchParams.round,
       difficulty: searchParams.difficulty,
     }),
-    prisma.topic.findMany({
-      orderBy: { name: "asc" },
-    }),
+    getAllTopics(),
   ]);
 
   return (

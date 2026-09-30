@@ -135,6 +135,7 @@ export function Navbar({ currentUser: initialUser }: NavbarProps) {
                 <Link
                   key={link.href}
                   href={link.href}
+                  prefetch={true}
                   onClick={() => setOptimisticPath(link.href)}
                   className={`px-3 py-1.5 text-xs sm:text-sm font-medium transition-colors duration-150 rounded-lg outline-none focus:outline-none focus-visible:outline-none border-0 ${
                     isActive
@@ -154,6 +155,7 @@ export function Navbar({ currentUser: initialUser }: NavbarProps) {
           {/* Share Experience Button */}
           <Link
             href="/share"
+            prefetch={true}
             className="hidden sm:inline-flex items-center gap-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 text-xs sm:text-sm font-medium transition-all duration-200 ease-out hover:shadow-lg hover:shadow-blue-600/30 hover:scale-[1.02] active:scale-[0.98] shadow-md shadow-blue-600/20 outline-none focus:outline-none"
           >
             <PlusCircle className="h-4 w-4" />
@@ -357,6 +359,7 @@ export function Navbar({ currentUser: initialUser }: NavbarProps) {
                 <Link
                   key={link.href}
                   href={link.href}
+                  prefetch={true}
                   onClick={() => {
                     setOptimisticPath(link.href);
                     setMobileMenuOpen(false);
@@ -373,6 +376,7 @@ export function Navbar({ currentUser: initialUser }: NavbarProps) {
             })}
             <Link
               href="/share"
+              prefetch={true}
               onClick={() => setMobileMenuOpen(false)}
               className="mt-2 flex items-center justify-center gap-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 py-2.5 text-sm font-medium text-white shadow-md shadow-blue-600/20 outline-none"
             >

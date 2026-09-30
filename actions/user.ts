@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
-import { requireAuth, createSessionCookie } from "@/lib/auth";
+import { requireAuth, createSessionCookie, invalidateUserCache } from "@/lib/auth";
 
 export async function updateUserProfileAction(prevState: any, formData: FormData) {
   try {
@@ -85,6 +85,9 @@ export async function updateUserProfileAction(prevState: any, formData: FormData
       role: updated.role,
       name: updated.name,
     });
+
+    // Invalidate memory cache so next request fetches fresh data
+    invalidateUserCache(updated.id);
 
     revalidatePath("/", "layout");
     revalidatePath("/profile");

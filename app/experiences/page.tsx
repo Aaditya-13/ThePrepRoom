@@ -1,6 +1,5 @@
 import Link from "next/link";
-import { prisma } from "@/lib/prisma";
-import { getPublicExperiences } from "@/lib/public-queries";
+import { getPublicExperiences, getExperienceCatalogStaticData } from "@/lib/public-queries";
 import { ExperienceFeed } from "@/components/experience-feed";
 import { ExperienceSidebarFilters } from "@/components/experience-sidebar-filters";
 import { ExperienceSearchBar } from "@/components/experience-search-bar";
@@ -35,15 +34,7 @@ export default async function ExperiencesPage(props: PageProps) {
   const page = searchParams.page ? parseInt(searchParams.page, 10) : 1;
   const interviewYear = searchParams.year ? parseInt(searchParams.year, 10) : undefined;
 
-  const [
-    data,
-    companies,
-    roles,
-    availableYears,
-    trendingExperiences,
-    trendingCompanies,
-    trendingTopics,
-  ] = await Promise.all([
+  const [data, catalogStatic] = await Promise.all([
     getPublicExperiences({
       query: searchParams.q,
       companySlug: searchParams.company,
@@ -55,98 +46,17 @@ export default async function ExperiencesPage(props: PageProps) {
       page,
       limit: 6,
     }),
-    prisma.company.findMany({
-      select: {
-        name: true,
-        slug: true,
-        _count: {
-          select: {
-            experiences: {
-              where: { status: { in: ["APPROVED", "PENDING"] } },
-            },
-          },
-        },
-      },
-      orderBy: { name: "asc" },
-    }),
-    prisma.companyRole.findMany({
-      where: {
-        experiences: {
-          some: { status: { in: ["APPROVED", "PENDING"] } },
-        },
-      },
-      select: {
-        title: true,
-        slug: true,
-        _count: {
-          select: {
-            experiences: {
-              where: { status: { in: ["APPROVED", "PENDING"] } },
-            },
-          },
-        },
-      },
-      orderBy: { title: "asc" },
-    }),
-    prisma.experience.findMany({
-      where: { status: { in: ["APPROVED", "PENDING"] } },
-      select: { interviewYear: true },
-      distinct: ["interviewYear"],
-      orderBy: { interviewYear: "desc" },
-    }),
-    prisma.experience.findMany({
-      where: { status: { in: ["APPROVED", "PENDING"] } },
-      take: 3,
-      orderBy: { viewsCount: "desc" },
-      include: {
-        company: { select: { name: true, slug: true } },
-        role: { select: { title: true, slug: true } },
-      },
-    }),
-    prisma.company.findMany({
-      where: {
-        experiences: {
-          some: { status: { in: ["APPROVED", "PENDING"] } },
-        },
-      },
-      take: 6,
-      select: {
-        name: true,
-        slug: true,
-        _count: {
-          select: {
-            experiences: {
-              where: { status: { in: ["APPROVED", "PENDING"] } },
-            },
-          },
-        },
-      },
-      orderBy: {
-        experiences: {
-          _count: "desc",
-        },
-      },
-    }),
-    prisma.topic.findMany({
-      take: 4,
-      select: {
-        name: true,
-        slug: true,
-        _count: {
-          select: {
-            questions: true,
-          },
-        },
-      },
-      orderBy: {
-        questions: {
-          _count: "desc",
-        },
-      },
-    }),
+    getExperienceCatalogStaticData(),
   ]);
 
-  const years = availableYears.map((y) => y.interviewYear);
+  const {
+    companies,
+    roles,
+    availableYears: years,
+    trendingExperiences,
+    trendingCompanies,
+    trendingTopics,
+  } = catalogStatic;
 
   return (
     <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8 space-y-7">

@@ -41,12 +41,29 @@ export async function createSessionCookie(payload: SessionPayload) {
   return token;
 }
 
+interface CachedUserEntry {
+  user: any;
+  timestamp: number;
+}
+
+const userMemoryCache = new Map<string, CachedUserEntry>();
+const USER_CACHE_TTL_MS = 60 * 1000; // 60s in-memory cache
+
+export function invalidateUserCache(userId?: string) {
+  if (userId) {
+    userMemoryCache.delete(userId);
+  } else {
+    userMemoryCache.clear();
+  }
+}
+
 /**
  * Clears the session cookie
  */
 export async function clearSessionCookie() {
   const cookieStore = await cookies();
   cookieStore.delete(SESSION_COOKIE_NAME);
+  invalidateUserCache();
 }
 
 /**
@@ -75,12 +92,17 @@ export async function getSessionPayload(): Promise<SessionPayload | null> {
 }
 
 /**
- * Retrieves the currently authenticated user from the database
+ * Retrieves the currently authenticated user from the database (cached in-memory)
  */
 export async function getCurrentUser() {
   try {
     const session = await getSessionPayload();
     if (!session?.userId) return null;
+
+    const cached = userMemoryCache.get(session.userId);
+    if (cached && Date.now() - cached.timestamp < USER_CACHE_TTL_MS) {
+      return cached.user;
+    }
 
     const user = await prisma.user.findUnique({
       where: { id: session.userId },
@@ -102,6 +124,10 @@ export async function getCurrentUser() {
         createdAt: true,
       },
     });
+
+    if (user) {
+      userMemoryCache.set(session.userId, { user, timestamp: Date.now() });
+    }
 
     return user;
   } catch {
