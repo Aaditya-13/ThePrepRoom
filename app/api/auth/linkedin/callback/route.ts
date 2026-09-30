@@ -9,7 +9,7 @@ export async function GET(request: NextRequest) {
   const state = searchParams.get("state");
   const error = searchParams.get("error");
   const errorDescription = searchParams.get("error_description");
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || request.nextUrl.origin;
 
   const cookieStore = await cookies();
   const savedState = cookieStore.get("linkedin_oauth_state")?.value;
