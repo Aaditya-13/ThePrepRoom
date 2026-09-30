@@ -4,6 +4,7 @@ import { Building2, Globe, Calendar, ArrowRight, HelpCircle, FileText } from "lu
 import { getPublicCompanyBySlug } from "@/lib/public-queries";
 import { ExperienceRow } from "@/components/experience-row";
 import { BookmarkButton } from "@/components/bookmark-button";
+import { ViewCounter } from "@/components/view-counter";
 
 interface PageProps {
   params: Promise<{ slug: string }>;
@@ -62,9 +63,18 @@ export default async function CompanyDetailPage(props: PageProps) {
       <header className="rounded-2xl border border-stone-200 dark:border-zinc-800/90 bg-white dark:bg-[#111317] p-6 sm:p-8 shadow-xs space-y-6">
         <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
           <div className="space-y-2 max-w-2xl">
-            <span className="inline-block rounded-full border border-blue-500/20 bg-blue-50/50 dark:bg-blue-950/30 px-3 py-0.5 text-xs font-semibold text-blue-600 dark:text-blue-400 uppercase tracking-wider">
-              {company.industry || "Technology & Services"}
-            </span>
+            <div className="flex flex-wrap items-center gap-3">
+              <span className="inline-block rounded-full border border-blue-500/20 bg-blue-50/50 dark:bg-blue-950/30 px-3 py-0.5 text-xs font-semibold text-blue-600 dark:text-blue-400 uppercase tracking-wider">
+                {company.industry || "Technology & Services"}
+              </span>
+              <ViewCounter
+                targetType="COMPANY"
+                targetId={company.id}
+                initialViews={company.viewsCount || 0}
+                className="inline-flex items-center gap-1.5 text-slate-500 dark:text-zinc-400 text-xs font-mono"
+                iconClassName="h-3.5 w-3.5 text-blue-400"
+              />
+            </div>
             <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-slate-900 dark:text-white">
               {company.name}
             </h1>
@@ -101,7 +111,7 @@ export default async function CompanyDetailPage(props: PageProps) {
         </div>
 
         {/* Stats Row */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-6 border-t border-stone-100 dark:border-zinc-800/80 text-xs">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 pt-6 border-t border-stone-100 dark:border-zinc-800/80 text-xs">
           <div className="p-3 rounded-xl bg-stone-50/50 dark:bg-zinc-800/40 border border-stone-200/60 dark:border-zinc-700/50">
             <span className="text-slate-400 dark:text-zinc-500 uppercase tracking-wider font-semibold block text-[10px]">
               Experiences
@@ -135,6 +145,15 @@ export default async function CompanyDetailPage(props: PageProps) {
             </span>
             <span className="text-2xl font-bold text-blue-600 dark:text-blue-400">
               {company.latestYear || "N/A"}
+            </span>
+          </div>
+
+          <div className="p-3 rounded-xl bg-stone-50/50 dark:bg-zinc-800/40 border border-stone-200/60 dark:border-zinc-700/50">
+            <span className="text-slate-400 dark:text-zinc-500 uppercase tracking-wider font-semibold block text-[10px]">
+              Unique Views
+            </span>
+            <span className="text-2xl font-bold text-emerald-600 dark:text-emerald-400 font-mono">
+              {company.viewsCount || 0}
             </span>
           </div>
         </div>

@@ -109,6 +109,7 @@ model Company {
   description     String?
   website         String?
   industry        String?
+  viewsCount      Int           @default(0)
   createdAt       DateTime      @default(now())
 
   roles           CompanyRole[]

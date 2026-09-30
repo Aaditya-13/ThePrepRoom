@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useTransition } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import {
   FileText,
   Clock,
@@ -11,8 +12,11 @@ import {
   ArrowRight,
   Building2,
   Sparkles,
+  Trash2,
 } from "lucide-react";
 import { formatDate } from "@/lib/utils";
+import { deleteUserExperienceAction } from "@/actions/experience";
+import { DeleteConfirmationModal } from "@/components/delete-confirmation-modal";
 
 interface SubmissionItem {
   id: string;
@@ -34,8 +38,38 @@ interface ProfileSubmissionsListProps {
   experiences: SubmissionItem[];
 }
 
-export function ProfileSubmissionsList({ experiences }: ProfileSubmissionsListProps) {
+export function ProfileSubmissionsList({ experiences: initialExperiences }: ProfileSubmissionsListProps) {
+  const router = useRouter();
+  const [experiences, setExperiences] = useState<SubmissionItem[]>(initialExperiences);
   const [activeTab, setActiveTab] = useState<"ALL" | "APPROVED" | "PENDING" | "DRAFT">("ALL");
+  const [itemToDelete, setItemToDelete] = useState<SubmissionItem | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [statusNotice, setStatusNotice] = useState<{ type: "success" | "error"; text: string } | null>(null);
+  const [isPending, startTransition] = useTransition();
+
+  const handleDeleteConfirm = async () => {
+    if (!itemToDelete) return;
+    setIsDeleting(true);
+    setStatusNotice(null);
+
+    const res = await deleteUserExperienceAction(itemToDelete.id);
+    setIsDeleting(false);
+
+    if (res?.error) {
+      setStatusNotice({ type: "error", text: res.error });
+    } else {
+      const deletedType = itemToDelete.status === "DRAFT" ? "Draft" : "Experience";
+      setExperiences((prev) => prev.filter((e) => e.id !== itemToDelete.id));
+      setStatusNotice({
+        type: "success",
+        text: `${deletedType} deleted successfully.`,
+      });
+      setItemToDelete(null);
+      startTransition(() => {
+        router.refresh();
+      });
+    }
+  };
 
   const approved = experiences.filter((e) => e.status === "APPROVED");
   const pending = experiences.filter((e) => e.status === "PENDING");
@@ -117,6 +151,26 @@ export function ProfileSubmissionsList({ experiences }: ProfileSubmissionsListPr
         )}
       </div>
 
+      {/* Notification Banner */}
+      {statusNotice && (
+        <div
+          className={`rounded-2xl p-4 text-xs font-semibold flex items-center justify-between gap-3 border ${
+            statusNotice.type === "success"
+              ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/25"
+              : "bg-red-500/10 text-red-400 border-red-500/25"
+          }`}
+        >
+          <span>{statusNotice.text}</span>
+          <button
+            type="button"
+            onClick={() => setStatusNotice(null)}
+            className="text-zinc-400 hover:text-zinc-200 cursor-pointer"
+          >
+            ✕
+          </button>
+        </div>
+      )}
+
       {/* Submissions List */}
       {experiences.length === 0 ? (
         <div className="text-center py-16 border border-dashed border-zinc-800 rounded-3xl bg-[#111317] p-8 space-y-3">
@@ -186,7 +240,17 @@ export function ProfileSubmissionsList({ experiences }: ProfileSubmissionsListPr
                       href={`/experiences/${exp.slug}`}
                       className="rounded-xl border border-zinc-700 bg-[#16181e] hover:border-blue-500 hover:text-blue-400 px-3.5 py-1.5 text-xs text-zinc-200 inline-flex items-center gap-1.5 font-semibold transition-colors shadow-xs"
                     >
-                      <span>View Experience</span>
+                      <span>View</span>
+                      <ArrowRight className="h-3.5 w-3.5" />
+                    </Link>
+                  )}
+
+                  {exp.status === "PENDING" && (
+                    <Link
+                      href={`/experiences/${exp.slug}`}
+                      className="rounded-xl border border-zinc-700 bg-[#16181e] hover:border-amber-500 hover:text-amber-400 px-3.5 py-1.5 text-xs text-zinc-200 inline-flex items-center gap-1.5 font-semibold transition-colors shadow-xs"
+                    >
+                      <span>View Live</span>
                       <ArrowRight className="h-3.5 w-3.5" />
                     </Link>
                   )}
@@ -201,17 +265,37 @@ export function ProfileSubmissionsList({ experiences }: ProfileSubmissionsListPr
                     </Link>
                   )}
 
-                  {exp.status === "PENDING" && (
-                    <span className="text-xs text-amber-400/80 font-medium px-2 py-1">
-                      Queued for moderation
-                    </span>
-                  )}
+                  {/* Delete Button with Warning Confirmation */}
+                  <button
+                    type="button"
+                    onClick={() => setItemToDelete(exp)}
+                    className="rounded-xl border border-zinc-700/60 hover:border-red-500/50 bg-[#16181e] hover:bg-red-500/10 text-zinc-400 hover:text-red-400 px-2.5 py-1.5 text-xs font-semibold inline-flex items-center gap-1 transition-all cursor-pointer shadow-xs"
+                    title={exp.status === "DRAFT" ? "Delete Draft" : "Delete Experience"}
+                    aria-label={exp.status === "DRAFT" ? "Delete Draft" : "Delete Experience"}
+                  >
+                    <Trash2 className="h-3.5 w-3.5" />
+                    <span className="hidden sm:inline text-[11px]">Delete</span>
+                  </button>
                 </div>
               </div>
             );
           })}
         </div>
       )}
+
+      {/* Delete Confirmation Modal with Warning */}
+      <DeleteConfirmationModal
+        isOpen={!!itemToDelete}
+        onClose={() => setItemToDelete(null)}
+        onConfirm={handleDeleteConfirm}
+        isDeleting={isDeleting}
+        itemType={itemToDelete?.status === "DRAFT" ? "draft" : "experience"}
+        itemName={
+          itemToDelete
+            ? `${itemToDelete.company.name} — ${itemToDelete.role.title} (${itemToDelete.interviewYear})`
+            : undefined
+        }
+      />
     </div>
   );
 }

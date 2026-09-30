@@ -379,6 +379,49 @@ export async function submitExperienceAction(data: ExperienceSubmissionData) {
 }
 
 /**
+ * Allows the author (or an admin) to delete their experience or draft.
+ * Cascades related interview rounds, questions, reports, and bookmarks.
+ */
+export async function deleteUserExperienceAction(id: string) {
+  const user = await getCurrentUser();
+  if (!user) {
+    return { error: "You must be signed in to delete an experience." };
+  }
+
+  const existing = await prisma.experience.findUnique({
+    where: { id },
+    select: { id: true, userId: true, status: true, slug: true },
+  });
+
+  if (!existing) {
+    return { error: "Experience not found." };
+  }
+
+  if (existing.userId !== user.id && user.role !== "ADMIN") {
+    return { error: "You are not authorized to delete this experience." };
+  }
+
+  // Delete bookmarks pointing to this experience
+  await prisma.bookmark.deleteMany({
+    where: { targetType: "EXPERIENCE", targetId: id },
+  });
+
+  // Delete the experience (cascades rounds, questions, reports)
+  await prisma.experience.delete({
+    where: { id },
+  });
+
+  revalidatePath("/profile");
+  revalidatePath("/experiences");
+  revalidatePath("/admin");
+  revalidatePath("/");
+  revalidatePath("/companies");
+  revalidatePath("/questions");
+
+  return { success: true };
+}
+
+/**
  * ADMIN ONLY: Moderate experience (Approve, Reject, Feature, Delete)
  */
 export async function adminModerateExperienceAction(

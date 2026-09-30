@@ -217,7 +217,7 @@ export default async function HomePage() {
                         </span>
                       </div>
                       <span className="text-xs font-mono text-zinc-500">
-                        {exp.viewsCount} views
+                        {exp.viewsCount} {exp.viewsCount === 1 ? "view" : "views"}
                       </span>
                     </div>
                   </Link>

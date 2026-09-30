@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Search, Building2, ArrowRight } from "lucide-react";
+import { Search, Building2, ArrowRight, Eye } from "lucide-react";
 import { getAllPublicCompanies } from "@/lib/public-queries";
 
 export const revalidate = 60;
@@ -93,7 +93,10 @@ export default async function CompaniesPage(props: PageProps) {
                   {company.approvedExperiencesCount === 1 ? "experience" : "experiences"} ·{" "}
                   {company.rolesCount} {company.rolesCount === 1 ? "role" : "roles"}
                 </span>
-                <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform text-zinc-500 group-hover:text-blue-400" />
+                <span className="inline-flex items-center gap-1 text-[11px] text-zinc-400">
+                  <Eye className="h-3.5 w-3.5 text-blue-400/80" />
+                  <span>{company.viewsCount || 0}</span>
+                </span>
               </div>
             </Link>
           ))}

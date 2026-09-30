@@ -30,6 +30,9 @@ import { BookmarkButton } from "@/components/bookmark-button";
 import { ReportModal } from "@/components/report-modal";
 import { TableOfContents } from "@/components/table-of-contents";
 import { UserAvatar } from "@/components/user-avatar";
+import { AuthorExperienceActions } from "@/components/author-experience-actions";
+import { ViewCounter } from "@/components/view-counter";
+import { getCurrentUser } from "@/lib/auth";
 import { PLACEMENT_STATUS_CONFIG } from "@/lib/profile-constants";
 
 export const dynamic = "force-dynamic";
@@ -60,11 +63,17 @@ export async function generateMetadata(props: PageProps) {
 
 export default async function ExperienceDetailPage(props: PageProps) {
   const params = await props.params;
-  const experience = await getCachedExperience(params.slug);
+  const [experience, currentUser] = await Promise.all([
+    getCachedExperience(params.slug),
+    getCurrentUser(),
+  ]);
 
   if (!experience) {
     notFound();
   }
+
+  const isAuthor = !!(currentUser && experience.userId && currentUser.id === experience.userId);
+  const isAdmin = currentUser?.role === "ADMIN";
 
   const related = await getRelatedExperiences(
     experience.id,
@@ -121,6 +130,18 @@ export default async function ExperienceDetailPage(props: PageProps) {
           {experience.role.title} ({experience.interviewYear})
         </span>
       </nav>
+
+      {/* Author / Admin Management Actions */}
+      {(isAuthor || isAdmin) && (
+        <div className="mb-6">
+          <AuthorExperienceActions
+            experienceId={experience.id}
+            experienceTitle={`${experience.company.name} — ${experience.role.title} (${experience.interviewYear})`}
+            isAuthor={isAuthor}
+            isAdmin={isAdmin}
+          />
+        </div>
+      )}
 
       {/* Main Experience Article Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10">
@@ -208,12 +229,15 @@ export default async function ExperienceDetailPage(props: PageProps) {
                   </>
                 )}
 
-                {/* Real-time Views Count */}
+                {/* Real-time Unique Views Counter */}
                 <span>•</span>
-                <span className="inline-flex items-center gap-1 text-slate-600 dark:text-zinc-400 font-mono">
-                  <Eye className="h-3.5 w-3.5 text-blue-400" />
-                  <span>{experience.viewsCount} {experience.viewsCount === 1 ? "view" : "views"}</span>
-                </span>
+                <ViewCounter
+                  targetType="EXPERIENCE"
+                  targetId={experience.id}
+                  initialViews={experience.viewsCount}
+                  className="inline-flex items-center gap-1 text-slate-600 dark:text-zinc-400 font-mono"
+                  iconClassName="h-3.5 w-3.5 text-blue-400"
+                />
               </div>
 
               <div className="flex items-center gap-2">

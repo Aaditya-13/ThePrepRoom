@@ -21,6 +21,7 @@ import {
 import {
   saveExperienceDraftAction,
   submitExperienceAction,
+  deleteUserExperienceAction,
   ExperienceSubmissionData,
   RoundEntry,
   QuestionEntry,
@@ -28,6 +29,7 @@ import {
 import { findOrCreateCompanyAction, findOrCreateRoleAction } from "@/actions/admin";
 import { formatPlacementType, formatResultStatus } from "@/lib/utils";
 import { ModernSelect, ModernSelectOption } from "@/components/modern-select";
+import { DeleteConfirmationModal } from "@/components/delete-confirmation-modal";
 
 interface WizardProps {
   companies: {
@@ -397,6 +399,23 @@ export function ShareExperienceWizard({
         });
       }
     });
+  };
+
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [isDeletingDraft, setIsDeletingDraft] = useState(false);
+
+  const handleDeleteDraft = async () => {
+    if (!draftId) return;
+    setIsDeletingDraft(true);
+    setStatusMessage(null);
+    const res = await deleteUserExperienceAction(draftId);
+    setIsDeletingDraft(false);
+    if (res?.error) {
+      setStatusMessage({ type: "error", text: res.error });
+      setShowDeleteModal(false);
+    } else {
+      router.push("/profile");
+    }
   };
 
   // Continue / Next Step Handler
@@ -1435,7 +1454,7 @@ export function ShareExperienceWizard({
           <button
             type="button"
             onClick={handleSaveDraft}
-            disabled={isPending}
+            disabled={isPending || isDeletingDraft}
             className="rounded-xl border border-stone-200 dark:border-zinc-700 bg-white dark:bg-[#16181e] px-3.5 sm:px-4 py-2 text-xs font-semibold text-slate-700 dark:text-zinc-300 hover:border-blue-500/50 hover:text-blue-500 inline-flex items-center gap-1.5 transition-all shadow-xs cursor-pointer shrink-0"
             title="Save as private draft to resume later"
           >
@@ -1443,6 +1462,19 @@ export function ShareExperienceWizard({
             <span className="hidden xs:inline">Save Draft</span>
             <span className="xs:hidden">Save</span>
           </button>
+
+          {draftId && (
+            <button
+              type="button"
+              onClick={() => setShowDeleteModal(true)}
+              disabled={isPending || isDeletingDraft}
+              className="rounded-xl border border-stone-200 dark:border-zinc-700 bg-white dark:bg-[#16181e] hover:border-red-500/50 hover:bg-red-500/10 text-slate-600 dark:text-zinc-400 hover:text-red-400 px-3 py-2 text-xs font-semibold inline-flex items-center gap-1.5 transition-all shadow-xs cursor-pointer shrink-0"
+              title="Delete this saved draft"
+            >
+              <Trash2 className="h-4 w-4" />
+              <span className="hidden sm:inline">Delete Draft</span>
+            </button>
+          )}
         </div>
 
         <div>
@@ -1477,6 +1509,20 @@ export function ShareExperienceWizard({
           )}
         </div>
       </div>
+
+      {/* Delete Draft Warning Confirmation Modal */}
+      <DeleteConfirmationModal
+        isOpen={showDeleteModal}
+        onClose={() => setShowDeleteModal(false)}
+        onConfirm={handleDeleteDraft}
+        isDeleting={isDeletingDraft}
+        itemType="draft"
+        itemName={
+          activeCompany?.name
+            ? `${activeCompany.name} (${interviewYear})`
+            : "Interview Draft"
+        }
+      />
     </div>
   );
 }

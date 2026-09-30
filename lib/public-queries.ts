@@ -203,14 +203,6 @@ export async function getPublicExperienceBySlug(slug: string) {
     return null;
   }
 
-  // Fire-and-forget view count increment without blocking page render
-  prisma.experience
-    .update({
-      where: { id: experience.id },
-      data: { viewsCount: { increment: 1 } },
-    })
-    .catch(() => {});
-
   return experience;
 }
 
@@ -422,6 +414,7 @@ const getCachedCompaniesList = unstable_cache(
       description: c.description,
       industry: c.industry,
       website: c.website,
+      viewsCount: c.viewsCount,
       approvedExperiencesCount: c._count.experiences,
       rolesCount: c._count.roles,
       latestYear: c.experiences[0]?.interviewYear ?? null,
@@ -471,6 +464,7 @@ export async function getAllPublicCompanies(search?: string) {
     description: c.description,
     industry: c.industry,
     website: c.website,
+    viewsCount: c.viewsCount,
     approvedExperiencesCount: c._count.experiences,
     rolesCount: c._count.roles,
     latestYear: c.experiences[0]?.interviewYear ?? null,
