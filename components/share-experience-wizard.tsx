@@ -444,16 +444,13 @@ export function ShareExperienceWizard({
       } else {
         setStatusMessage({
           type: "success",
-          text: "Experience added successfully! Marked as 'Unverified' on top. Redirecting to your live experience...",
+          text: "Experience submitted successfully! Opening...",
         });
-        setTimeout(() => {
-          if (res?.slug) {
-            router.push(`/experiences/${res.slug}`);
-          } else {
-            router.push("/profile");
-          }
-          router.refresh();
-        }, 1200);
+        if (res?.slug) {
+          router.push(`/experiences/${res.slug}`);
+        } else {
+          router.push("/profile");
+        }
       }
     });
   };

@@ -149,21 +149,8 @@ export async function getPublicExperiences(filter: GetExperiencesFilter = {}) {
  * Fetch a single approved experience by slug
  */
 export async function getPublicExperienceBySlug(slug: string) {
-  // First verify existence and public status
-  const existing = await prisma.experience.findUnique({
+  const experience = await prisma.experience.findUnique({
     where: { slug },
-    select: { id: true, status: true },
-  });
-
-  // Allow public viewing if APPROVED or PENDING
-  if (!existing || (existing.status !== "APPROVED" && existing.status !== "PENDING")) {
-    return null;
-  }
-
-  // Atomically increment viewsCount AND fetch the fresh record in one atomic operation
-  const experience = await prisma.experience.update({
-    where: { id: existing.id },
-    data: { viewsCount: { increment: 1 } },
     include: {
       company: {
         include: {
@@ -210,6 +197,19 @@ export async function getPublicExperienceBySlug(slug: string) {
       },
     },
   });
+
+  // Allow public viewing if APPROVED or PENDING
+  if (!experience || (experience.status !== "APPROVED" && experience.status !== "PENDING")) {
+    return null;
+  }
+
+  // Fire-and-forget view count increment without blocking page render
+  prisma.experience
+    .update({
+      where: { id: experience.id },
+      data: { viewsCount: { increment: 1 } },
+    })
+    .catch(() => {});
 
   return experience;
 }
@@ -330,7 +330,14 @@ export const getPopularCompanies = unstable_cache(
       },
     });
 
-    const result = companiesWithExp.map((c) => ({
+    const result: Array<{
+      id: string;
+      name: string;
+      slug: string;
+      approvedExperiencesCount: number;
+      rolesCount: number;
+      latestYear: number | null;
+    }> = companiesWithExp.map((c) => ({
       id: c.id,
       name: c.name,
       slug: c.slug,

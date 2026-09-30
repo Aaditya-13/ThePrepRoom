@@ -58,17 +58,19 @@ export async function findOrCreateCanonicalQuestion(
     return existing;
   }
 
-  // 2. Generate a clean, unique slug
+  // 2. Generate a clean, unique slug with at most 1 fast check
   let baseSlug = slugify(trimmedText.slice(0, 80));
   if (!baseSlug) {
     baseSlug = `q-${Date.now()}`;
   }
 
   let uniqueSlug = baseSlug;
-  let counter = 1;
-  while (await db.question.findUnique({ where: { slug: uniqueSlug } })) {
-    uniqueSlug = `${baseSlug}-${counter}`;
-    counter++;
+  const slugExists = await db.question.findUnique({
+    where: { slug: uniqueSlug },
+    select: { id: true },
+  });
+  if (slugExists) {
+    uniqueSlug = `${baseSlug}-${Math.random().toString(36).substring(2, 6)}`;
   }
 
   // 3. Create canonical question record

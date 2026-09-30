@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { cache } from "react";
 import {
   Building2,
   Calendar,
@@ -34,13 +35,18 @@ import { PLACEMENT_STATUS_CONFIG } from "@/lib/profile-constants";
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
+// Per-request memoization to avoid duplicate queries between generateMetadata and Page
+const getCachedExperience = cache(async (slug: string) => {
+  return await getPublicExperienceBySlug(slug);
+});
+
 interface PageProps {
   params: Promise<{ slug: string }>;
 }
 
 export async function generateMetadata(props: PageProps) {
   const params = await props.params;
-  const experience = await getPublicExperienceBySlug(params.slug);
+  const experience = await getCachedExperience(params.slug);
 
   if (!experience) {
     return { title: "Experience Not Found" };
@@ -54,7 +60,7 @@ export async function generateMetadata(props: PageProps) {
 
 export default async function ExperienceDetailPage(props: PageProps) {
   const params = await props.params;
-  const experience = await getPublicExperienceBySlug(params.slug);
+  const experience = await getCachedExperience(params.slug);
 
   if (!experience) {
     notFound();

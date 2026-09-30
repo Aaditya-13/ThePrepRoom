@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser, requireAdmin } from "@/lib/auth";
 import { verifyCompanyRoleConsistency } from "@/lib/company-role";
-import { findOrCreateCanonicalQuestion } from "@/lib/deduplicate";
+import { findOrCreateCanonicalQuestion, normalizeQuestionText } from "@/lib/deduplicate";
 import { slugify } from "@/lib/utils";
 import { getPublicExperiences } from "@/lib/public-queries";
 
@@ -48,35 +48,70 @@ export interface ExperienceSubmissionData {
  * to eliminate transaction timeouts and SQLite lock contention.
  */
 async function preResolveRoundsAndQuestions(rounds: RoundEntry[]) {
-  const resolved: {
-    round: RoundEntry;
-    questionLinks: { questionId: string; notes: string | null }[];
-  }[] = [];
+  if (!rounds || rounds.length === 0) return [];
 
-  if (!rounds || rounds.length === 0) return resolved;
-
+  // 1. Gather all unique non-empty questions across rounds
+  const questionMap = new Map<string, QuestionEntry & { roundType: string }>();
   for (const r of rounds) {
-    const links: { questionId: string; notes: string | null }[] = [];
-    if (r.questions && r.questions.length > 0) {
+    if (r.questions) {
       for (const q of r.questions) {
         if (q.text && q.text.trim()) {
-          const canonical = await findOrCreateCanonicalQuestion({
-            text: q.text,
-            topicId: q.topicId || null,
-            round: r.roundType,
-            difficulty: q.difficulty || "MEDIUM",
-          });
-          links.push({
-            questionId: canonical.id,
-            notes: q.notes?.trim() || null,
-          });
+          const norm = normalizeQuestionText(q.text);
+          if (!questionMap.has(norm)) {
+            questionMap.set(norm, { ...q, roundType: r.roundType });
+          }
         }
       }
     }
-    resolved.push({ round: r, questionLinks: links });
   }
 
-  return resolved;
+  // 2. Batch lookup all normalized questions in ONE single roundtrip
+  const allNormalized = Array.from(questionMap.keys());
+  const existingQuestions =
+    allNormalized.length > 0
+      ? await prisma.question.findMany({
+          where: { normalizedText: { in: allNormalized } },
+        })
+      : [];
+
+  const existingMap = new Map(existingQuestions.map((q) => [q.normalizedText, q]));
+
+  // 3. Concurrently create only missing questions in parallel
+  const missing = allNormalized.filter((norm) => !existingMap.has(norm));
+  if (missing.length > 0) {
+    await Promise.all(
+      missing.map(async (norm) => {
+        const qData = questionMap.get(norm)!;
+        const created = await findOrCreateCanonicalQuestion({
+          text: qData.text,
+          topicId: qData.topicId || null,
+          round: qData.roundType,
+          difficulty: qData.difficulty || "MEDIUM",
+        });
+        existingMap.set(norm, created);
+      })
+    );
+  }
+
+  // 4. Assemble question links synchronously (0 extra DB queries!)
+  return rounds.map((r) => {
+    const links: { questionId: string; notes: string | null }[] = [];
+    if (r.questions) {
+      for (const q of r.questions) {
+        if (q.text && q.text.trim()) {
+          const norm = normalizeQuestionText(q.text);
+          const canonical = existingMap.get(norm);
+          if (canonical) {
+            links.push({
+              questionId: canonical.id,
+              notes: q.notes?.trim() || null,
+            });
+          }
+        }
+      }
+    }
+    return { round: r, questionLinks: links };
+  });
 }
 
 /**
@@ -164,33 +199,35 @@ export async function saveExperienceDraftAction(data: ExperienceSubmissionData) 
         });
       }
 
-      // Fast batch insert of rounds and questions
-      for (const item of resolvedRounds) {
-        const round = await tx.interviewRound.create({
-          data: {
-            experienceId: exp.id,
-            roundType: item.round.roundType,
-            orderIndex: item.round.orderIndex,
-            roundName: item.round.roundName,
-            platform: item.round.platform || null,
-            durationMinutes: item.round.durationMinutes || null,
-            sections: item.round.sections || null,
-            difficulty: item.round.difficulty || null,
-            description: item.round.description || null,
-          },
-        });
-
-        if (item.questionLinks.length > 0) {
-          await tx.experienceQuestion.createMany({
-            data: item.questionLinks.map((ql) => ({
+      // Fast parallel insert of rounds and questions
+      await Promise.all(
+        resolvedRounds.map(async (item) => {
+          const round = await tx.interviewRound.create({
+            data: {
               experienceId: exp.id,
-              interviewRoundId: round.id,
-              questionId: ql.questionId,
-              studentNotes: ql.notes,
-            })),
+              roundType: item.round.roundType,
+              orderIndex: item.round.orderIndex,
+              roundName: item.round.roundName,
+              platform: item.round.platform || null,
+              durationMinutes: item.round.durationMinutes ? Number(item.round.durationMinutes) : null,
+              sections: item.round.sections || null,
+              difficulty: item.round.difficulty || null,
+              description: item.round.description || null,
+            },
           });
-        }
-      }
+
+          if (item.questionLinks.length > 0) {
+            await tx.experienceQuestion.createMany({
+              data: item.questionLinks.map((ql) => ({
+                experienceId: exp.id,
+                interviewRoundId: round.id,
+                questionId: ql.questionId,
+                studentNotes: ql.notes,
+              })),
+            });
+          }
+        })
+      );
 
       return exp;
     },
@@ -225,32 +262,38 @@ export async function submitExperienceAction(data: ExperienceSubmissionData) {
     return { error: check.error };
   }
 
-  const college = await prisma.college.findFirst();
+  // Concurrently fetch company, role, and college in ONE parallel roundtrip
+  const [company, role, college] = await Promise.all([
+    prisma.company.findUnique({ where: { id: data.companyId }, select: { name: true } }),
+    prisma.companyRole.findUnique({ where: { id: data.roleId }, select: { title: true } }),
+    prisma.college.findFirst({ select: { id: true } }),
+  ]);
 
-  // Generate unique slug
-  const company = await prisma.company.findUnique({ where: { id: data.companyId } });
-  const role = await prisma.companyRole.findUnique({ where: { id: data.roleId } });
+  // Fast single slug check
   const baseSlug = slugify(`${company?.name || "company"}-${role?.title || "role"}-${data.interviewYear}`);
-
   let uniqueSlug = baseSlug;
-  let counter = 1;
-  while (await prisma.experience.findFirst({ where: { slug: uniqueSlug, id: { not: data.id || "" } } })) {
-    uniqueSlug = `${baseSlug}-${counter}`;
-    counter++;
+  const existingSlug = await prisma.experience.findFirst({
+    where: { slug: uniqueSlug, id: { not: data.id || "" } },
+    select: { id: true },
+  });
+  if (existingSlug) {
+    uniqueSlug = `${baseSlug}-${Date.now().toString().slice(-4)}`;
   }
 
-  // Pre-resolve canonical questions outside the transaction to eliminate transaction timeouts
+  // Pre-resolve canonical questions concurrently
   const resolvedRounds = await preResolveRoundsAndQuestions(data.rounds);
 
-  // Execute database transaction with 15s timeout
+  // Execute database transaction with parallel round insertion
   const submitted = await prisma.$transaction(
     async (tx) => {
       let exp;
 
       if (data.id) {
-        // Clear old rounds if updating from draft
-        await tx.experienceQuestion.deleteMany({ where: { experienceId: data.id } });
-        await tx.interviewRound.deleteMany({ where: { experienceId: data.id } });
+        // Concurrently clear old rounds if updating from draft
+        await Promise.all([
+          tx.experienceQuestion.deleteMany({ where: { experienceId: data.id } }),
+          tx.interviewRound.deleteMany({ where: { experienceId: data.id } }),
+        ]);
 
         exp = await tx.experience.update({
           where: { id: data.id },
@@ -290,33 +333,35 @@ export async function submitExperienceAction(data: ExperienceSubmissionData) {
         });
       }
 
-      // Fast batch insert of rounds and questions
-      for (const item of resolvedRounds) {
-        const round = await tx.interviewRound.create({
-          data: {
-            experienceId: exp.id,
-            roundType: item.round.roundType,
-            orderIndex: item.round.orderIndex,
-            roundName: item.round.roundName,
-            platform: item.round.platform?.trim() || null,
-            durationMinutes: item.round.durationMinutes ? Number(item.round.durationMinutes) : null,
-            sections: item.round.sections?.trim() || null,
-            difficulty: item.round.difficulty || null,
-            description: item.round.description?.trim() || null,
-          },
-        });
-
-        if (item.questionLinks.length > 0) {
-          await tx.experienceQuestion.createMany({
-            data: item.questionLinks.map((ql) => ({
+      // Concurrently insert all rounds and question links in parallel
+      await Promise.all(
+        resolvedRounds.map(async (item) => {
+          const round = await tx.interviewRound.create({
+            data: {
               experienceId: exp.id,
-              interviewRoundId: round.id,
-              questionId: ql.questionId,
-              studentNotes: ql.notes,
-            })),
+              roundType: item.round.roundType,
+              orderIndex: item.round.orderIndex,
+              roundName: item.round.roundName,
+              platform: item.round.platform?.trim() || null,
+              durationMinutes: item.round.durationMinutes ? Number(item.round.durationMinutes) : null,
+              sections: item.round.sections?.trim() || null,
+              difficulty: item.round.difficulty || null,
+              description: item.round.description?.trim() || null,
+            },
           });
-        }
-      }
+
+          if (item.questionLinks.length > 0) {
+            await tx.experienceQuestion.createMany({
+              data: item.questionLinks.map((ql) => ({
+                experienceId: exp.id,
+                interviewRoundId: round.id,
+                questionId: ql.questionId,
+                studentNotes: ql.notes,
+              })),
+            });
+          }
+        })
+      );
 
       return exp;
     },
@@ -324,11 +369,12 @@ export async function submitExperienceAction(data: ExperienceSubmissionData) {
   );
 
   revalidatePath("/profile");
-  revalidatePath("/admin");
   revalidatePath("/experiences");
+  revalidatePath("/admin");
   revalidatePath("/");
   revalidatePath("/companies");
   revalidatePath("/questions");
+
   return { success: true, slug: submitted.slug, experienceId: submitted.id };
 }
 
