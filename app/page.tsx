@@ -21,6 +21,7 @@ import {
 import { HeroIllustration } from "@/components/hero-illustration";
 import { TopStoriesCarousel } from "@/components/top-stories-carousel";
 import { getUserInitials } from "@/lib/user-utils";
+import { formatPlacementType } from "@/lib/utils";
 
 export const revalidate = 30; // 30s ISR for sub-50ms page loads with instant revalidatePath invalidation
 
@@ -55,13 +56,7 @@ export default async function HomePage() {
 
   const featuredQuestions = topQuestions.slice(0, 4);
 
-  // Sample tag colors for diversity in featured cards
-  const TAG_STYLES = [
-    { label: "DSA", bg: "bg-lime-400/10 text-lime-400 border-lime-400/20" },
-    { label: "Core CS", bg: "bg-blue-400/10 text-blue-400 border-blue-400/20" },
-    { label: "On-Campus", bg: "bg-emerald-400/10 text-emerald-400 border-emerald-400/20" },
-    { label: "Technical", bg: "bg-purple-400/10 text-purple-400 border-purple-400/20" },
-  ];
+
 
   return (
     <div className="min-h-screen bg-[#090a0d] text-white">
@@ -163,8 +158,8 @@ export default async function HomePage() {
             </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-              {featuredExperiences.map((exp, idx) => {
-                const tagStyle = TAG_STYLES[idx % TAG_STYLES.length];
+              {featuredExperiences.map((exp) => {
+                const dept = exp.department || exp.user?.department;
                 const authorName = exp.isAnonymous ? "Anonymous Candidate" : exp.user?.name || "Student";
                 const authorInitials = getUserInitials(authorName);
 
@@ -175,13 +170,12 @@ export default async function HomePage() {
                     className="rounded-2xl border border-zinc-800/90 bg-[#121418] p-5 hover:border-blue-500/40 hover:-translate-y-0.5 active:scale-[0.995] transition-[transform,border-color,background-color,box-shadow] duration-200 ease-out shadow-xs hover:shadow-xl hover:shadow-black/40 group flex flex-col justify-between cursor-pointer outline-none select-none"
                   >
                     <div className="space-y-3">
-                      {/* Top Row: Year · Department and Tag */}
-                      <div className="flex items-center justify-between text-xs font-mono">
-                        <span className="text-zinc-400 font-medium">
-                          {exp.interviewYear} · {exp.user?.department || "CSE"}
-                        </span>
-                        <span className={`px-2 py-0.5 rounded-full border text-[10px] font-semibold ${tagStyle.bg}`}>
-                          {tagStyle.label}
+                      {/* Top Row: Year · Department / Placement Type */}
+                      <div className="flex items-center text-xs font-mono text-zinc-400">
+                        <span className="font-medium">
+                          {exp.interviewYear}
+                          {dept ? ` · ${dept}` : ""}
+                          {exp.placementType ? ` · ${formatPlacementType(exp.placementType)}` : ""}
                         </span>
                       </div>
 
