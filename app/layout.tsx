@@ -42,8 +42,11 @@ export const metadata: Metadata = {
     "campus recruitment",
   ],
   icons: {
-    icon: "/icon.png",
-    shortcut: "/icon.png",
+    icon: [
+      { url: "/icon.png", type: "image/png" },
+      { url: "/favicon.ico" },
+    ],
+    shortcut: "/favicon.ico",
     apple: "/icon.png",
   },
 };
