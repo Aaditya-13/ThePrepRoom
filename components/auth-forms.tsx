@@ -6,7 +6,6 @@ import Link from "next/link";
 import Image from "next/image";
 import {
   AlertCircle,
-  Sparkles,
   Info,
 } from "lucide-react";
 import { loginAction, registerAction } from "@/actions/auth";
@@ -130,10 +129,6 @@ export function LoginForm() {
 
       {/* Header */}
       <div className="space-y-1.5 relative z-10">
-        <div className="inline-flex items-center gap-1.5 rounded-full border border-blue-500/30 bg-blue-500/10 px-3 py-0.5 text-[11px] font-semibold text-blue-400">
-          <Sparkles className="h-3 w-3" />
-          <span>Student Authentication</span>
-        </div>
         <h1 className="text-2xl font-bold tracking-tight text-white">
           Sign In
         </h1>
@@ -298,10 +293,6 @@ export function RegisterForm() {
 
       {/* Header */}
       <div className="space-y-1.5 relative z-10">
-        <div className="inline-flex items-center gap-1.5 rounded-full border border-blue-500/30 bg-blue-500/10 px-3 py-0.5 text-[11px] font-semibold text-blue-400">
-          <Sparkles className="h-3 w-3" />
-          <span>Student Registration</span>
-        </div>
         <h1 className="text-2xl font-bold tracking-tight text-white">
           Create Account
         </h1>

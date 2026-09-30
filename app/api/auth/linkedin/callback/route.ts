@@ -105,16 +105,6 @@ export async function GET(request: NextRequest) {
     });
 
     if (user) {
-      // If user is an admin, prevent OAuth login to avoid bypassing 2FA
-      if (user.role === "ADMIN") {
-        const adminUrl = new URL("/admin/login", appUrl);
-        adminUrl.searchParams.set(
-          "error",
-          "Administrator accounts must authenticate with email, password, and TOTP 2FA. Social login is disabled for admins."
-        );
-        return NextResponse.redirect(adminUrl);
-      }
-
       // Link LinkedIn account and update image if not set
       user = await prisma.user.update({
         where: { id: user.id },

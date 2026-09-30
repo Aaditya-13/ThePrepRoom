@@ -30,13 +30,6 @@ export async function loginAction(prevState: any, formData: FormData) {
     return { error: "Invalid email or password." };
   }
 
-  // Reject admin from student login form without revealing admin role
-  if (user.role === "ADMIN") {
-    return {
-      error: "Invalid email or password.",
-    };
-  }
-
   await createSessionCookie({
     userId: user.id,
     email: user.email,
