@@ -468,7 +468,7 @@ export function ShareExperienceWizard({
   ];
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-8" suppressHydrationWarning>
       {/* Streamlined Step Progress Bar */}
       <div className="rounded-2xl border border-stone-200 dark:border-zinc-800/90 bg-white dark:bg-[#111317] p-3 sm:p-4 shadow-sm">
         <div className="flex items-center justify-between overflow-x-auto gap-2 text-xs no-scrollbar">
@@ -670,6 +670,10 @@ export function ShareExperienceWizard({
                 onChange={(e) => setInterviewYear(Number(e.target.value))}
                 min={2020}
                 max={2030}
+                autoComplete="off"
+                data-1p-ignore="true"
+                data-lpignore="true"
+                suppressHydrationWarning
                 className="w-full rounded-xl border border-stone-300 dark:border-zinc-700 bg-stone-50 dark:bg-[#0c0d10] px-4 py-2.5 text-slate-900 dark:text-zinc-100 focus:border-blue-500 focus:outline-hidden"
               />
               <span className="text-[11px] text-slate-400 dark:text-zinc-500 mt-1 block">
@@ -686,6 +690,10 @@ export function ShareExperienceWizard({
                 value={graduationYear || ""}
                 onChange={(e) => setGraduationYear(e.target.value ? Number(e.target.value) : undefined)}
                 placeholder="e.g. 2027"
+                autoComplete="off"
+                data-1p-ignore="true"
+                data-lpignore="true"
+                suppressHydrationWarning
                 className="w-full rounded-xl border border-stone-300 dark:border-zinc-700 bg-stone-50 dark:bg-[#0c0d10] px-4 py-2.5 text-slate-900 dark:text-zinc-100 focus:border-blue-500 focus:outline-hidden"
               />
               <span className="text-[11px] text-slate-400 dark:text-zinc-500 mt-1 block">
@@ -702,6 +710,10 @@ export function ShareExperienceWizard({
                 value={department}
                 onChange={(e) => setDepartment(e.target.value)}
                 placeholder="e.g. Information Technology"
+                autoComplete="off"
+                data-1p-ignore="true"
+                data-lpignore="true"
+                suppressHydrationWarning
                 className="w-full rounded-xl border border-stone-300 dark:border-zinc-700 bg-stone-50 dark:bg-[#0c0d10] px-4 py-2.5 text-slate-900 dark:text-zinc-100 focus:border-blue-500 focus:outline-hidden"
               />
             </div>
