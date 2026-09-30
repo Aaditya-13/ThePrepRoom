@@ -4,8 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { getPublicQuestions } from "@/lib/public-queries";
 import { BookmarkButton } from "@/components/bookmark-button";
 
-export const dynamic = "force-dynamic";
-export const revalidate = 0;
+export const revalidate = 30;
 
 export const metadata = {
   title: "Interview Questions Bank",
@@ -103,12 +102,42 @@ export default async function QuestionsPage(props: PageProps) {
 
       {/* Questions List */}
       {questions.length === 0 ? (
-        <div className="text-center py-16 border border-dashed border-zinc-800 rounded-2xl bg-[#111317] p-8 shadow-xs">
-          <HelpCircle className="mx-auto h-8 w-8 text-zinc-500 mb-2" />
-          <h3 className="text-base font-bold text-white">No questions found</h3>
-          <p className="text-xs text-zinc-400 mt-1">
-            Try searching for broader terms or selecting a different topic.
-          </p>
+        <div className="text-center py-16 border border-dashed border-zinc-800 rounded-2xl bg-[#111317] p-8 sm:p-12 shadow-xs">
+          <div className="w-12 h-12 rounded-2xl bg-blue-950/40 border border-blue-800/40 flex items-center justify-center mx-auto mb-4 text-blue-400 shadow-sm shadow-blue-500/10">
+            <HelpCircle className="h-6 w-6" />
+          </div>
+          {searchParams.q || searchParams.topic || searchParams.round || searchParams.difficulty ? (
+            <>
+              <h3 className="text-base sm:text-lg font-bold text-white">No matching questions found</h3>
+              <p className="text-xs sm:text-sm text-zinc-400 mt-1.5 max-w-md mx-auto">
+                No questions matched your current filters. Try searching for broader terms or resetting your search.
+              </p>
+              <div className="mt-5">
+                <Link
+                  href="/questions"
+                  className="rounded-full border border-zinc-700 bg-zinc-800/80 hover:bg-zinc-700 px-5 py-2 text-xs sm:text-sm font-semibold text-zinc-200 transition-all inline-block"
+                >
+                  Clear All Filters
+                </Link>
+              </div>
+            </>
+          ) : (
+            <>
+              <h3 className="text-base sm:text-lg font-bold text-white">No Interview Questions Yet</h3>
+              <p className="text-xs sm:text-sm text-zinc-400 mt-1.5 max-w-md mx-auto">
+                Questions are automatically indexed in real-time as students and alumni share their verified interview experiences.
+              </p>
+              <div className="mt-5">
+                <Link
+                  href="/share"
+                  className="rounded-full bg-blue-600 hover:bg-blue-500 px-6 py-2.5 text-xs sm:text-sm font-semibold text-white shadow-md shadow-blue-600/25 transition-all hover:scale-105 active:scale-95 inline-flex items-center gap-2"
+                >
+                  <span>Share an Interview Experience</span>
+                  <ArrowRight className="h-4 w-4" />
+                </Link>
+              </div>
+            </>
+          )}
         </div>
       ) : (
         <div className="divide-y divide-zinc-800/80 border border-zinc-800/80 rounded-2xl bg-[#121418] overflow-hidden shadow-xs">

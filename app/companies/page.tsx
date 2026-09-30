@@ -2,8 +2,7 @@ import Link from "next/link";
 import { Search, Building2, ArrowRight } from "lucide-react";
 import { getAllPublicCompanies } from "@/lib/public-queries";
 
-export const dynamic = "force-dynamic";
-export const revalidate = 0;
+export const revalidate = 60;
 
 export const metadata = {
   title: "Companies Directory",

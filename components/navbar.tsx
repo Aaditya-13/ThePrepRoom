@@ -382,6 +382,16 @@ export function Navbar({ currentUser: initialUser }: NavbarProps) {
 
             {currentUser ? (
               <div className="pt-3 border-t border-zinc-800 mt-2 space-y-1">
+                {currentUser.role === "ADMIN" && (
+                  <Link
+                    href="/admin"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="flex items-center gap-2 px-3 py-2 text-sm text-emerald-400 hover:bg-emerald-500/10 rounded-lg font-semibold"
+                  >
+                    <Shield className="h-4 w-4 text-emerald-400" />
+                    <span>Admin Moderation</span>
+                  </Link>
+                )}
                 <Link
                   href="/profile"
                   onClick={() => setMobileMenuOpen(false)}

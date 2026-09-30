@@ -7,8 +7,7 @@ import { ExperienceSearchBar } from "@/components/experience-search-bar";
 import { ExperienceRightSidebar } from "@/components/experience-right-sidebar";
 import { StickySidebar } from "@/components/sticky-sidebar";
 
-export const dynamic = "force-dynamic";
-export const revalidate = 0;
+export const revalidate = 15;
 
 export const metadata = {
   title: "Interview Experiences",

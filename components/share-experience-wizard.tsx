@@ -1414,11 +1414,12 @@ export function ShareExperienceWizard({
               className="rounded-xl border border-stone-200 dark:border-zinc-700 bg-white dark:bg-[#16181e] px-4 py-2 text-xs font-semibold text-slate-700 dark:text-zinc-300 hover:border-blue-500/50 hover:text-blue-500 inline-flex items-center gap-1.5 transition-all shadow-xs cursor-pointer"
             >
               <ChevronLeft className="h-4 w-4" />
-              <span>
+              <span className="hidden sm:inline">
                 {step === 3 && hasPrevRoundInStep3
                   ? `Back: ${prevRoundLabel}`
                   : "Previous"}
               </span>
+              <span className="sm:hidden">Back</span>
             </button>
           )}
 
@@ -1426,11 +1427,12 @@ export function ShareExperienceWizard({
             type="button"
             onClick={handleSaveDraft}
             disabled={isPending}
-            className="rounded-xl border border-stone-200 dark:border-zinc-700 bg-white dark:bg-[#16181e] px-4 py-2 text-xs font-semibold text-slate-700 dark:text-zinc-300 hover:border-blue-500/50 hover:text-blue-500 inline-flex items-center gap-1.5 transition-all shadow-xs cursor-pointer"
+            className="rounded-xl border border-stone-200 dark:border-zinc-700 bg-white dark:bg-[#16181e] px-3.5 sm:px-4 py-2 text-xs font-semibold text-slate-700 dark:text-zinc-300 hover:border-blue-500/50 hover:text-blue-500 inline-flex items-center gap-1.5 transition-all shadow-xs cursor-pointer shrink-0"
             title="Save as private draft to resume later"
           >
             <Save className="h-4 w-4 text-blue-500" />
-            <span>Save Draft</span>
+            <span className="hidden xs:inline">Save Draft</span>
+            <span className="xs:hidden">Save</span>
           </button>
         </div>
 
@@ -1439,14 +1441,17 @@ export function ShareExperienceWizard({
             <button
               type="button"
               onClick={handleContinueStep}
-              className="rounded-xl bg-blue-600 hover:bg-blue-500 px-5 py-2.5 text-xs sm:text-sm font-semibold text-white shadow-md shadow-blue-500/20 active:scale-95 inline-flex items-center gap-1.5 transition-all cursor-pointer"
+              className="rounded-xl bg-blue-600 hover:bg-blue-500 px-4 sm:px-5 py-2 sm:py-2.5 text-xs sm:text-sm font-semibold text-white shadow-md shadow-blue-500/20 active:scale-95 inline-flex items-center gap-1.5 transition-all cursor-pointer shrink-0"
             >
-              <span>
+              <span className="hidden sm:inline">
                 {step === 3 && hasNextRoundInStep3
                   ? `Next: ${nextRoundLabel}`
                   : step === 3
                   ? "Continue to Experience"
                   : "Continue"}
+              </span>
+              <span className="sm:hidden">
+                {step === 3 && hasNextRoundInStep3 ? "Next Round" : "Continue"}
               </span>
               <ChevronRight className="h-4 w-4" />
             </button>
@@ -1455,10 +1460,10 @@ export function ShareExperienceWizard({
               type="button"
               onClick={handleSubmitExperience}
               disabled={isPending}
-              className="rounded-xl bg-emerald-600 hover:bg-emerald-500 px-6 py-2.5 text-xs sm:text-sm font-bold text-white shadow-md shadow-emerald-500/20 active:scale-95 disabled:opacity-50 inline-flex items-center gap-2 transition-all cursor-pointer"
+              className="rounded-xl bg-emerald-600 hover:bg-emerald-500 px-4 sm:px-6 py-2 sm:py-2.5 text-xs sm:text-sm font-bold text-white shadow-md shadow-emerald-500/20 active:scale-95 disabled:opacity-50 inline-flex items-center gap-2 transition-all cursor-pointer shrink-0"
             >
               <CheckCircle2 className="h-4 w-4" />
-              <span>{isPending ? "Submitting..." : "Submit Experience for Review"}</span>
+              <span>{isPending ? "Submitting..." : "Submit Experience"}</span>
             </button>
           )}
         </div>

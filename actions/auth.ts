@@ -36,6 +36,7 @@ export async function loginAction(prevState: any, formData: FormData) {
     role: user.role,
     name: user.name,
     authMethod: "credentials",
+    adminVerified: user.role === "ADMIN",
   });
 
   revalidatePath("/", "layout");
