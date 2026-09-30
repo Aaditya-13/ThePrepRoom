@@ -1,0 +1,268 @@
+datasource db {
+  provider = "postgresql"
+  directUrl = env("DIRECT_URL")
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum RoleType {
+  STUDENT
+  ADMIN
+}
+
+enum PlacementType {
+  CAMPUS
+  OFF_CAMPUS
+  REFERRAL
+  INTERNSHIP
+}
+
+enum ResultStatus {
+  SELECTED
+  REJECTED
+  WAITLISTED
+  PENDING
+  PREFER_NOT_TO_SAY
+}
+
+enum ExperienceStatus {
+  DRAFT
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum RoundType {
+  ONLINE_ASSESSMENT
+  APTITUDE
+  GROUP_DISCUSSION
+  TECHNICAL
+  HR
+  MANAGERIAL
+  OTHER
+}
+
+enum Difficulty {
+  EASY
+  MEDIUM
+  HARD
+}
+
+enum BookmarkTargetType {
+  EXPERIENCE
+  QUESTION
+  COMPANY
+}
+
+enum ReportStatus {
+  PENDING
+  RESOLVED
+  DISMISSED
+}
+
+model College {
+  id          String        @id @default(cuid())
+  name        String
+  slug        String        @unique
+  emailDomain String?
+  createdAt   DateTime      @default(now())
+
+  users       User[]
+  experiences Experience[]
+}
+
+model User {
+  id              String        @id @default(cuid())
+  email           String        @unique
+  passwordHash    String?       // Nullable for OAuth compatibility
+  name            String
+  role            String        @default("STUDENT") // STUDENT or ADMIN
+  collegeId       String?
+  college         College?      @relation(fields: [collegeId], references: [id], onDelete: SetNull)
+  department      String?
+  graduationYear  Int?          // Student profile metadata only
+  bio             String?
+  image           String?       // Profile picture / avatar
+  linkedinUrl     String?       // LinkedIn profile link
+  placementStatus String?       @default("PREPARING") // OFFER_ACCEPTED, ACTIVELY_INTERVIEWING, PREPARING, SEEKING_INTERNSHIP, HIGHER_STUDIES
+  placedCompany   String?       // Company & role name if placed
+  oauthProvider   String?       // "google" or "linkedin"
+  oauthId         String?       // OAuth provider unique subject ID
+  totpSecret      String?       // Admin TOTP 2FA secret (base32)
+  totpEnabled     Boolean       @default(false)
+  totpRecoveryCodes String?     // Admin hashed backup recovery codes (JSON string)
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  experiences     Experience[]
+  bookmarks       Bookmark[]
+  reports         Report[]
+}
+
+model Company {
+  id              String        @id @default(cuid())
+  name            String        @unique
+  slug            String        @unique
+  description     String?
+  website         String?
+  industry        String?
+  createdAt       DateTime      @default(now())
+
+  roles           CompanyRole[]
+  experiences     Experience[]
+}
+
+model CompanyRole {
+  id              String        @id @default(cuid())
+  title           String
+  slug            String
+  companyId       String
+  company         Company       @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  experiences     Experience[]
+
+  @@unique([companyId, slug])
+  @@index([companyId])
+}
+
+model Topic {
+  id              String        @id @default(cuid())
+  name            String        @unique
+  slug            String        @unique
+  category        String        // Core CS, Development, Cloud/Infra, Interview
+  questions       Question[]
+}
+
+model Question {
+  id              String               @id @default(cuid())
+  text            String               // Original text for display
+  normalizedText  String               @unique // Deterministic deduplication key (e.g., "what is dns")
+  slug            String               @unique
+  round           String               @default("TECHNICAL") // RoundType
+  difficulty      String               @default("MEDIUM")    // Difficulty
+  topicId         String?
+  topic           Topic?               @relation(fields: [topicId], references: [id], onDelete: SetNull)
+  createdAt       DateTime             @default(now())
+
+  experienceLinks ExperienceQuestion[]
+  reports         Report[]
+
+  @@index([normalizedText])
+  @@index([topicId])
+  @@index([round])
+}
+
+model Experience {
+  id                String              @id @default(cuid())
+  slug              String              @unique
+  userId            String?
+  user              User?               @relation(fields: [userId], references: [id], onDelete: SetNull)
+  collegeId         String?
+  college           College?            @relation(fields: [collegeId], references: [id], onDelete: SetNull)
+  companyId         String
+  company           Company             @relation(fields: [companyId], references: [id])
+  roleId            String
+  role              CompanyRole         @relation(fields: [roleId], references: [id])
+  interviewYear     Int                 // Primary year for filtering, stats, latest hiring year
+  graduationYear    Int?                // Student metadata only
+  department        String?
+  placementType     String              @default("CAMPUS") // PlacementType
+  result            String              @default("PENDING") // ResultStatus
+  overallExperience String              // Long-form editorial markdown
+  advice            String?             // Preparation advice for juniors
+  isAnonymous       Boolean             @default(false)
+  status            String              @default("APPROVED") // ExperienceStatus: DRAFT, PENDING, APPROVED, REJECTED
+  isDemo            Boolean             @default(false)    // Explicit flag for demo/seed data
+  isFeatured        Boolean             @default(false)
+  viewsCount        Int                 @default(0)
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+
+  rounds            InterviewRound[]
+  questionLinks     ExperienceQuestion[]
+  reports           Report[]
+
+  @@index([companyId])
+  @@index([roleId])
+  @@index([interviewYear])
+  @@index([status])
+  @@index([placementType])
+  @@index([createdAt])
+}
+
+model InterviewRound {
+  id              String              @id @default(cuid())
+  experienceId    String
+  experience      Experience          @relation(fields: [experienceId], references: [id], onDelete: Cascade)
+  roundType       String              // RoundType: ONLINE_ASSESSMENT, APTITUDE, GROUP_DISCUSSION, TECHNICAL, HR, MANAGERIAL, OTHER
+  orderIndex      Int
+  roundName       String
+  platform        String?             // e.g. HackerRank, Codility, TestDome, Mettl, Company Internal
+  durationMinutes Int?
+  sections        String?             // e.g. "Aptitude, Technical, Behavioural"
+  difficulty      String?             // Difficulty
+  description     String?
+  questions       ExperienceQuestion[]
+
+  @@index([experienceId])
+  @@index([roundType])
+  @@index([orderIndex])
+}
+
+model ExperienceQuestion {
+  id               String          @id @default(cuid())
+  experienceId     String
+  experience       Experience      @relation(fields: [experienceId], references: [id], onDelete: Cascade)
+  interviewRoundId String?
+  interviewRound   InterviewRound? @relation(fields: [interviewRoundId], references: [id], onDelete: Cascade)
+  questionId       String
+  question         Question        @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  studentNotes     String?
+
+  @@index([experienceId])
+  @@index([questionId])
+}
+
+model Bookmark {
+  id         String   @id @default(cuid())
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  targetType String   // BookmarkTargetType: EXPERIENCE, QUESTION, COMPANY
+  targetId   String   // ID of experience, question, or company
+  createdAt  DateTime @default(now())
+
+  @@unique([userId, targetType, targetId])
+  @@index([userId, targetType, targetId])
+}
+
+model Report {
+  id           String      @id @default(cuid())
+  reporterId   String?
+  reporter     User?       @relation(fields: [reporterId], references: [id], onDelete: SetNull)
+  experienceId String?
+  experience   Experience? @relation(fields: [experienceId], references: [id], onDelete: Cascade)
+  questionId   String?
+  question     Question?   @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  reason       String      // "Incorrect information", "Spam", "Personal information", "Offensive content", "Duplicate", "Other"
+  details      String?
+  status       String      @default("PENDING") // ReportStatus: PENDING, RESOLVED, DISMISSED
+  createdAt    DateTime    @default(now())
+
+  @@index([experienceId])
+  @@index([questionId])
+  @@index([status])
+}
+
+model AdminLoginAttempt {
+  id        String   @id @default(cuid())
+  ip        String
+  email     String
+  success   Boolean
+  createdAt DateTime @default(now())
+
+  @@index([ip, createdAt])
+  @@index([email, createdAt])
+}
+

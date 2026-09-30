@@ -73,11 +73,12 @@ const RESULT_OPTIONS: ModernSelectOption[] = [
 ];
 
 const COMMON_HR_PROMPTS = [
-  "Tell me about yourself and your background.",
-  "Why do you want to join our company?",
-  "Are you willing to relocate or work in rotating shifts?",
-  "Tell me about a difficult challenge in a college project.",
-  "Where do you see yourself in 3 to 5 years?",
+  { chip: "Tell me about yourself", prompt: "Tell me about yourself and your academic background." },
+  { chip: "Why our company?", prompt: "Why do you want to join our company and what excites you about this role?" },
+  { chip: "Difficult challenge", prompt: "Describe a difficult challenge you faced in a project and how you solved it." },
+  { chip: "Strengths & growth", prompt: "What are your greatest technical strengths and areas you are actively improving?" },
+  { chip: "Relocation / Shifts", prompt: "Are you comfortable with relocation, hybrid work, or flexible shift schedules?" },
+  { chip: "3 to 5 year goal", prompt: "Where do you see yourself professionally in the next 3 to 5 years?" },
 ];
 
 export function ShareExperienceWizard({
@@ -93,6 +94,27 @@ export function ShareExperienceWizard({
     type: "success" | "error";
     text: string;
   } | null>(null);
+
+  // Track steps that have been explicitly completed and saved via Continue or Save Draft
+  const [completedSteps, setCompletedSteps] = useState<number[]>(() => {
+    const list: number[] = [];
+    if (initialDraft?.companyId && initialDraft?.roleId) list.push(1);
+    if (initialDraft?.rounds && initialDraft.rounds.length > 0) {
+      list.push(2);
+      const hasRoundContent = initialDraft.rounds.some(
+        (r: any) =>
+          (r.questions && r.questions.length > 0) || r.platform || r.description
+      );
+      if (hasRoundContent) list.push(3);
+    }
+    if (initialDraft?.overallExperience && initialDraft.overallExperience.length >= 20) {
+      list.push(4);
+    }
+    if (initialDraft?.result && initialDraft.result !== "PENDING") {
+      list.push(5);
+    }
+    return list;
+  });
 
   // Form State
   const [draftId, setDraftId] = useState<string | undefined>(initialDraft?.id);
@@ -156,7 +178,7 @@ export function ShareExperienceWizard({
     initialDraft?.rounds?.find((r: any) => r.roundType === "HR")?.questions?.map((q: any) => ({
       text: q.question.text,
       notes: q.studentNotes || "",
-    })) || [{ text: "", notes: "" }]
+    })) || [{ text: "Tell me about yourself and your academic background.", notes: "" }]
   );
 
   // Other Round Descriptions
@@ -368,12 +390,47 @@ export function ShareExperienceWizard({
         setStatusMessage({ type: "error", text: res.error });
       } else {
         setDraftId(res.experienceId);
+        setCompletedSteps((prev) => Array.from(new Set([...prev, step])));
         setStatusMessage({
           type: "success",
           text: "Draft saved successfully. You can safely leave and resume anytime from your profile.",
         });
       }
     });
+  };
+
+  // Continue / Next Step Handler
+  const handleContinueStep = async () => {
+    setStatusMessage(null);
+
+    // If on Step 1 and user typed a custom role without saving
+    if (step === 1 && isAddingNewRole && customRoleTitle.trim()) {
+      await handleAddNewRole();
+    }
+
+    // Step 3 internal sub-round navigation
+    if (step === 3 && hasNextRoundInStep3) {
+      setActiveRoundTab(selectedRounds[currentRoundIdx + 1]);
+      window.scrollTo({ top: 120, behavior: "smooth" });
+      return;
+    }
+
+    // Mark current step as completed and saved
+    const completedStepNum = step;
+    setCompletedSteps((prev) => Array.from(new Set([...prev, completedStepNum])));
+
+    // Auto-save draft on Continue
+    const payload = buildPayload();
+    saveExperienceDraftAction(payload)
+      .then((res) => {
+        if (res?.experienceId) {
+          setDraftId(res.experienceId);
+        }
+      })
+      .catch(() => {});
+
+    setStep(step + 1);
+    window.scrollTo({ top: 120, behavior: "smooth" });
   };
 
   // Final Submit Handler
@@ -415,33 +472,38 @@ export function ShareExperienceWizard({
       {/* Streamlined Step Progress Bar */}
       <div className="rounded-2xl border border-stone-200 dark:border-zinc-800/90 bg-white dark:bg-[#111317] p-3 sm:p-4 shadow-sm">
         <div className="flex items-center justify-between overflow-x-auto gap-2 text-xs no-scrollbar">
-          {stepsList.map((s) => (
-            <button
-              key={s.num}
-              type="button"
-              onClick={() => setStep(s.num)}
-              className={`flex items-center gap-2 py-1.5 px-3 rounded-xl font-medium shrink-0 transition-all ${
-                step === s.num
-                  ? "bg-blue-600 text-white font-bold shadow-md shadow-blue-500/20"
-                  : step > s.num
-                  ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20"
-                  : "bg-stone-100 dark:bg-zinc-800/80 text-slate-500 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-zinc-200"
-              }`}
-            >
-              <span
-                className={`flex h-5 w-5 items-center justify-center rounded-full text-[11px] font-bold ${
-                  step === s.num
-                    ? "bg-white text-blue-600"
-                    : step > s.num
-                    ? "bg-emerald-500 text-white"
-                    : "border border-stone-300 dark:border-zinc-700 text-slate-500 dark:text-zinc-400"
+          {stepsList.map((s) => {
+            const isCurrent = step === s.num;
+            const isCompleted = completedSteps.includes(s.num);
+
+            return (
+              <button
+                key={s.num}
+                type="button"
+                onClick={() => setStep(s.num)}
+                className={`flex items-center gap-2 py-1.5 px-3 rounded-xl font-medium shrink-0 transition-all cursor-pointer ${
+                  isCurrent
+                    ? "bg-blue-600 text-white font-semibold shadow-xs"
+                    : isCompleted
+                    ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 hover:border-emerald-500/40"
+                    : "bg-stone-100 dark:bg-[#14161e] border border-stone-200 dark:border-zinc-800 text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-zinc-200 hover:border-zinc-700"
                 }`}
               >
-                {step > s.num ? "✓" : s.num}
-              </span>
-              <span className="hidden md:inline">{s.label}</span>
-            </button>
-          ))}
+                <span
+                  className={`flex h-5 w-5 items-center justify-center rounded-full text-[11px] font-bold ${
+                    isCurrent
+                      ? "bg-white text-blue-600"
+                      : isCompleted
+                      ? "bg-emerald-500 text-white"
+                      : "border border-stone-300 dark:border-zinc-700 bg-stone-200/60 dark:bg-zinc-800/80 text-slate-600 dark:text-zinc-400"
+                  }`}
+                >
+                  {isCompleted && !isCurrent ? "✓" : s.num}
+                </span>
+                <span className="hidden md:inline text-xs">{s.label}</span>
+              </button>
+            );
+          })}
         </div>
       </div>
 
@@ -749,7 +811,7 @@ export function ShareExperienceWizard({
                     value={oaPlatform}
                     onChange={(e) => setOaPlatform(e.target.value)}
                     placeholder="e.g. HackerRank, AMCAT, Mettl"
-                    className="w-full rounded-xl border border-stone-300 dark:border-zinc-700 bg-stone-50 dark:bg-[#0c0d10] px-4 py-2.5 text-slate-900 dark:text-zinc-100 focus:border-blue-500 focus:outline-hidden"
+                    className="w-full rounded-xl border border-stone-300 dark:border-zinc-700 bg-stone-50 dark:bg-[#0e1017] px-4 py-2.5 text-slate-900 dark:text-zinc-100 placeholder:text-stone-400 dark:placeholder:text-zinc-400 focus:border-blue-500 focus:outline-hidden"
                   />
                 </div>
                 <div>
@@ -760,7 +822,7 @@ export function ShareExperienceWizard({
                     type="number"
                     value={oaDuration}
                     onChange={(e) => setOaDuration(Number(e.target.value))}
-                    className="w-full rounded-xl border border-stone-300 dark:border-zinc-700 bg-stone-50 dark:bg-[#0c0d10] px-4 py-2.5 text-slate-900 dark:text-zinc-100 focus:border-blue-500 focus:outline-hidden"
+                    className="w-full rounded-xl border border-stone-300 dark:border-zinc-700 bg-stone-50 dark:bg-[#0e1017] px-4 py-2.5 text-slate-900 dark:text-zinc-100 placeholder:text-stone-400 dark:placeholder:text-zinc-400 focus:border-blue-500 focus:outline-hidden"
                   />
                 </div>
                 <div>
@@ -784,7 +846,7 @@ export function ShareExperienceWizard({
                   value={oaSections}
                   onChange={(e) => setOaSections(e.target.value)}
                   placeholder="e.g. Aptitude (20 Qs), Technical Networking & OS (30 Qs), 2 Coding Problems"
-                  className="w-full rounded-xl border border-stone-300 dark:border-zinc-700 bg-stone-50 dark:bg-[#0c0d10] px-4 py-2.5 text-slate-900 dark:text-zinc-100 focus:border-blue-500 focus:outline-hidden"
+                  className="w-full rounded-xl border border-stone-300 dark:border-zinc-700 bg-stone-50 dark:bg-[#0e1017] px-4 py-2.5 text-slate-900 dark:text-zinc-100 placeholder:text-stone-400 dark:placeholder:text-zinc-400 focus:border-blue-500 focus:outline-hidden"
                 />
               </div>
             </div>
@@ -811,7 +873,7 @@ export function ShareExperienceWizard({
                 {techQuestions.map((q, idx) => (
                   <div
                     key={idx}
-                    className="rounded-2xl border border-zinc-800 bg-[#14161e]/90 p-4 sm:p-5 space-y-3.5 text-xs shadow-sm hover:border-zinc-700/80 transition-all"
+                    className="rounded-2xl border border-zinc-700/80 bg-[#141620] p-4 sm:p-5 space-y-3.5 text-xs shadow-sm hover:border-zinc-600 transition-all"
                   >
                     <div className="flex items-center justify-between gap-2">
                       <div className="flex items-center gap-2">
@@ -819,7 +881,7 @@ export function ShareExperienceWizard({
                           #{idx + 1}
                         </span>
                         <span className="font-bold text-zinc-200 text-xs">
-                          Question Details
+                          Technical Question
                         </span>
                       </div>
                       {techQuestions.length > 1 && (
@@ -836,17 +898,22 @@ export function ShareExperienceWizard({
                       )}
                     </div>
 
-                    <input
-                      type="text"
-                      value={q.text}
-                      onChange={(e) => {
-                        const updated = [...techQuestions];
-                        updated[idx].text = e.target.value;
-                        setTechQuestions(updated);
-                      }}
-                      placeholder="e.g. What is DNS and how does resolution work?"
-                      className="w-full rounded-xl border border-zinc-700/80 bg-[#0c0d10] px-4 py-2.5 text-zinc-100 placeholder:text-zinc-600 focus:border-blue-500 focus:outline-hidden text-sm"
-                    />
+                    <div>
+                      <label className="block text-xs font-semibold text-zinc-300 mb-1.5">
+                        Question Asked / Problem Statement <span className="text-rose-400">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        value={q.text}
+                        onChange={(e) => {
+                          const updated = [...techQuestions];
+                          updated[idx].text = e.target.value;
+                          setTechQuestions(updated);
+                        }}
+                        placeholder="e.g. What is DNS and how does resolution work?"
+                        className="w-full rounded-xl border border-zinc-700 bg-[#0e1017] px-4 py-2.5 text-zinc-100 placeholder:text-zinc-400 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-hidden text-sm font-medium"
+                      />
+                    </div>
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                       <div>
@@ -881,17 +948,22 @@ export function ShareExperienceWizard({
                       </div>
                     </div>
 
-                    <textarea
-                      rows={2}
-                      value={q.notes || ""}
-                      onChange={(e) => {
-                        const updated = [...techQuestions];
-                        updated[idx].notes = e.target.value;
-                        setTechQuestions(updated);
-                      }}
-                      placeholder="Optional notes: How did you approach it? Follow-up questions asked by the interviewer?"
-                      className="w-full rounded-xl border border-zinc-700/80 bg-[#0c0d10] p-3 text-zinc-100 placeholder:text-zinc-600 focus:border-blue-500 focus:outline-hidden text-xs"
-                    />
+                    <div>
+                      <label className="block text-xs font-semibold text-zinc-300 mb-1.5">
+                        Approach & Notes <span className="text-zinc-500 text-[11px] font-normal">(Optional)</span>
+                      </label>
+                      <textarea
+                        rows={2}
+                        value={q.notes || ""}
+                        onChange={(e) => {
+                          const updated = [...techQuestions];
+                          updated[idx].notes = e.target.value;
+                          setTechQuestions(updated);
+                        }}
+                        placeholder="Optional notes: How did you approach it? Follow-up questions asked by the interviewer?"
+                        className="w-full rounded-xl border border-zinc-700 bg-[#0e1017] p-3 text-zinc-100 placeholder:text-zinc-400 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-hidden text-xs"
+                      />
+                    </div>
                   </div>
                 ))}
               </div>
@@ -933,20 +1005,25 @@ export function ShareExperienceWizard({
               </div>
 
               {/* Quick suggestions */}
-              <div className="flex flex-wrap items-center gap-2 text-xs text-zinc-400">
-                <span className="font-semibold text-zinc-500">Quick add:</span>
-                {COMMON_HR_PROMPTS.map((prompt) => (
+              <div className="flex flex-wrap items-center gap-2 text-xs">
+                <span className="font-semibold text-zinc-400 text-xs">Quick suggestions:</span>
+                {COMMON_HR_PROMPTS.map((item) => (
                   <button
-                    key={prompt}
+                    key={item.chip}
                     type="button"
                     onClick={() => {
-                      if (!hrQuestions.some((q) => q.text === prompt)) {
-                        setHrQuestions([...hrQuestions, { text: prompt, notes: "" }]);
+                      const emptyIdx = hrQuestions.findIndex((q) => !q.text.trim());
+                      if (emptyIdx !== -1) {
+                        const updated = [...hrQuestions];
+                        updated[emptyIdx] = { ...updated[emptyIdx], text: item.prompt };
+                        setHrQuestions(updated);
+                      } else if (!hrQuestions.some((q) => q.text === item.prompt)) {
+                        setHrQuestions([...hrQuestions, { text: item.prompt, notes: "" }]);
                       }
                     }}
-                    className="rounded-full border border-zinc-800 bg-[#16181e] px-2.5 py-1 hover:border-blue-500/50 hover:text-blue-400 text-zinc-300 transition-colors text-[11px] cursor-pointer"
+                    className="rounded-lg border border-zinc-700/80 bg-[#161822] px-3 py-1 text-xs text-zinc-300 hover:text-white hover:border-blue-500/60 hover:bg-blue-500/10 transition-colors cursor-pointer"
                   >
-                    + {prompt.slice(0, 28)}...
+                    + {item.chip}
                   </button>
                 ))}
               </div>
@@ -955,7 +1032,7 @@ export function ShareExperienceWizard({
                 {hrQuestions.map((q, idx) => (
                   <div
                     key={idx}
-                    className="rounded-2xl border border-zinc-800 bg-[#14161e]/90 p-4 sm:p-5 space-y-3.5 text-xs shadow-sm hover:border-zinc-700/80 transition-all"
+                    className="rounded-2xl border border-zinc-700/80 bg-[#141620] p-4 sm:p-5 space-y-3.5 text-xs shadow-sm hover:border-zinc-600 transition-all"
                   >
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
@@ -963,7 +1040,7 @@ export function ShareExperienceWizard({
                           #{idx + 1}
                         </span>
                         <span className="font-bold text-zinc-200 text-xs">
-                          HR Question
+                          HR / Behavioral Question
                         </span>
                       </div>
                       {hrQuestions.length > 1 && (
@@ -979,28 +1056,40 @@ export function ShareExperienceWizard({
                         </button>
                       )}
                     </div>
-                    <input
-                      type="text"
-                      value={q.text}
-                      onChange={(e) => {
-                        const updated = [...hrQuestions];
-                        updated[idx].text = e.target.value;
-                        setHrQuestions(updated);
-                      }}
-                      placeholder="e.g. Why should we hire you?"
-                      className="w-full rounded-xl border border-zinc-700/80 bg-[#0c0d10] px-4 py-2.5 text-zinc-100 placeholder:text-zinc-600 focus:border-blue-500 focus:outline-hidden text-sm"
-                    />
-                    <textarea
-                      rows={2}
-                      value={q.notes || ""}
-                      onChange={(e) => {
-                        const updated = [...hrQuestions];
-                        updated[idx].notes = e.target.value;
-                        setHrQuestions(updated);
-                      }}
-                      placeholder="Candidate notes or how the conversation unfolded..."
-                      className="w-full rounded-xl border border-zinc-700/80 bg-[#0c0d10] p-3 text-zinc-100 placeholder:text-zinc-600 focus:border-blue-500 focus:outline-hidden text-xs"
-                    />
+
+                    <div>
+                      <label className="block text-xs font-semibold text-zinc-300 mb-1.5">
+                        Question Asked / Prompt <span className="text-rose-400">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        value={q.text}
+                        onChange={(e) => {
+                          const updated = [...hrQuestions];
+                          updated[idx].text = e.target.value;
+                          setHrQuestions(updated);
+                        }}
+                        placeholder="e.g. Tell me about a time you handled a tight deadline..."
+                        className="w-full rounded-xl border border-zinc-700 bg-[#0e1017] px-4 py-2.5 text-zinc-100 placeholder:text-zinc-400 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-hidden text-sm font-medium"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-semibold text-zinc-300 mb-1.5">
+                        Candidate Notes / Your Answer Summary <span className="text-zinc-500 text-[11px] font-normal">(Optional)</span>
+                      </label>
+                      <textarea
+                        rows={2}
+                        value={q.notes || ""}
+                        onChange={(e) => {
+                          const updated = [...hrQuestions];
+                          updated[idx].notes = e.target.value;
+                          setHrQuestions(updated);
+                        }}
+                        placeholder="How did you structure your response? Any follow-up questions from the interviewer?"
+                        className="w-full rounded-xl border border-zinc-700 bg-[#0e1017] p-3 text-zinc-100 placeholder:text-zinc-400 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-hidden text-xs"
+                      />
+                    </div>
                   </div>
                 ))}
               </div>
@@ -1012,10 +1101,10 @@ export function ShareExperienceWizard({
                   onClick={() =>
                     setHrQuestions([...hrQuestions, { text: "", notes: "" }])
                   }
-                  className="inline-flex items-center gap-2 rounded-xl border border-zinc-800 bg-[#12141a] hover:bg-zinc-800/80 px-4 py-2.5 text-xs font-semibold text-zinc-200 hover:text-white transition-all cursor-pointer shadow-xs active:scale-95"
+                  className="inline-flex items-center gap-2 rounded-xl border border-zinc-700/80 bg-[#14161e] hover:bg-zinc-800 px-4 py-2.5 text-xs font-semibold text-zinc-200 hover:text-white transition-all cursor-pointer shadow-xs active:scale-95"
                 >
                   <Plus className="h-3.5 w-3.5 text-blue-400" />
-                  <span>Add Question</span>
+                  <span>Add Another Question</span>
                 </button>
               </div>
             </div>
@@ -1034,7 +1123,7 @@ export function ShareExperienceWizard({
                     value={aptitudePlatform}
                     onChange={(e) => setAptitudePlatform(e.target.value)}
                     placeholder="e.g. AMCAT, CoCubes, Mettl"
-                    className="w-full rounded-xl border border-stone-300 dark:border-zinc-700 bg-stone-50 dark:bg-[#0c0d10] px-4 py-2.5 text-slate-900 dark:text-zinc-100 focus:border-blue-500 focus:outline-hidden"
+                    className="w-full rounded-xl border border-stone-300 dark:border-zinc-700 bg-stone-50 dark:bg-[#0e1017] px-4 py-2.5 text-slate-900 dark:text-zinc-100 placeholder:text-stone-400 dark:placeholder:text-zinc-400 focus:border-blue-500 focus:outline-hidden"
                   />
                 </div>
                 <div>
@@ -1045,7 +1134,7 @@ export function ShareExperienceWizard({
                     type="number"
                     value={aptitudeDuration}
                     onChange={(e) => setAptitudeDuration(Number(e.target.value))}
-                    className="w-full rounded-xl border border-stone-300 dark:border-zinc-700 bg-stone-50 dark:bg-[#0c0d10] px-4 py-2.5 text-slate-900 dark:text-zinc-100 focus:border-blue-500 focus:outline-hidden"
+                    className="w-full rounded-xl border border-stone-300 dark:border-zinc-700 bg-stone-50 dark:bg-[#0e1017] px-4 py-2.5 text-slate-900 dark:text-zinc-100 placeholder:text-stone-400 dark:placeholder:text-zinc-400 focus:border-blue-500 focus:outline-hidden"
                   />
                 </div>
                 <div>
@@ -1069,7 +1158,7 @@ export function ShareExperienceWizard({
                   value={aptitudeNotes}
                   onChange={(e) => setAptitudeNotes(e.target.value)}
                   placeholder="e.g. Quantitative (P&L, Probability), Logical Reasoning (Syllogisms, Blood Relations), Verbal (Reading Comprehension)"
-                  className="w-full rounded-xl border border-stone-300 dark:border-zinc-700 bg-stone-50 dark:bg-[#0c0d10] p-3.5 text-slate-900 dark:text-zinc-100 focus:border-blue-500 focus:outline-hidden"
+                  className="w-full rounded-xl border border-stone-300 dark:border-zinc-700 bg-stone-50 dark:bg-[#0e1017] p-3.5 text-slate-900 dark:text-zinc-100 placeholder:text-stone-400 dark:placeholder:text-zinc-400 focus:border-blue-500 focus:outline-hidden"
                 />
               </div>
             </div>
@@ -1087,7 +1176,7 @@ export function ShareExperienceWizard({
                   value={gdTopic}
                   onChange={(e) => setGdTopic(e.target.value)}
                   placeholder="What was the topic? How many candidates participated? What evaluation criteria were emphasized?"
-                  className="w-full rounded-xl border border-stone-300 dark:border-zinc-700 bg-stone-50 dark:bg-[#0c0d10] p-3.5 text-slate-900 dark:text-zinc-100 focus:border-blue-500 focus:outline-hidden"
+                  className="w-full rounded-xl border border-stone-300 dark:border-zinc-700 bg-stone-50 dark:bg-[#0e1017] p-3.5 text-slate-900 dark:text-zinc-100 placeholder:text-stone-400 dark:placeholder:text-zinc-400 focus:border-blue-500 focus:outline-hidden"
                 />
               </div>
             </div>
@@ -1105,7 +1194,7 @@ export function ShareExperienceWizard({
                   value={managerialNotes}
                   onChange={(e) => setManagerialNotes(e.target.value)}
                   placeholder="Describe the nature of this round, role expectations discussed, leadership questions asked..."
-                  className="w-full rounded-xl border border-stone-300 dark:border-zinc-700 bg-stone-50 dark:bg-[#0c0d10] p-3.5 text-slate-900 dark:text-zinc-100 focus:border-blue-500 focus:outline-hidden"
+                  className="w-full rounded-xl border border-stone-300 dark:border-zinc-700 bg-stone-50 dark:bg-[#0e1017] p-3.5 text-slate-900 dark:text-zinc-100 placeholder:text-stone-400 dark:placeholder:text-zinc-400 focus:border-blue-500 focus:outline-hidden"
                 />
               </div>
             </div>
@@ -1349,18 +1438,7 @@ export function ShareExperienceWizard({
           {step < 6 ? (
             <button
               type="button"
-              onClick={async () => {
-                if (step === 1 && isAddingNewRole && customRoleTitle.trim()) {
-                  await handleAddNewRole();
-                }
-                if (step === 3 && hasNextRoundInStep3) {
-                  setActiveRoundTab(selectedRounds[currentRoundIdx + 1]);
-                  window.scrollTo({ top: 120, behavior: "smooth" });
-                  return;
-                }
-                setStep(step + 1);
-                window.scrollTo({ top: 120, behavior: "smooth" });
-              }}
+              onClick={handleContinueStep}
               className="rounded-xl bg-blue-600 hover:bg-blue-500 px-5 py-2.5 text-xs sm:text-sm font-semibold text-white shadow-md shadow-blue-500/20 active:scale-95 inline-flex items-center gap-1.5 transition-all cursor-pointer"
             >
               <span>

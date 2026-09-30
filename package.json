@@ -5,9 +5,13 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
+    "postinstall": "prisma generate",
     "start": "next start",
     "lint": "eslint",
-    "seed": "tsx prisma/seed.ts"
+    "seed": "tsx prisma/seed.ts",
+    "db:postgres": "node scripts/switch-db.js postgres",
+    "db:sqlite": "node scripts/switch-db.js sqlite",
+    "db:push": "prisma db push"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"
