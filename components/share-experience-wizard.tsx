@@ -127,10 +127,10 @@ export function ShareExperienceWizard({
   // Round Details (Step 3)
   const [activeRoundTab, setActiveRoundTab] = useState<string>("ONLINE_ASSESSMENT");
   const [oaPlatform, setOaPlatform] = useState<string>(
-    initialDraft?.rounds?.find((r: any) => r.roundType === "ONLINE_ASSESSMENT")?.platform || "HackerRank"
+    initialDraft?.rounds?.find((r: any) => r.roundType === "ONLINE_ASSESSMENT")?.platform || ""
   );
   const [oaDuration, setOaDuration] = useState<number>(
-    initialDraft?.rounds?.find((r: any) => r.roundType === "ONLINE_ASSESSMENT")?.durationMinutes || 75
+    initialDraft?.rounds?.find((r: any) => r.roundType === "ONLINE_ASSESSMENT")?.durationMinutes || 60
   );
   const [oaSections, setOaSections] = useState<string>(
     initialDraft?.rounds?.find((r: any) => r.roundType === "ONLINE_ASSESSMENT")?.sections || ""
@@ -156,14 +156,14 @@ export function ShareExperienceWizard({
     initialDraft?.rounds?.find((r: any) => r.roundType === "HR")?.questions?.map((q: any) => ({
       text: q.question.text,
       notes: q.studentNotes || "",
-    })) || [{ text: "Tell me about yourself and your background.", notes: "" }]
+    })) || [{ text: "", notes: "" }]
   );
 
   // Other Round Descriptions
   const [gdTopic, setGdTopic] = useState<string>("");
   const [managerialNotes, setManagerialNotes] = useState<string>("");
   const [aptitudeNotes, setAptitudeNotes] = useState<string>("");
-  const [aptitudePlatform, setAptitudePlatform] = useState<string>("CoCubes / AMCAT");
+  const [aptitudePlatform, setAptitudePlatform] = useState<string>("");
   const [aptitudeDuration, setAptitudeDuration] = useState<number>(60);
 
   // Sync activeRoundTab with selectedRounds
@@ -172,29 +172,6 @@ export function ShareExperienceWizard({
       setActiveRoundTab(selectedRounds[0]);
     }
   }, [selectedRounds, activeRoundTab]);
-
-  // Round completion check for smart visual indicators
-  const isRoundCompleted = (rType: string) => {
-    if (rType === "ONLINE_ASSESSMENT") {
-      return Boolean(oaPlatform.trim() || oaSections.trim());
-    }
-    if (rType === "TECHNICAL") {
-      return techQuestions.some((q) => q.text.trim().length > 0);
-    }
-    if (rType === "HR") {
-      return hrQuestions.some((q) => q.text.trim().length > 0);
-    }
-    if (rType === "GROUP_DISCUSSION") {
-      return Boolean(gdTopic.trim());
-    }
-    if (rType === "MANAGERIAL" || rType === "OTHER") {
-      return Boolean(managerialNotes.trim());
-    }
-    if (rType === "APTITUDE") {
-      return Boolean(aptitudeNotes.trim() || aptitudePlatform.trim());
-    }
-    return false;
-  };
 
   // Step 3 Round Navigation Calculations
   const currentRoundIdx = selectedRounds.indexOf(activeRoundTab);
@@ -736,36 +713,24 @@ export function ShareExperienceWizard({
             </p>
           </div>
 
-          {/* Sub-tabs for selected rounds with progress badge */}
+          {/* Round Navigation Tabs */}
           <div className="flex flex-wrap items-center gap-2 border-b border-stone-100 dark:border-zinc-800 pb-3">
-            {selectedRounds.map((rType, idx) => {
+            {selectedRounds.map((rType) => {
               const label = ROUND_TYPES.find((r) => r.id === rType)?.label || rType;
               const isActive = activeRoundTab === rType;
-              const completed = isRoundCompleted(rType);
 
               return (
                 <button
                   key={rType}
                   type="button"
                   onClick={() => setActiveRoundTab(rType)}
-                  className={`rounded-xl px-3.5 py-2 text-xs font-semibold transition-all inline-flex items-center gap-2 cursor-pointer ${
+                  className={`rounded-xl px-4 py-2 text-xs font-semibold transition-all cursor-pointer ${
                     isActive
-                      ? "bg-blue-600 text-white shadow-lg shadow-blue-500/25 ring-1 ring-blue-400/30"
-                      : "bg-[#16181e] border border-zinc-800 text-zinc-400 hover:text-zinc-200 hover:border-zinc-700"
+                      ? "bg-blue-600 text-white shadow-xs"
+                      : "bg-[#14161d] border border-zinc-800 text-zinc-400 hover:text-zinc-200 hover:border-zinc-700"
                   }`}
                 >
-                  <span
-                    className={`flex h-4 w-4 items-center justify-center rounded-full text-[10px] font-bold ${
-                      isActive
-                        ? "bg-white text-blue-600"
-                        : completed
-                        ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/40"
-                        : "bg-zinc-800 text-zinc-400"
-                    }`}
-                  >
-                    {completed && !isActive ? "✓" : idx + 1}
-                  </span>
-                  <span>{label}</span>
+                  {label}
                 </button>
               );
             })}
@@ -821,29 +786,6 @@ export function ShareExperienceWizard({
                   placeholder="e.g. Aptitude (20 Qs), Technical Networking & OS (30 Qs), 2 Coding Problems"
                   className="w-full rounded-xl border border-stone-300 dark:border-zinc-700 bg-stone-50 dark:bg-[#0c0d10] px-4 py-2.5 text-slate-900 dark:text-zinc-100 focus:border-blue-500 focus:outline-hidden"
                 />
-              </div>
-
-              {/* Round footer navigation prompt */}
-              <div className="pt-4 border-t border-zinc-800/80 flex flex-col sm:flex-row items-center justify-between gap-3">
-                <span className="text-xs text-zinc-400">
-                  Round {currentRoundIdx + 1} of {selectedRounds.length}:{" "}
-                  <span className="text-zinc-200 font-semibold">
-                    Online Assessment (OA)
-                  </span>
-                </span>
-                {hasNextRoundInStep3 && (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setActiveRoundTab(selectedRounds[currentRoundIdx + 1]);
-                      window.scrollTo({ top: 120, behavior: "smooth" });
-                    }}
-                    className="rounded-xl bg-blue-600/10 border border-blue-500/30 hover:border-blue-500/60 px-4 py-2 text-xs font-semibold text-blue-400 hover:bg-blue-600 hover:text-white inline-flex items-center gap-2 transition-all cursor-pointer shadow-xs"
-                  >
-                    <span>Proceed to {nextRoundLabel}</span>
-                    <ArrowRight className="h-3.5 w-3.5" />
-                  </button>
-                )}
               </div>
             </div>
           )}
@@ -954,44 +896,21 @@ export function ShareExperienceWizard({
                 ))}
               </div>
 
-              {/* Add Question Button - Located BELOW the questions list as requested */}
-              <button
-                type="button"
-                onClick={() =>
-                  setTechQuestions([
-                    ...techQuestions,
-                    { text: "", topicId: topics[0]?.id || "", difficulty: "MEDIUM", notes: "" },
-                  ])
-                }
-                className="w-full py-3 px-4 rounded-2xl border border-dashed border-zinc-700/80 hover:border-blue-500/60 bg-[#16181e]/60 hover:bg-blue-500/5 text-zinc-300 hover:text-blue-400 font-semibold text-xs sm:text-sm transition-all flex items-center justify-center gap-2 group shadow-xs active:scale-[0.99] cursor-pointer"
-              >
-                <div className="flex h-5 w-5 items-center justify-center rounded-full bg-blue-500/10 text-blue-400 group-hover:bg-blue-500 group-hover:text-white transition-all">
-                  <Plus className="h-3.5 w-3.5" />
-                </div>
-                <span>Add Another Technical Question</span>
-              </button>
-
-              {/* Round footer navigation prompt */}
-              <div className="pt-4 border-t border-zinc-800/80 flex flex-col sm:flex-row items-center justify-between gap-3">
-                <span className="text-xs text-zinc-400">
-                  Round {currentRoundIdx + 1} of {selectedRounds.length}:{" "}
-                  <span className="text-zinc-200 font-semibold">
-                    Technical Interview
-                  </span>
-                </span>
-                {hasNextRoundInStep3 && (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setActiveRoundTab(selectedRounds[currentRoundIdx + 1]);
-                      window.scrollTo({ top: 120, behavior: "smooth" });
-                    }}
-                    className="rounded-xl bg-blue-600/10 border border-blue-500/30 hover:border-blue-500/60 px-4 py-2 text-xs font-semibold text-blue-400 hover:bg-blue-600 hover:text-white inline-flex items-center gap-2 transition-all cursor-pointer shadow-xs"
-                  >
-                    <span>Proceed to {nextRoundLabel}</span>
-                    <ArrowRight className="h-3.5 w-3.5" />
-                  </button>
-                )}
+              {/* Add Question Button */}
+              <div className="pt-1">
+                <button
+                  type="button"
+                  onClick={() =>
+                    setTechQuestions([
+                      ...techQuestions,
+                      { text: "", topicId: topics[0]?.id || "", difficulty: "MEDIUM", notes: "" },
+                    ])
+                  }
+                  className="inline-flex items-center gap-2 rounded-xl border border-zinc-800 bg-[#12141a] hover:bg-zinc-800/80 px-4 py-2.5 text-xs font-semibold text-zinc-200 hover:text-white transition-all cursor-pointer shadow-xs active:scale-95"
+                >
+                  <Plus className="h-3.5 w-3.5 text-blue-400" />
+                  <span>Add Question</span>
+                </button>
               </div>
             </div>
           )}
@@ -1086,41 +1005,18 @@ export function ShareExperienceWizard({
                 ))}
               </div>
 
-              {/* Add Question Button - Located BELOW the questions list as requested */}
-              <button
-                type="button"
-                onClick={() =>
-                  setHrQuestions([...hrQuestions, { text: "", notes: "" }])
-                }
-                className="w-full py-3 px-4 rounded-2xl border border-dashed border-zinc-700/80 hover:border-blue-500/60 bg-[#16181e]/60 hover:bg-blue-500/5 text-zinc-300 hover:text-blue-400 font-semibold text-xs sm:text-sm transition-all flex items-center justify-center gap-2 group shadow-xs active:scale-[0.99] cursor-pointer"
-              >
-                <div className="flex h-5 w-5 items-center justify-center rounded-full bg-blue-500/10 text-blue-400 group-hover:bg-blue-500 group-hover:text-white transition-all">
-                  <Plus className="h-3.5 w-3.5" />
-                </div>
-                <span>Add Another HR Question</span>
-              </button>
-
-              {/* Round footer navigation prompt */}
-              <div className="pt-4 border-t border-zinc-800/80 flex flex-col sm:flex-row items-center justify-between gap-3">
-                <span className="text-xs text-zinc-400">
-                  Round {currentRoundIdx + 1} of {selectedRounds.length}:{" "}
-                  <span className="text-zinc-200 font-semibold">
-                    HR Interview
-                  </span>
-                </span>
-                {hasNextRoundInStep3 && (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setActiveRoundTab(selectedRounds[currentRoundIdx + 1]);
-                      window.scrollTo({ top: 120, behavior: "smooth" });
-                    }}
-                    className="rounded-xl bg-blue-600/10 border border-blue-500/30 hover:border-blue-500/60 px-4 py-2 text-xs font-semibold text-blue-400 hover:bg-blue-600 hover:text-white inline-flex items-center gap-2 transition-all cursor-pointer shadow-xs"
-                  >
-                    <span>Proceed to {nextRoundLabel}</span>
-                    <ArrowRight className="h-3.5 w-3.5" />
-                  </button>
-                )}
+              {/* Add Question Button */}
+              <div className="pt-1">
+                <button
+                  type="button"
+                  onClick={() =>
+                    setHrQuestions([...hrQuestions, { text: "", notes: "" }])
+                  }
+                  className="inline-flex items-center gap-2 rounded-xl border border-zinc-800 bg-[#12141a] hover:bg-zinc-800/80 px-4 py-2.5 text-xs font-semibold text-zinc-200 hover:text-white transition-all cursor-pointer shadow-xs active:scale-95"
+                >
+                  <Plus className="h-3.5 w-3.5 text-blue-400" />
+                  <span>Add Question</span>
+                </button>
               </div>
             </div>
           )}
@@ -1176,27 +1072,6 @@ export function ShareExperienceWizard({
                   className="w-full rounded-xl border border-stone-300 dark:border-zinc-700 bg-stone-50 dark:bg-[#0c0d10] p-3.5 text-slate-900 dark:text-zinc-100 focus:border-blue-500 focus:outline-hidden"
                 />
               </div>
-
-              {/* Round footer navigation prompt */}
-              <div className="pt-4 border-t border-zinc-800/80 flex flex-col sm:flex-row items-center justify-between gap-3">
-                <span className="text-xs text-zinc-400">
-                  Round {currentRoundIdx + 1} of {selectedRounds.length}:{" "}
-                  <span className="text-zinc-200 font-semibold">Aptitude Test</span>
-                </span>
-                {hasNextRoundInStep3 && (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setActiveRoundTab(selectedRounds[currentRoundIdx + 1]);
-                      window.scrollTo({ top: 120, behavior: "smooth" });
-                    }}
-                    className="rounded-xl bg-blue-600/10 border border-blue-500/30 hover:border-blue-500/60 px-4 py-2 text-xs font-semibold text-blue-400 hover:bg-blue-600 hover:text-white inline-flex items-center gap-2 transition-all cursor-pointer shadow-xs"
-                  >
-                    <span>Proceed to {nextRoundLabel}</span>
-                    <ArrowRight className="h-3.5 w-3.5" />
-                  </button>
-                )}
-              </div>
             </div>
           )}
 
@@ -1215,27 +1090,6 @@ export function ShareExperienceWizard({
                   className="w-full rounded-xl border border-stone-300 dark:border-zinc-700 bg-stone-50 dark:bg-[#0c0d10] p-3.5 text-slate-900 dark:text-zinc-100 focus:border-blue-500 focus:outline-hidden"
                 />
               </div>
-
-              {/* Round footer navigation prompt */}
-              <div className="pt-4 border-t border-zinc-800/80 flex flex-col sm:flex-row items-center justify-between gap-3">
-                <span className="text-xs text-zinc-400">
-                  Round {currentRoundIdx + 1} of {selectedRounds.length}:{" "}
-                  <span className="text-zinc-200 font-semibold">Group Discussion</span>
-                </span>
-                {hasNextRoundInStep3 && (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setActiveRoundTab(selectedRounds[currentRoundIdx + 1]);
-                      window.scrollTo({ top: 120, behavior: "smooth" });
-                    }}
-                    className="rounded-xl bg-blue-600/10 border border-blue-500/30 hover:border-blue-500/60 px-4 py-2 text-xs font-semibold text-blue-400 hover:bg-blue-600 hover:text-white inline-flex items-center gap-2 transition-all cursor-pointer shadow-xs"
-                  >
-                    <span>Proceed to {nextRoundLabel}</span>
-                    <ArrowRight className="h-3.5 w-3.5" />
-                  </button>
-                )}
-              </div>
             </div>
           )}
 
@@ -1253,29 +1107,6 @@ export function ShareExperienceWizard({
                   placeholder="Describe the nature of this round, role expectations discussed, leadership questions asked..."
                   className="w-full rounded-xl border border-stone-300 dark:border-zinc-700 bg-stone-50 dark:bg-[#0c0d10] p-3.5 text-slate-900 dark:text-zinc-100 focus:border-blue-500 focus:outline-hidden"
                 />
-              </div>
-
-              {/* Round footer navigation prompt */}
-              <div className="pt-4 border-t border-zinc-800/80 flex flex-col sm:flex-row items-center justify-between gap-3">
-                <span className="text-xs text-zinc-400">
-                  Round {currentRoundIdx + 1} of {selectedRounds.length}:{" "}
-                  <span className="text-zinc-200 font-semibold">
-                    {ROUND_TYPES.find((r) => r.id === activeRoundTab)?.label || activeRoundTab}
-                  </span>
-                </span>
-                {hasNextRoundInStep3 && (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setActiveRoundTab(selectedRounds[currentRoundIdx + 1]);
-                      window.scrollTo({ top: 120, behavior: "smooth" });
-                    }}
-                    className="rounded-xl bg-blue-600/10 border border-blue-500/30 hover:border-blue-500/60 px-4 py-2 text-xs font-semibold text-blue-400 hover:bg-blue-600 hover:text-white inline-flex items-center gap-2 transition-all cursor-pointer shadow-xs"
-                  >
-                    <span>Proceed to {nextRoundLabel}</span>
-                    <ArrowRight className="h-3.5 w-3.5" />
-                  </button>
-                )}
               </div>
             </div>
           )}
