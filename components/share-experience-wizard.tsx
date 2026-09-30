@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState, useTransition, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import {
   CheckCircle2,
@@ -15,6 +15,8 @@ import {
   Sparkles,
   Building2,
   Briefcase,
+  ArrowRight,
+  Check,
 } from "lucide-react";
 import {
   saveExperienceDraftAction,
@@ -25,6 +27,7 @@ import {
 } from "@/actions/experience";
 import { findOrCreateCompanyAction, findOrCreateRoleAction } from "@/actions/admin";
 import { formatPlacementType, formatResultStatus } from "@/lib/utils";
+import { ModernSelect, ModernSelectOption } from "@/components/modern-select";
 
 interface WizardProps {
   companies: {
@@ -46,6 +49,27 @@ const ROUND_TYPES = [
   { id: "HR", label: "HR / Behavioral Round" },
   { id: "MANAGERIAL", label: "Managerial Round" },
   { id: "OTHER", label: "Other Round" },
+];
+
+const DIFFICULTY_OPTIONS: ModernSelectOption[] = [
+  { value: "EASY", label: "Easy", dotColor: "bg-emerald-400" },
+  { value: "MEDIUM", label: "Medium", dotColor: "bg-amber-400" },
+  { value: "HARD", label: "Hard", dotColor: "bg-rose-400" },
+];
+
+const PLACEMENT_TYPE_OPTIONS: ModernSelectOption[] = [
+  { value: "CAMPUS", label: "Campus Placement", badge: "On-Campus" },
+  { value: "OFF_CAMPUS", label: "Off-Campus Drive", badge: "Off-Campus" },
+  { value: "REFERRAL", label: "Employee Referral", badge: "Referral" },
+  { value: "INTERNSHIP", label: "Internship Hiring", badge: "Internship" },
+];
+
+const RESULT_OPTIONS: ModernSelectOption[] = [
+  { value: "SELECTED", label: "Selected (Offer Accepted / Given)", dotColor: "bg-emerald-400" },
+  { value: "REJECTED", label: "Rejected", dotColor: "bg-rose-400" },
+  { value: "WAITLISTED", label: "Waitlisted", dotColor: "bg-amber-400" },
+  { value: "PENDING", label: "Result Pending", dotColor: "bg-blue-400" },
+  { value: "PREFER_NOT_TO_SAY", label: "Prefer not to say", dotColor: "bg-zinc-400" },
 ];
 
 const COMMON_HR_PROMPTS = [
@@ -138,6 +162,59 @@ export function ShareExperienceWizard({
   // Other Round Descriptions
   const [gdTopic, setGdTopic] = useState<string>("");
   const [managerialNotes, setManagerialNotes] = useState<string>("");
+  const [aptitudeNotes, setAptitudeNotes] = useState<string>("");
+  const [aptitudePlatform, setAptitudePlatform] = useState<string>("CoCubes / AMCAT");
+  const [aptitudeDuration, setAptitudeDuration] = useState<number>(60);
+
+  // Sync activeRoundTab with selectedRounds
+  useEffect(() => {
+    if (selectedRounds.length > 0 && !selectedRounds.includes(activeRoundTab)) {
+      setActiveRoundTab(selectedRounds[0]);
+    }
+  }, [selectedRounds, activeRoundTab]);
+
+  // Round completion check for smart visual indicators
+  const isRoundCompleted = (rType: string) => {
+    if (rType === "ONLINE_ASSESSMENT") {
+      return Boolean(oaPlatform.trim() || oaSections.trim());
+    }
+    if (rType === "TECHNICAL") {
+      return techQuestions.some((q) => q.text.trim().length > 0);
+    }
+    if (rType === "HR") {
+      return hrQuestions.some((q) => q.text.trim().length > 0);
+    }
+    if (rType === "GROUP_DISCUSSION") {
+      return Boolean(gdTopic.trim());
+    }
+    if (rType === "MANAGERIAL" || rType === "OTHER") {
+      return Boolean(managerialNotes.trim());
+    }
+    if (rType === "APTITUDE") {
+      return Boolean(aptitudeNotes.trim() || aptitudePlatform.trim());
+    }
+    return false;
+  };
+
+  // Step 3 Round Navigation Calculations
+  const currentRoundIdx = selectedRounds.indexOf(activeRoundTab);
+  const hasNextRoundInStep3 =
+    step === 3 &&
+    currentRoundIdx >= 0 &&
+    currentRoundIdx < selectedRounds.length - 1;
+  const hasPrevRoundInStep3 = step === 3 && currentRoundIdx > 0;
+  const nextRoundType = hasNextRoundInStep3
+    ? selectedRounds[currentRoundIdx + 1]
+    : null;
+  const nextRoundLabel = nextRoundType
+    ? ROUND_TYPES.find((r) => r.id === nextRoundType)?.label || nextRoundType
+    : null;
+  const prevRoundType = hasPrevRoundInStep3
+    ? selectedRounds[currentRoundIdx - 1]
+    : null;
+  const prevRoundLabel = prevRoundType
+    ? ROUND_TYPES.find((r) => r.id === prevRoundType)?.label || prevRoundType
+    : null;
 
   // Step 4: Narrative & Advice
   const [overallExperience, setOverallExperience] = useState<string>(
@@ -269,6 +346,15 @@ export function ShareExperienceWizard({
           roundName: "Managerial Round",
           orderIndex: orderIndex++,
           description: managerialNotes,
+        });
+      } else if (rType === "APTITUDE") {
+        rounds.push({
+          roundType: "APTITUDE",
+          roundName: "Aptitude Test",
+          orderIndex: orderIndex++,
+          platform: aptitudePlatform,
+          durationMinutes: Number(aptitudeDuration),
+          description: aptitudeNotes,
         });
       } else {
         rounds.push({
@@ -454,20 +540,15 @@ export function ShareExperienceWizard({
                   </button>
                 </div>
               ) : (
-                <select
+                <ModernSelect
                   value={selectedCompanyId}
-                  onChange={(e) => {
-                    setSelectedCompanyId(e.target.value);
+                  onChange={(val) => {
+                    setSelectedCompanyId(val);
                     setIsAddingNewRole(false);
                   }}
-                  className="w-full rounded-xl border border-stone-300 dark:border-zinc-700 bg-stone-50 dark:bg-[#0c0d10] px-4 py-2.5 text-slate-900 dark:text-zinc-100 focus:border-blue-500 focus:outline-hidden"
-                >
-                  {companyList.map((c) => (
-                    <option key={c.id} value={c.id}>
-                      {c.name}
-                    </option>
-                  ))}
-                </select>
+                  options={companyList.map((c) => ({ value: c.id, label: c.name }))}
+                  placeholder="Select Company"
+                />
               )}
             </div>
 
@@ -522,24 +603,21 @@ export function ShareExperienceWizard({
                   )}
                 </div>
               ) : (
-                <select
+                <ModernSelect
                   value={selectedRoleId}
-                  onChange={(e) => {
-                    if (e.target.value === "__NEW__") {
+                  onChange={(val) => {
+                    if (val === "__NEW__") {
                       setIsAddingNewRole(true);
                     } else {
-                      setSelectedRoleId(e.target.value);
+                      setSelectedRoleId(val);
                     }
                   }}
-                  className="w-full rounded-xl border border-stone-300 dark:border-zinc-700 bg-stone-50 dark:bg-[#0c0d10] px-4 py-2.5 text-slate-900 dark:text-zinc-100 focus:border-blue-500 focus:outline-hidden"
-                >
-                  {activeRoles.map((r) => (
-                    <option key={r.id} value={r.id}>
-                      {r.title}
-                    </option>
-                  ))}
-                  <option value="__NEW__">+ Add a custom / new role...</option>
-                </select>
+                  options={[
+                    ...activeRoles.map((r) => ({ value: r.id, label: r.title })),
+                    { value: "__NEW__", label: "+ Add a custom / new role...", badge: "Custom" },
+                  ]}
+                  placeholder="Select Role"
+                />
               )}
             </div>
 
@@ -593,16 +671,11 @@ export function ShareExperienceWizard({
               <label className="block font-semibold text-slate-700 dark:text-zinc-300 mb-1.5">
                 Placement Type *
               </label>
-              <select
+              <ModernSelect
                 value={placementType}
-                onChange={(e) => setPlacementType(e.target.value)}
-                className="w-full rounded-xl border border-stone-300 dark:border-zinc-700 bg-stone-50 dark:bg-[#0c0d10] px-4 py-2.5 text-slate-900 dark:text-zinc-100 focus:border-blue-500 focus:outline-hidden"
-              >
-                <option value="CAMPUS">Campus Placement</option>
-                <option value="OFF_CAMPUS">Off-Campus</option>
-                <option value="REFERRAL">Referral</option>
-                <option value="INTERNSHIP">Internship</option>
-              </select>
+                onChange={(val) => setPlacementType(val)}
+                options={PLACEMENT_TYPE_OPTIONS}
+              />
             </div>
           </div>
         </div>
@@ -659,26 +732,40 @@ export function ShareExperienceWizard({
               Step 3: Round Details & Questions
             </h2>
             <p className="text-xs sm:text-sm text-slate-500 dark:text-zinc-400 mt-0.5">
-              Provide specific questions, test platforms, and topics asked in each round.
+              Provide specific questions, test platforms, and topics asked in each round of your selection process.
             </p>
           </div>
 
-          {/* Sub-tabs for selected rounds */}
-          <div className="flex flex-wrap gap-2 border-b border-stone-100 dark:border-zinc-800 pb-3">
-            {selectedRounds.map((rType) => {
+          {/* Sub-tabs for selected rounds with progress badge */}
+          <div className="flex flex-wrap items-center gap-2 border-b border-stone-100 dark:border-zinc-800 pb-3">
+            {selectedRounds.map((rType, idx) => {
               const label = ROUND_TYPES.find((r) => r.id === rType)?.label || rType;
+              const isActive = activeRoundTab === rType;
+              const completed = isRoundCompleted(rType);
+
               return (
                 <button
                   key={rType}
                   type="button"
                   onClick={() => setActiveRoundTab(rType)}
-                  className={`rounded-xl px-3.5 py-1.5 text-xs font-semibold transition-all ${
-                    activeRoundTab === rType
-                      ? "bg-blue-600 text-white shadow-md shadow-blue-500/20"
-                      : "bg-stone-100 dark:bg-zinc-800 text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-zinc-200"
+                  className={`rounded-xl px-3.5 py-2 text-xs font-semibold transition-all inline-flex items-center gap-2 cursor-pointer ${
+                    isActive
+                      ? "bg-blue-600 text-white shadow-lg shadow-blue-500/25 ring-1 ring-blue-400/30"
+                      : "bg-[#16181e] border border-zinc-800 text-zinc-400 hover:text-zinc-200 hover:border-zinc-700"
                   }`}
                 >
-                  {label}
+                  <span
+                    className={`flex h-4 w-4 items-center justify-center rounded-full text-[10px] font-bold ${
+                      isActive
+                        ? "bg-white text-blue-600"
+                        : completed
+                        ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/40"
+                        : "bg-zinc-800 text-zinc-400"
+                    }`}
+                  >
+                    {completed && !isActive ? "✓" : idx + 1}
+                  </span>
+                  <span>{label}</span>
                 </button>
               );
             })}
@@ -715,15 +802,11 @@ export function ShareExperienceWizard({
                   <label className="block font-semibold text-slate-700 dark:text-zinc-300 mb-1.5">
                     Difficulty
                   </label>
-                  <select
+                  <ModernSelect
                     value={oaDifficulty}
-                    onChange={(e) => setOaDifficulty(e.target.value)}
-                    className="w-full rounded-xl border border-stone-300 dark:border-zinc-700 bg-stone-50 dark:bg-[#0c0d10] px-4 py-2.5 text-slate-900 dark:text-zinc-100 focus:border-blue-500 focus:outline-hidden"
-                  >
-                    <option value="EASY">Easy</option>
-                    <option value="MEDIUM">Medium</option>
-                    <option value="HARD">Hard</option>
-                  </select>
+                    onChange={(val) => setOaDifficulty(val)}
+                    options={DIFFICULTY_OPTIONS}
+                  />
                 </div>
               </div>
 
@@ -739,6 +822,29 @@ export function ShareExperienceWizard({
                   className="w-full rounded-xl border border-stone-300 dark:border-zinc-700 bg-stone-50 dark:bg-[#0c0d10] px-4 py-2.5 text-slate-900 dark:text-zinc-100 focus:border-blue-500 focus:outline-hidden"
                 />
               </div>
+
+              {/* Round footer navigation prompt */}
+              <div className="pt-4 border-t border-zinc-800/80 flex flex-col sm:flex-row items-center justify-between gap-3">
+                <span className="text-xs text-zinc-400">
+                  Round {currentRoundIdx + 1} of {selectedRounds.length}:{" "}
+                  <span className="text-zinc-200 font-semibold">
+                    Online Assessment (OA)
+                  </span>
+                </span>
+                {hasNextRoundInStep3 && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setActiveRoundTab(selectedRounds[currentRoundIdx + 1]);
+                      window.scrollTo({ top: 120, behavior: "smooth" });
+                    }}
+                    className="rounded-xl bg-blue-600/10 border border-blue-500/30 hover:border-blue-500/60 px-4 py-2 text-xs font-semibold text-blue-400 hover:bg-blue-600 hover:text-white inline-flex items-center gap-2 transition-all cursor-pointer shadow-xs"
+                  >
+                    <span>Proceed to {nextRoundLabel}</span>
+                    <ArrowRight className="h-3.5 w-3.5" />
+                  </button>
+                )}
+              </div>
             </div>
           )}
 
@@ -746,41 +852,42 @@ export function ShareExperienceWizard({
           {activeRoundTab === "TECHNICAL" && (
             <div className="space-y-4">
               <div className="flex items-center justify-between text-xs sm:text-sm">
-                <span className="font-bold text-slate-800 dark:text-zinc-200">
-                  Technical Questions Asked
+                <div className="space-y-0.5">
+                  <span className="font-bold text-slate-800 dark:text-zinc-200 text-sm">
+                    Technical Questions Asked
+                  </span>
+                  <p className="text-xs text-zinc-400">
+                    Add specific programming, conceptual, or problem-solving questions.
+                  </p>
+                </div>
+                <span className="rounded-full bg-blue-500/10 border border-blue-500/20 px-2.5 py-0.5 text-[11px] font-semibold text-blue-400">
+                  {techQuestions.length} {techQuestions.length === 1 ? "Question" : "Questions"}
                 </span>
-                <button
-                  type="button"
-                  onClick={() =>
-                    setTechQuestions([
-                      ...techQuestions,
-                      { text: "", topicId: topics[0]?.id || "", difficulty: "MEDIUM", notes: "" },
-                    ])
-                  }
-                  className="rounded-xl bg-blue-600/10 border border-blue-500/30 px-3 py-1.5 text-xs font-semibold text-blue-600 dark:text-blue-400 hover:bg-blue-600/20 inline-flex items-center gap-1.5 transition-colors"
-                >
-                  <Plus className="h-3.5 w-3.5" />
-                  <span>Add Question</span>
-                </button>
               </div>
 
               <div className="space-y-3.5">
                 {techQuestions.map((q, idx) => (
                   <div
                     key={idx}
-                    className="rounded-2xl border border-stone-200 dark:border-zinc-800 bg-stone-50/60 dark:bg-[#16181e] p-4 sm:p-5 space-y-3 text-xs"
+                    className="rounded-2xl border border-zinc-800 bg-[#14161e]/90 p-4 sm:p-5 space-y-3.5 text-xs shadow-sm hover:border-zinc-700/80 transition-all"
                   >
                     <div className="flex items-center justify-between gap-2">
-                      <span className="font-bold text-slate-800 dark:text-zinc-200">
-                        Question #{idx + 1}
-                      </span>
+                      <div className="flex items-center gap-2">
+                        <span className="flex h-5 w-5 items-center justify-center rounded-md bg-blue-500/15 text-blue-400 font-bold text-[11px]">
+                          #{idx + 1}
+                        </span>
+                        <span className="font-bold text-zinc-200 text-xs">
+                          Question Details
+                        </span>
+                      </div>
                       {techQuestions.length > 1 && (
                         <button
                           type="button"
                           onClick={() =>
                             setTechQuestions(techQuestions.filter((_, i) => i !== idx))
                           }
-                          className="text-rose-500 hover:text-rose-700 p-1"
+                          className="text-zinc-500 hover:text-rose-400 p-1 rounded-lg hover:bg-rose-500/10 transition-colors cursor-pointer"
+                          title="Remove question"
                         >
                           <Trash2 className="h-4 w-4" />
                         </button>
@@ -796,44 +903,39 @@ export function ShareExperienceWizard({
                         setTechQuestions(updated);
                       }}
                       placeholder="e.g. What is DNS and how does resolution work?"
-                      className="w-full rounded-xl border border-stone-300 dark:border-zinc-700 bg-white dark:bg-[#111317] px-4 py-2.5 text-slate-900 dark:text-zinc-100 focus:border-blue-500 focus:outline-hidden text-sm"
+                      className="w-full rounded-xl border border-zinc-700/80 bg-[#0c0d10] px-4 py-2.5 text-zinc-100 placeholder:text-zinc-600 focus:border-blue-500 focus:outline-hidden text-sm"
                     />
 
-                    <div className="grid grid-cols-2 gap-3">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                       <div>
-                        <label className="block text-[11px] font-semibold text-slate-500 dark:text-zinc-400 mb-1">Topic</label>
-                        <select
-                          value={q.topicId || ""}
-                          onChange={(e) => {
+                        <label className="block text-[11px] font-semibold text-zinc-400 mb-1">
+                          Topic
+                        </label>
+                        <ModernSelect
+                          value={q.topicId || topics[0]?.id || ""}
+                          onChange={(val) => {
                             const updated = [...techQuestions];
-                            updated[idx].topicId = e.target.value;
+                            updated[idx].topicId = val;
                             setTechQuestions(updated);
                           }}
-                          className="w-full rounded-xl border border-stone-300 dark:border-zinc-700 bg-white dark:bg-[#111317] px-3 py-2 text-slate-800 dark:text-zinc-200"
-                        >
-                          {topics.map((t) => (
-                            <option key={t.id} value={t.id}>
-                              {t.name}
-                            </option>
-                          ))}
-                        </select>
+                          options={topics.map((t) => ({ value: t.id, label: t.name }))}
+                          placeholder="Select Topic"
+                        />
                       </div>
 
                       <div>
-                        <label className="block text-[11px] font-semibold text-slate-500 dark:text-zinc-400 mb-1">Difficulty</label>
-                        <select
+                        <label className="block text-[11px] font-semibold text-zinc-400 mb-1">
+                          Difficulty
+                        </label>
+                        <ModernSelect
                           value={q.difficulty || "MEDIUM"}
-                          onChange={(e) => {
+                          onChange={(val) => {
                             const updated = [...techQuestions];
-                            updated[idx].difficulty = e.target.value;
+                            updated[idx].difficulty = val;
                             setTechQuestions(updated);
                           }}
-                          className="w-full rounded-xl border border-stone-300 dark:border-zinc-700 bg-white dark:bg-[#111317] px-3 py-2 text-slate-800 dark:text-zinc-200"
-                        >
-                          <option value="EASY">Easy</option>
-                          <option value="MEDIUM">Medium</option>
-                          <option value="HARD">Hard</option>
-                        </select>
+                          options={DIFFICULTY_OPTIONS}
+                        />
                       </div>
                     </div>
 
@@ -845,11 +947,51 @@ export function ShareExperienceWizard({
                         updated[idx].notes = e.target.value;
                         setTechQuestions(updated);
                       }}
-                      placeholder="Optional notes: How did you approach it? Follow-up questions asked?"
-                      className="w-full rounded-xl border border-stone-300 dark:border-zinc-700 bg-white dark:bg-[#111317] p-3 text-slate-900 dark:text-zinc-100 placeholder:text-slate-400 dark:placeholder:text-zinc-500 focus:border-blue-500 focus:outline-hidden"
+                      placeholder="Optional notes: How did you approach it? Follow-up questions asked by the interviewer?"
+                      className="w-full rounded-xl border border-zinc-700/80 bg-[#0c0d10] p-3 text-zinc-100 placeholder:text-zinc-600 focus:border-blue-500 focus:outline-hidden text-xs"
                     />
                   </div>
                 ))}
+              </div>
+
+              {/* Add Question Button - Located BELOW the questions list as requested */}
+              <button
+                type="button"
+                onClick={() =>
+                  setTechQuestions([
+                    ...techQuestions,
+                    { text: "", topicId: topics[0]?.id || "", difficulty: "MEDIUM", notes: "" },
+                  ])
+                }
+                className="w-full py-3 px-4 rounded-2xl border border-dashed border-zinc-700/80 hover:border-blue-500/60 bg-[#16181e]/60 hover:bg-blue-500/5 text-zinc-300 hover:text-blue-400 font-semibold text-xs sm:text-sm transition-all flex items-center justify-center gap-2 group shadow-xs active:scale-[0.99] cursor-pointer"
+              >
+                <div className="flex h-5 w-5 items-center justify-center rounded-full bg-blue-500/10 text-blue-400 group-hover:bg-blue-500 group-hover:text-white transition-all">
+                  <Plus className="h-3.5 w-3.5" />
+                </div>
+                <span>Add Another Technical Question</span>
+              </button>
+
+              {/* Round footer navigation prompt */}
+              <div className="pt-4 border-t border-zinc-800/80 flex flex-col sm:flex-row items-center justify-between gap-3">
+                <span className="text-xs text-zinc-400">
+                  Round {currentRoundIdx + 1} of {selectedRounds.length}:{" "}
+                  <span className="text-zinc-200 font-semibold">
+                    Technical Interview
+                  </span>
+                </span>
+                {hasNextRoundInStep3 && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setActiveRoundTab(selectedRounds[currentRoundIdx + 1]);
+                      window.scrollTo({ top: 120, behavior: "smooth" });
+                    }}
+                    className="rounded-xl bg-blue-600/10 border border-blue-500/30 hover:border-blue-500/60 px-4 py-2 text-xs font-semibold text-blue-400 hover:bg-blue-600 hover:text-white inline-flex items-center gap-2 transition-all cursor-pointer shadow-xs"
+                  >
+                    <span>Proceed to {nextRoundLabel}</span>
+                    <ArrowRight className="h-3.5 w-3.5" />
+                  </button>
+                )}
               </div>
             </div>
           )}
@@ -858,24 +1000,22 @@ export function ShareExperienceWizard({
           {activeRoundTab === "HR" && (
             <div className="space-y-4">
               <div className="flex items-center justify-between text-xs sm:text-sm">
-                <span className="font-bold text-slate-800 dark:text-zinc-200">
-                  HR Questions Asked
+                <div className="space-y-0.5">
+                  <span className="font-bold text-slate-800 dark:text-zinc-200 text-sm">
+                    HR Questions Asked
+                  </span>
+                  <p className="text-xs text-zinc-400">
+                    Behavioral, cultural fit, and situational questions.
+                  </p>
+                </div>
+                <span className="rounded-full bg-blue-500/10 border border-blue-500/20 px-2.5 py-0.5 text-[11px] font-semibold text-blue-400">
+                  {hrQuestions.length} {hrQuestions.length === 1 ? "Question" : "Questions"}
                 </span>
-                <button
-                  type="button"
-                  onClick={() =>
-                    setHrQuestions([...hrQuestions, { text: "", notes: "" }])
-                  }
-                  className="rounded-xl bg-blue-600/10 border border-blue-500/30 px-3 py-1.5 text-xs font-semibold text-blue-600 dark:text-blue-400 hover:bg-blue-600/20 inline-flex items-center gap-1.5 transition-colors"
-                >
-                  <Plus className="h-3.5 w-3.5" />
-                  <span>Add HR Question</span>
-                </button>
               </div>
 
-              {/* Suggestions */}
-              <div className="flex flex-wrap items-center gap-2 text-xs text-slate-500 dark:text-zinc-400">
-                <span className="font-semibold">Quick add:</span>
+              {/* Quick suggestions */}
+              <div className="flex flex-wrap items-center gap-2 text-xs text-zinc-400">
+                <span className="font-semibold text-zinc-500">Quick add:</span>
                 {COMMON_HR_PROMPTS.map((prompt) => (
                   <button
                     key={prompt}
@@ -885,7 +1025,7 @@ export function ShareExperienceWizard({
                         setHrQuestions([...hrQuestions, { text: prompt, notes: "" }]);
                       }
                     }}
-                    className="rounded-full border border-stone-200 dark:border-zinc-800 bg-white dark:bg-[#16181e] px-2.5 py-0.5 hover:border-blue-500/50 hover:text-blue-500 text-slate-700 dark:text-zinc-300 transition-colors"
+                    className="rounded-full border border-zinc-800 bg-[#16181e] px-2.5 py-1 hover:border-blue-500/50 hover:text-blue-400 text-zinc-300 transition-colors text-[11px] cursor-pointer"
                   >
                     + {prompt.slice(0, 28)}...
                   </button>
@@ -896,19 +1036,25 @@ export function ShareExperienceWizard({
                 {hrQuestions.map((q, idx) => (
                   <div
                     key={idx}
-                    className="rounded-2xl border border-stone-200 dark:border-zinc-800 bg-stone-50/60 dark:bg-[#16181e] p-4 sm:p-5 space-y-3 text-xs"
+                    className="rounded-2xl border border-zinc-800 bg-[#14161e]/90 p-4 sm:p-5 space-y-3.5 text-xs shadow-sm hover:border-zinc-700/80 transition-all"
                   >
                     <div className="flex items-center justify-between">
-                      <span className="font-bold text-slate-800 dark:text-zinc-200">
-                        HR Question #{idx + 1}
-                      </span>
+                      <div className="flex items-center gap-2">
+                        <span className="flex h-5 w-5 items-center justify-center rounded-md bg-blue-500/15 text-blue-400 font-bold text-[11px]">
+                          #{idx + 1}
+                        </span>
+                        <span className="font-bold text-zinc-200 text-xs">
+                          HR Question
+                        </span>
+                      </div>
                       {hrQuestions.length > 1 && (
                         <button
                           type="button"
                           onClick={() =>
                             setHrQuestions(hrQuestions.filter((_, i) => i !== idx))
                           }
-                          className="text-rose-500 hover:text-rose-700 p-1"
+                          className="text-zinc-500 hover:text-rose-400 p-1 rounded-lg hover:bg-rose-500/10 transition-colors cursor-pointer"
+                          title="Remove question"
                         >
                           <Trash2 className="h-4 w-4" />
                         </button>
@@ -923,7 +1069,7 @@ export function ShareExperienceWizard({
                         setHrQuestions(updated);
                       }}
                       placeholder="e.g. Why should we hire you?"
-                      className="w-full rounded-xl border border-stone-300 dark:border-zinc-700 bg-white dark:bg-[#111317] px-4 py-2.5 text-slate-900 dark:text-zinc-100 focus:border-blue-500 focus:outline-hidden text-sm"
+                      className="w-full rounded-xl border border-zinc-700/80 bg-[#0c0d10] px-4 py-2.5 text-zinc-100 placeholder:text-zinc-600 focus:border-blue-500 focus:outline-hidden text-sm"
                     />
                     <textarea
                       rows={2}
@@ -934,43 +1080,203 @@ export function ShareExperienceWizard({
                         setHrQuestions(updated);
                       }}
                       placeholder="Candidate notes or how the conversation unfolded..."
-                      className="w-full rounded-xl border border-stone-300 dark:border-zinc-700 bg-white dark:bg-[#111317] p-3 text-slate-900 dark:text-zinc-100 placeholder:text-slate-400 dark:placeholder:text-zinc-500 focus:border-blue-500 focus:outline-hidden"
+                      className="w-full rounded-xl border border-zinc-700/80 bg-[#0c0d10] p-3 text-zinc-100 placeholder:text-zinc-600 focus:border-blue-500 focus:outline-hidden text-xs"
                     />
                   </div>
                 ))}
+              </div>
+
+              {/* Add Question Button - Located BELOW the questions list as requested */}
+              <button
+                type="button"
+                onClick={() =>
+                  setHrQuestions([...hrQuestions, { text: "", notes: "" }])
+                }
+                className="w-full py-3 px-4 rounded-2xl border border-dashed border-zinc-700/80 hover:border-blue-500/60 bg-[#16181e]/60 hover:bg-blue-500/5 text-zinc-300 hover:text-blue-400 font-semibold text-xs sm:text-sm transition-all flex items-center justify-center gap-2 group shadow-xs active:scale-[0.99] cursor-pointer"
+              >
+                <div className="flex h-5 w-5 items-center justify-center rounded-full bg-blue-500/10 text-blue-400 group-hover:bg-blue-500 group-hover:text-white transition-all">
+                  <Plus className="h-3.5 w-3.5" />
+                </div>
+                <span>Add Another HR Question</span>
+              </button>
+
+              {/* Round footer navigation prompt */}
+              <div className="pt-4 border-t border-zinc-800/80 flex flex-col sm:flex-row items-center justify-between gap-3">
+                <span className="text-xs text-zinc-400">
+                  Round {currentRoundIdx + 1} of {selectedRounds.length}:{" "}
+                  <span className="text-zinc-200 font-semibold">
+                    HR Interview
+                  </span>
+                </span>
+                {hasNextRoundInStep3 && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setActiveRoundTab(selectedRounds[currentRoundIdx + 1]);
+                      window.scrollTo({ top: 120, behavior: "smooth" });
+                    }}
+                    className="rounded-xl bg-blue-600/10 border border-blue-500/30 hover:border-blue-500/60 px-4 py-2 text-xs font-semibold text-blue-400 hover:bg-blue-600 hover:text-white inline-flex items-center gap-2 transition-all cursor-pointer shadow-xs"
+                  >
+                    <span>Proceed to {nextRoundLabel}</span>
+                    <ArrowRight className="h-3.5 w-3.5" />
+                  </button>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* APTITUDE TEST TAB */}
+          {activeRoundTab === "APTITUDE" && (
+            <div className="space-y-4 text-xs sm:text-sm">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div>
+                  <label className="block font-semibold text-slate-700 dark:text-zinc-300 mb-1.5">
+                    Testing Platform
+                  </label>
+                  <input
+                    type="text"
+                    value={aptitudePlatform}
+                    onChange={(e) => setAptitudePlatform(e.target.value)}
+                    placeholder="e.g. AMCAT, CoCubes, Mettl"
+                    className="w-full rounded-xl border border-stone-300 dark:border-zinc-700 bg-stone-50 dark:bg-[#0c0d10] px-4 py-2.5 text-slate-900 dark:text-zinc-100 focus:border-blue-500 focus:outline-hidden"
+                  />
+                </div>
+                <div>
+                  <label className="block font-semibold text-slate-700 dark:text-zinc-300 mb-1.5">
+                    Duration (Minutes)
+                  </label>
+                  <input
+                    type="number"
+                    value={aptitudeDuration}
+                    onChange={(e) => setAptitudeDuration(Number(e.target.value))}
+                    className="w-full rounded-xl border border-stone-300 dark:border-zinc-700 bg-stone-50 dark:bg-[#0c0d10] px-4 py-2.5 text-slate-900 dark:text-zinc-100 focus:border-blue-500 focus:outline-hidden"
+                  />
+                </div>
+                <div>
+                  <label className="block font-semibold text-slate-700 dark:text-zinc-300 mb-1.5">
+                    Overall Difficulty
+                  </label>
+                  <ModernSelect
+                    value={oaDifficulty}
+                    onChange={(val) => setOaDifficulty(val)}
+                    options={DIFFICULTY_OPTIONS}
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block font-semibold text-slate-700 dark:text-zinc-300 mb-1.5">
+                  Aptitude Sections & Topic Breakdown
+                </label>
+                <textarea
+                  rows={3}
+                  value={aptitudeNotes}
+                  onChange={(e) => setAptitudeNotes(e.target.value)}
+                  placeholder="e.g. Quantitative (P&L, Probability), Logical Reasoning (Syllogisms, Blood Relations), Verbal (Reading Comprehension)"
+                  className="w-full rounded-xl border border-stone-300 dark:border-zinc-700 bg-stone-50 dark:bg-[#0c0d10] p-3.5 text-slate-900 dark:text-zinc-100 focus:border-blue-500 focus:outline-hidden"
+                />
+              </div>
+
+              {/* Round footer navigation prompt */}
+              <div className="pt-4 border-t border-zinc-800/80 flex flex-col sm:flex-row items-center justify-between gap-3">
+                <span className="text-xs text-zinc-400">
+                  Round {currentRoundIdx + 1} of {selectedRounds.length}:{" "}
+                  <span className="text-zinc-200 font-semibold">Aptitude Test</span>
+                </span>
+                {hasNextRoundInStep3 && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setActiveRoundTab(selectedRounds[currentRoundIdx + 1]);
+                      window.scrollTo({ top: 120, behavior: "smooth" });
+                    }}
+                    className="rounded-xl bg-blue-600/10 border border-blue-500/30 hover:border-blue-500/60 px-4 py-2 text-xs font-semibold text-blue-400 hover:bg-blue-600 hover:text-white inline-flex items-center gap-2 transition-all cursor-pointer shadow-xs"
+                  >
+                    <span>Proceed to {nextRoundLabel}</span>
+                    <ArrowRight className="h-3.5 w-3.5" />
+                  </button>
+                )}
               </div>
             </div>
           )}
 
           {/* GROUP DISCUSSION */}
           {activeRoundTab === "GROUP_DISCUSSION" && (
-            <div className="text-xs sm:text-sm space-y-2">
-              <label className="block font-semibold text-slate-700 dark:text-zinc-300">
-                GD Topic & Evaluation Focus
-              </label>
-              <textarea
-                rows={3}
-                value={gdTopic}
-                onChange={(e) => setGdTopic(e.target.value)}
-                placeholder="What was the topic? How many candidates participated? What evaluation criteria were emphasized?"
-                className="w-full rounded-xl border border-stone-300 dark:border-zinc-700 bg-stone-50 dark:bg-[#0c0d10] p-3.5 text-slate-900 dark:text-zinc-100 focus:border-blue-500 focus:outline-hidden"
-              />
+            <div className="text-xs sm:text-sm space-y-4">
+              <div className="space-y-2">
+                <label className="block font-semibold text-slate-700 dark:text-zinc-300">
+                  GD Topic & Evaluation Focus
+                </label>
+                <textarea
+                  rows={4}
+                  value={gdTopic}
+                  onChange={(e) => setGdTopic(e.target.value)}
+                  placeholder="What was the topic? How many candidates participated? What evaluation criteria were emphasized?"
+                  className="w-full rounded-xl border border-stone-300 dark:border-zinc-700 bg-stone-50 dark:bg-[#0c0d10] p-3.5 text-slate-900 dark:text-zinc-100 focus:border-blue-500 focus:outline-hidden"
+                />
+              </div>
+
+              {/* Round footer navigation prompt */}
+              <div className="pt-4 border-t border-zinc-800/80 flex flex-col sm:flex-row items-center justify-between gap-3">
+                <span className="text-xs text-zinc-400">
+                  Round {currentRoundIdx + 1} of {selectedRounds.length}:{" "}
+                  <span className="text-zinc-200 font-semibold">Group Discussion</span>
+                </span>
+                {hasNextRoundInStep3 && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setActiveRoundTab(selectedRounds[currentRoundIdx + 1]);
+                      window.scrollTo({ top: 120, behavior: "smooth" });
+                    }}
+                    className="rounded-xl bg-blue-600/10 border border-blue-500/30 hover:border-blue-500/60 px-4 py-2 text-xs font-semibold text-blue-400 hover:bg-blue-600 hover:text-white inline-flex items-center gap-2 transition-all cursor-pointer shadow-xs"
+                  >
+                    <span>Proceed to {nextRoundLabel}</span>
+                    <ArrowRight className="h-3.5 w-3.5" />
+                  </button>
+                )}
+              </div>
             </div>
           )}
 
           {/* MANAGERIAL / OTHER */}
           {(activeRoundTab === "MANAGERIAL" || activeRoundTab === "OTHER") && (
-            <div className="text-xs sm:text-sm space-y-2">
-              <label className="block font-semibold text-slate-700 dark:text-zinc-300">
-                Round Notes & Topics Discussed
-              </label>
-              <textarea
-                rows={3}
-                value={managerialNotes}
-                onChange={(e) => setManagerialNotes(e.target.value)}
-                placeholder="Describe the nature of this round..."
-                className="w-full rounded-xl border border-stone-300 dark:border-zinc-700 bg-stone-50 dark:bg-[#0c0d10] p-3.5 text-slate-900 dark:text-zinc-100 focus:border-blue-500 focus:outline-hidden"
-              />
+            <div className="text-xs sm:text-sm space-y-4">
+              <div className="space-y-2">
+                <label className="block font-semibold text-slate-700 dark:text-zinc-300">
+                  Round Notes & Topics Discussed
+                </label>
+                <textarea
+                  rows={4}
+                  value={managerialNotes}
+                  onChange={(e) => setManagerialNotes(e.target.value)}
+                  placeholder="Describe the nature of this round, role expectations discussed, leadership questions asked..."
+                  className="w-full rounded-xl border border-stone-300 dark:border-zinc-700 bg-stone-50 dark:bg-[#0c0d10] p-3.5 text-slate-900 dark:text-zinc-100 focus:border-blue-500 focus:outline-hidden"
+                />
+              </div>
+
+              {/* Round footer navigation prompt */}
+              <div className="pt-4 border-t border-zinc-800/80 flex flex-col sm:flex-row items-center justify-between gap-3">
+                <span className="text-xs text-zinc-400">
+                  Round {currentRoundIdx + 1} of {selectedRounds.length}:{" "}
+                  <span className="text-zinc-200 font-semibold">
+                    {ROUND_TYPES.find((r) => r.id === activeRoundTab)?.label || activeRoundTab}
+                  </span>
+                </span>
+                {hasNextRoundInStep3 && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setActiveRoundTab(selectedRounds[currentRoundIdx + 1]);
+                      window.scrollTo({ top: 120, behavior: "smooth" });
+                    }}
+                    className="rounded-xl bg-blue-600/10 border border-blue-500/30 hover:border-blue-500/60 px-4 py-2 text-xs font-semibold text-blue-400 hover:bg-blue-600 hover:text-white inline-flex items-center gap-2 transition-all cursor-pointer shadow-xs"
+                  >
+                    <span>Proceed to {nextRoundLabel}</span>
+                    <ArrowRight className="h-3.5 w-3.5" />
+                  </button>
+                )}
+              </div>
             </div>
           )}
         </div>
@@ -1038,17 +1344,13 @@ export function ShareExperienceWizard({
               <label className="block font-semibold text-slate-700 dark:text-zinc-300 mb-1.5">
                 Interview Result *
               </label>
-              <select
-                value={result}
-                onChange={(e) => setResult(e.target.value)}
-                className="w-full rounded-xl border border-stone-300 dark:border-zinc-700 bg-stone-50 dark:bg-[#0c0d10] px-4 py-2.5 text-slate-900 dark:text-zinc-100 focus:border-blue-500 focus:outline-hidden max-w-sm text-sm"
-              >
-                <option value="SELECTED">Selected</option>
-                <option value="REJECTED">Rejected</option>
-                <option value="WAITLISTED">Waitlisted</option>
-                <option value="PENDING">Result Pending</option>
-                <option value="PREFER_NOT_TO_SAY">Prefer not to say</option>
-              </select>
+              <div className="max-w-sm">
+                <ModernSelect
+                  value={result}
+                  onChange={(val) => setResult(val)}
+                  options={RESULT_OPTIONS}
+                />
+              </div>
             </div>
 
             <div className="pt-4 border-t border-stone-100 dark:border-zinc-800 space-y-3">
@@ -1180,11 +1482,23 @@ export function ShareExperienceWizard({
           {step > 1 && (
             <button
               type="button"
-              onClick={() => setStep(step - 1)}
-              className="rounded-xl border border-stone-200 dark:border-zinc-700 bg-white dark:bg-[#16181e] px-4 py-2 text-xs font-semibold text-slate-700 dark:text-zinc-300 hover:border-blue-500/50 hover:text-blue-500 inline-flex items-center gap-1.5 transition-all shadow-xs"
+              onClick={() => {
+                if (step === 3 && hasPrevRoundInStep3) {
+                  setActiveRoundTab(selectedRounds[currentRoundIdx - 1]);
+                  window.scrollTo({ top: 120, behavior: "smooth" });
+                  return;
+                }
+                setStep(step - 1);
+                window.scrollTo({ top: 120, behavior: "smooth" });
+              }}
+              className="rounded-xl border border-stone-200 dark:border-zinc-700 bg-white dark:bg-[#16181e] px-4 py-2 text-xs font-semibold text-slate-700 dark:text-zinc-300 hover:border-blue-500/50 hover:text-blue-500 inline-flex items-center gap-1.5 transition-all shadow-xs cursor-pointer"
             >
               <ChevronLeft className="h-4 w-4" />
-              <span>Previous</span>
+              <span>
+                {step === 3 && hasPrevRoundInStep3
+                  ? `Back: ${prevRoundLabel}`
+                  : "Previous"}
+              </span>
             </button>
           )}
 
@@ -1192,7 +1506,7 @@ export function ShareExperienceWizard({
             type="button"
             onClick={handleSaveDraft}
             disabled={isPending}
-            className="rounded-xl border border-stone-200 dark:border-zinc-700 bg-white dark:bg-[#16181e] px-4 py-2 text-xs font-semibold text-slate-700 dark:text-zinc-300 hover:border-blue-500/50 hover:text-blue-500 inline-flex items-center gap-1.5 transition-all shadow-xs"
+            className="rounded-xl border border-stone-200 dark:border-zinc-700 bg-white dark:bg-[#16181e] px-4 py-2 text-xs font-semibold text-slate-700 dark:text-zinc-300 hover:border-blue-500/50 hover:text-blue-500 inline-flex items-center gap-1.5 transition-all shadow-xs cursor-pointer"
             title="Save as private draft to resume later"
           >
             <Save className="h-4 w-4 text-blue-500" />
@@ -1208,11 +1522,23 @@ export function ShareExperienceWizard({
                 if (step === 1 && isAddingNewRole && customRoleTitle.trim()) {
                   await handleAddNewRole();
                 }
+                if (step === 3 && hasNextRoundInStep3) {
+                  setActiveRoundTab(selectedRounds[currentRoundIdx + 1]);
+                  window.scrollTo({ top: 120, behavior: "smooth" });
+                  return;
+                }
                 setStep(step + 1);
+                window.scrollTo({ top: 120, behavior: "smooth" });
               }}
-              className="rounded-xl bg-blue-600 hover:bg-blue-500 px-5 py-2.5 text-xs sm:text-sm font-semibold text-white shadow-md shadow-blue-500/20 active:scale-95 inline-flex items-center gap-1.5 transition-all"
+              className="rounded-xl bg-blue-600 hover:bg-blue-500 px-5 py-2.5 text-xs sm:text-sm font-semibold text-white shadow-md shadow-blue-500/20 active:scale-95 inline-flex items-center gap-1.5 transition-all cursor-pointer"
             >
-              <span>Continue</span>
+              <span>
+                {step === 3 && hasNextRoundInStep3
+                  ? `Next: ${nextRoundLabel}`
+                  : step === 3
+                  ? "Continue to Experience"
+                  : "Continue"}
+              </span>
               <ChevronRight className="h-4 w-4" />
             </button>
           ) : (
@@ -1220,7 +1546,7 @@ export function ShareExperienceWizard({
               type="button"
               onClick={handleSubmitExperience}
               disabled={isPending}
-              className="rounded-xl bg-emerald-600 hover:bg-emerald-500 px-6 py-2.5 text-xs sm:text-sm font-bold text-white shadow-md shadow-emerald-500/20 active:scale-95 disabled:opacity-50 inline-flex items-center gap-2 transition-all"
+              className="rounded-xl bg-emerald-600 hover:bg-emerald-500 px-6 py-2.5 text-xs sm:text-sm font-bold text-white shadow-md shadow-emerald-500/20 active:scale-95 disabled:opacity-50 inline-flex items-center gap-2 transition-all cursor-pointer"
             >
               <CheckCircle2 className="h-4 w-4" />
               <span>{isPending ? "Submitting..." : "Submit Experience for Review"}</span>
